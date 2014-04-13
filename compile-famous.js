@@ -519,21 +519,28 @@ var resolveDependencies = function(wanted, libraryDeps, level) {
   for (var i = 0; i < wanted.length; i++) {
     var name = wanted[i];
     if (typeof neededDeps[name] === 'undefined') {
-      // Add the dep and resolve its deps
-      neededDeps[name] = level;
       // Get the lib root
       var root = getDepRoot(name);
-      // Get the nested deps
-      var nextWanted = libraryDeps[root][name];
-      // Add the deps to the load list
-      loadDepsList.push({ 
-        name: name,
-        level: level,
-        index: neededDepsIndex++,
-        deps: nextWanted.length
-      });
-      // Resolve the deps
-      resolveDependencies(nextWanted, libraryDeps, level+1);
+
+      if (libraryDeps[root] && libraryDeps[root][name]) {
+
+        // Get the nested deps
+        var nextWanted = libraryDeps[root][name];
+        // Add the dep and resolve its deps
+        neededDeps[name] = level;
+        // Add the deps to the load list
+        loadDepsList.push({ 
+          name: name,
+          level: level,
+          index: neededDepsIndex++,
+          deps: nextWanted.length
+        });
+        // Resolve the deps
+        resolveDependencies(nextWanted, libraryDeps, level+1);
+        
+      } else {
+        console.warn('Famono: Could not find library "' + name + '"');
+      }
     }
 
   }
@@ -556,8 +563,12 @@ Plugin.registerSourceHandler("require", function (compileStep) {
   // Scan the user code for require statements...
   var sourceDeps = sourceCodeDependencies();
 
+// console.log(sourceDeps);
+
   // Load libraries registers
   var libraryDeps = loadDependenciesRegisters(sourceDeps);
+
+//console.log(libraryDeps);
 
   // Load needed deps list
   for (var file in sourceDeps) {
@@ -580,5 +591,7 @@ Plugin.registerSourceHandler("require", function (compileStep) {
     });
     
   }
+
+// console.log(loadDepsList);
 
 });
