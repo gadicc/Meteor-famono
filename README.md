@@ -28,7 +28,7 @@ When you install the package you will get a `lib/smart.require` in your main app
   }
 }
 ```
-*you can mount any git repo on a namespace*
+*you can mount any git repo on a namespace, oh and in Meteor editing this file will trigger either an add/download or removal of the changed namespace - LIVE.*
 
 This enables you to do:
 ```js
