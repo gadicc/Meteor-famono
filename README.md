@@ -9,6 +9,7 @@ Well in short it's a Famo.us package system inside of the Meteor.js Package syst
 ```bash
 $ mrt add famono
 ```
+*Requires: `Meteor`, `Meteorite` and ofcourse `git` all easy to install*
 
 ### Edit the library register
 __What?__
