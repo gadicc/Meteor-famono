@@ -140,7 +140,7 @@ var ensureFolder = function(folder) {
  */
 var parseCode = function(currentDep, code) {
 //console.log(code);
-  var validChars = '_.$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890/';
+  var validChars = '_.$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890/-';
   var validCharsLookup = {};
   // Create index
   for (var a = 0; a < validChars.length; a++) validCharsLookup[validChars[a]] = a;
