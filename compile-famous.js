@@ -549,7 +549,7 @@ var sourceCodeDependencies = function() {
       // XXX: better add a git repo with an index.js? But for now allow meteor
       // packages in the packages folder to add deps to famono...
       sourceDeps[folder] = loadPackageRequire(folder, file.filename);
-      console.log('LOAD DEPS', sourceDeps[folder]);
+      //console.log('LOAD DEPS', sourceDeps[folder]);
     }
 
   });
