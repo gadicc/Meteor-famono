@@ -52,7 +52,7 @@ Package.on_use(function(api) {
   var filename = path.join(libFolder, 'smart.require');
   
   if (!fs.existsSync(libFolder))
-    mkdirSync(libFolder);
+    fs.mkdirSync(libFolder);
 
   if (!fs.existsSync(filename)) {
     // Prepare the user and system on how this is going down...
