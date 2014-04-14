@@ -3,15 +3,27 @@ var library = {};
 
 var reqiredLibraries = {};
 
+var getRequiredLibrary = function(name) {
+  return reqiredLibraries[name] || reqiredLibraries[name + '/index'];
+};
+
+var getLibrary = function(name) {
+  return library[name] || library[name + '/index'];
+};
+
+
 require = function(name) {
+  if (typeof getLibrary(name) ==' undefined')
+    throw new Error('Famono: library "' + name + '" not defined');
+
   // Return libraries already initialized
   if (typeof reqiredLibraries[name] !== 'undefined')
     return reqiredLibraries[name].exports;
 
-  var f = library[name];
+  var f = getLibrary(name);
 
   // Check if the library is found
-  if (typeof f === 'undefined')
+  if (typeof f !== 'function')
     throw new Error('Famono: library "' + name + '" not defined');
 
   // XXX: Not familiar with this - investigate when got time...
