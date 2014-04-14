@@ -85,20 +85,21 @@ Force clean dep registry:
 2. restore `lib/smart.require` with the deps you had in there and save
 
 ### Setting branch or tags
-You can set specific git references if you need to.
+Setting git references specific you can.
 
->Note: You can set either a branch or tag *(if both is set only tag is used)*
-> ```js
->{
->  "foo": {
->    "git": "https://github.com/Foo/bar.git"
->    "branch": "master",
->    "tag": "v1.0.0",
->    "recursive": false // default is true, true == load submodules
->   }
-> }
-> 
-> ```
+You can set either a branch or tag *(if both is set only tag is used)*
+```js
+{
+  "foo": {
+    "git": "https://github.com/Foo/bar.git"
+    "branch": "master",
+    "tag": "v1.0.0",
+    "recursive": false // default is true, true == load submodules
+   }
+}
+```
+
+> Note: "git" can be set to local folders too if developing locally. But you may have to force reset if referenced code has changed.
 
 ### Package creator?
 You can create a repo and have the user add it to the project just like the `Famo.us` packages.
