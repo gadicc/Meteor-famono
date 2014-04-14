@@ -590,34 +590,41 @@ Plugin.registerSourceHandler("require", function (compileStep) {
   // Add the library javascript
   for (var i = 0; i < loadDepsList.length; i++) {
     var dep = loadDepsList[i];
-    var filename = path.join(famonoLibFolder, dep.name + '.js');
-    compileStep.addJavaScript({
-      path: 'lib/' + dep.name + '.js',
-      sourcePath: 'lib/' + dep.name + '.js',//filename,
-      data: fs.readFileSync(filename, 'utf8'),
-      bare: true
-    });
-    
-  }
 
-  // Add the famous main css
-  var famousMainCss;
-  var famousMainCssPath;
+    // ADD JS
+    var filenameJS = path.join(famonoLibFolder, dep.name + '.js');
+    // Check if the ressource is found
+    if (fs.existsSync(filenameJS)) {
 
-  for (var name in libraryDeps) {
-    // Construct the filename
-    var filename = path.join(famonoRepoFolder, name, 'core', 'famous.css');
-    // Check if we found the base css
-    if (!famousMainCss && fs.existsSync(filename)) famousMainCssPath = 'lib/' + name + '/core/famous.css', famousMainCss = filename;
-  }
+      compileStep.addJavaScript({
+        path: 'lib/' + dep.name + '.js',
+        sourcePath: 'lib/' + dep.name + '.js',//filenameJS,
+        data: fs.readFileSync(filenameJS, 'utf8'),
+        bare: true
+      });
 
-  if (famousMainCss) {
-    // Add the main css
-    compileStep.addStylesheet({
-      path: famousMainCssPath,
-      data: fs.readFileSync(famousMainCss, 'utf8'),
-      //sourceMap: 
-    });
+    } else {
+      // Add definition - we prop. only got a css file or something
+      compileStep.addJavaScript({
+        path: 'lib/' + dep.name + '.js',
+        sourcePath: 'lib/' + dep.name + '.js',//filenameJS,
+        data: 'define("' + dep.name + '", function() {});',
+        bare: true
+      });      
+    }
+
+    // ADD CSS
+    var filenameCSS = path.join(famonoLibFolder, dep.name + '.css');
+    // Check if the ressource is found
+    if (fs.existsSync(filenameCSS)) {
+
+      compileStep.addStylesheet({
+        path: 'lib/' + dep.name + '.css',
+        data: fs.readFileSync(filenameCSS, 'utf8'),
+        //sourceMap: 
+      });
+      
+    }
 
   }
 
