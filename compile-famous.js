@@ -355,17 +355,20 @@ var checkGitFolders = function(newConfig, oldConfig) {
         if (newConfig[name]) {
 
           // Do a git update
-          var result = exec('git pull', { cwd: repoPath });
-          if (result.status == 0) {
-            if (result.stdout !== 'Already up-to-date.\n') {
-              console.log(green, 'Famono:', normal, 'updating dependencies "' + name + '" ');          
-              updateDependencies(name);
-            } else {
-              console.log(green, 'Famono:', normal, 'git update "' + name + '" is up-to-date');
-            }
-          } else {
-            console.log(green, 'Famono:', normal, 'git update "' + name + '" ' + repoPath, ' Error!!');
-          }
+          // XXX: We dont update the repo - if users wants this, they should
+          // set tag/branch etc.
+          //
+          // var result = exec('git pull', { cwd: repoPath });
+          // if (result.status == 0) {
+          //   if (result.stdout !== 'Already up-to-date.\n') {
+          //     console.log(green, 'Famono:', normal, 'updating dependencies "' + name + '" ');          
+          //     updateDependencies(name);
+          //   } else {
+          //     console.log(green, 'Famono:', normal, 'git update "' + name + '" is up-to-date');
+          //   }
+          // } else {
+          //   console.log(green, 'Famono:', normal, 'git update "' + name + '" ' + repoPath, ' Error!!');
+          // }
           //console.log(name, status);          
         } else {
           // Its not in the new repo so we remove it...
