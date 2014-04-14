@@ -380,8 +380,24 @@ var checkGitFolders = function(newConfig, oldConfig) {
           fs.mkdirSync(repoPath);
           // Guess so then clone the repo to the repo folder
           console.log(green, 'Famono:', normal, 'downloading "' + item.git + '"');
+          // Set git params
+          var gitParams = [];
+          // Set the base command
+          gitParams.push('git clone');
+          // Set the git reference
+          gitParams.push(item.git);
+          // Set the target path
+          gitParams.push(repoPath);
+          // We dive into submodules
+          if (item.recursive !== false) gitParams.push('--recursive');
+          // Set the branch but make sure that the user havent set tag already
+          // tags overrule the branch in Famono...
+          if (item.branch && !item.tag) gitParams.push('--branch ' + item.branch);
+          // Set the branch
+          if (item.tag) gitParams.push('--branch tags/' + item.tag);
+
           // Clone the repo
-          var result = exec('git clone ' + item.git + ' ' + repoPath + ' --recursive');
+          var result = exec(gitParams.join(' '));
           // Check if we have exited correctly
           if (result.status !== 0) {
             // Remove the folder
