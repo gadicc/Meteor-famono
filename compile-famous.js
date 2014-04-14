@@ -26,6 +26,22 @@ var famonoLibFolder = path.join(famonoRepoFolder, 'lib');
 // Make sure famonoLibFolder exists
 if (!fs.existsSync(famonoLibFolder)) fs.mkdirSync(famonoLibFolder);
 
+var installationGitIgnore = function() {
+  var gitignoreFolder = path.join(process.cwd(), '.meteor', '.gitignore');
+  var contents = '';
+  try {
+    contents = fs.readFileSync(gitignoreFolder, 'utf8');
+  } catch(err) {
+    // Prop. not found...
+  }
+  // Remove the .famono-repos
+  contents = contents.replace('.famono-repos\n', '');
+  // Add the .famono-repos
+  contents += '.famono-repos\n';
+  // Write the file again...
+  fs.writeFileSync(gitignoreFolder, contents, 'utf8');  
+};
+
 /**
  * @method eachFile
  * @param {Function} f callback(filename, name, level, index)
