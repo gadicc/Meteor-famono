@@ -350,7 +350,7 @@ var parseCode = function(currentDep, code) {
         // }
 
 
-        // Find require code and dep string
+        // Find require()
         if (last.mode === 'code' && last.text === 'require(' &&
                 (current.mode === 'single-string' ||
                  current.mode === 'double-string')) {
@@ -380,6 +380,7 @@ var parseCode = function(currentDep, code) {
 
         }
 
+        // Find define()
         if (current.mode === 'code' && current.text === 'define(') {          
           foundDefine = true;
           append = '\'' + currentDepName + '\', ';
