@@ -248,9 +248,6 @@ var parseCode = function(currentDep, code) {
               result.deps.push(currentWord);
             }
 
-            // XXX: try to fix #2
-            // Reset this for now, 
-            lastWord = '';
           }
         }
 
