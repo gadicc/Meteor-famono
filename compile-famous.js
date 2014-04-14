@@ -520,9 +520,8 @@ var sourceCodeDependencies = function() {
 
     // We dont care about public, private, server or package root folders
     // And we want javascript files and they may not be prefixed dotted
-    if (!/^\/public\/|^\/private\/|^\/server\/|^\/package\//.test(folder) &&
+    if (!/^\/public\/|^\/private\/|^\/server\/|^\/packages\//.test(folder) &&
             file.ext == 'js' && !file.isDotted) {
-
         // Load the code
         var code = fs.readFileSync(file.filename, 'utf8');
         // Parse the file
