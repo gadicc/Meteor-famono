@@ -94,6 +94,6 @@ Nope - the package scans your code and figure outs dependencies at your edit.
 Force clean dep registry:
 
 1. edit `lib/smart.require` set it to `{}` *empty* and save
-2. restore `lib/smart.require` with the deps you had in there
+2. restore `lib/smart.require` with the deps you had in there and save
 
 Kind regards Morten (aka raix)
