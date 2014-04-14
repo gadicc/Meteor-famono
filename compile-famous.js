@@ -247,6 +247,10 @@ var parseCode = function(currentDep, code) {
               // Do nothing to resolve - trust the user?
               result.deps.push(currentWord);
             }
+
+            // XXX: try to fix #2
+            // Reset this for now, 
+            lastWord = '';
           }
         }
 
