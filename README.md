@@ -30,32 +30,20 @@ When you install the package you will get a `lib/smart.require` in your main app
 ```
 *you can mount any git repo on a namespace, oh and in Meteor editing this file will trigger either an add/download or removal of the changed namespace - LIVE.*
 
->Note: You can set either a branch or tag *(if both is set only tag is used)*
-> ```js
->{
->  "foo": {
->    "git": "https://github.com/Foo/bar.git"
->    "branch": "master",
->    "tag": "v1.0.0",
->    "recursive": false // default is true, true == load submodules
->   }
-> }
-> 
-> ```
-
 This enables you to do:
 ```js
-// Make sure dom got a body...
-Meteor.startup(function() {
-    // Rig some famo.us deps
-    require("famous-polyfills"); // Add polyfills
-    require("famous/core/famous"); // Add the default css file
+  // Rig some famo.us deps
+  require("famous-polyfills"); // Add polyfills
+  require("famous/core/famous"); // Add the default css file
 
-    // Basic deps
-    var Engine           = require("famous/core/Engine");
-    var Modifier         = require("famous/core/Modifier");
-    var Surface          = require("famous/core/Surface");
-    var RenderController = require("famous/views/RenderController");
+  // Basic deps
+  var Engine           = require("famous/core/Engine");
+  var Modifier         = require("famous/core/Modifier");
+  var RenderController = require("famous/views/RenderController");
+
+  // Make sure dom got a body...
+  Meteor.startup(function() {
+    var Surface = require("famous/core/Surface"); // This one needs document.body
 
     var mainContext = Engine.createContext();
     var renderController = new RenderController();
@@ -83,7 +71,7 @@ Meteor.startup(function() {
 
     mainContext.add(new Modifier({origin: [.5, .5]})).add(renderController);
 
-});
+  });
 ```
 
 ### Will all the stuff be loaded to the client??
@@ -95,6 +83,22 @@ Force clean dep registry:
 
 1. edit `lib/smart.require` set it to `{}` *empty* and save
 2. restore `lib/smart.require` with the deps you had in there and save
+
+### Setting branch or tags
+You can set specific git references if you need to.
+
+>Note: You can set either a branch or tag *(if both is set only tag is used)*
+> ```js
+>{
+>  "foo": {
+>    "git": "https://github.com/Foo/bar.git"
+>    "branch": "master",
+>    "tag": "v1.0.0",
+>    "recursive": false // default is true, true == load submodules
+>   }
+> }
+> 
+> ```
 
 ### Package creator?
 You can create a repo and have the user add it to the project just like the `Famo.us` packages.
