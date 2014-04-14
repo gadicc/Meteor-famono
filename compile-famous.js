@@ -3,6 +3,7 @@ var fs = Npm.require('fs');
 var path = Npm.require('path');
 var exec = Npm.require('sync-exec');
 
+var red = '\u001b[31m';
 var green = '\u001b[32m';
 var gray = '\u001b[2m';
 var white = '\u001b[1m';
@@ -329,6 +330,7 @@ var updateDependencies = function(name) {
       fs.writeFileSync(filename, result.code, 'utf8');
 
     }
+
   });
   // Write the package deps
   fs.writeFileSync(depsPath, JSON.stringify(deps, null, '\t'), 'utf8');
@@ -466,9 +468,18 @@ var ensureDependencies = function(compileStep) {
 
     try {
       newConfig = JSON.parse(requireFile);
+    } catch(err) {
+      console.log(green, 'Famono:', normal, 'You have an error in your "lib/smart.require"');
+      console.log(red, 'Error:', normal, err.message);
+      throw new Error('Famono: could not parse "lib/smart.require"');
+    }
+
+    try {
       oldConfig = JSON.parse(lastRequireFile);
     } catch(err) {
-      throw new Error('Famono: Error "Invalid JSON",', err.message);
+      // We reset if theres an error on the old config...
+      // XXX: we should clean out the folder
+      oldConfig = '{}';
     }
 
     //console.log('CHECK REPO FOLDER');
