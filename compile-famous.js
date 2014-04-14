@@ -223,6 +223,10 @@ var resolveDepPath = function(currentPath, depPath) {
   return resolved;
 };
 
+var isStringMode = function(mode) {
+  return (mode === 'single-string' || mode === 'double-string');
+};
+
 /**
  * @method parseCode
  * @param {string} code Tha code to modify and scan for deps
@@ -230,18 +234,25 @@ var resolveDepPath = function(currentPath, depPath) {
  */
 var parseCode = function(currentDep, code) {
 //console.log(code);
-  var validChars = '_.$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890/-';
+  var validChars = '_.$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890()';
   var validCharsLookup = {};
+  var t = '';
+  var m = '';
   // Create index
   for (var a = 0; a < validChars.length; a++) validCharsLookup[validChars[a]] = a;
 
   var mode = 'code';
   var lastMode = mode;
+
+  var lastCharMode = mode;
+  var charMode = mode;
+
   var escape = false;
-  var lastWord = '';
+  var lastEscape = false;
   var currentWord = '';
   var append = '';
   var foundDefine = false;
+  var debug = 0;
 
   // Get the base name
   var currentBasename = path.basename(currentDep, '.js');
@@ -255,6 +266,8 @@ var parseCode = function(currentDep, code) {
     current: currentDepName,
     deps: []
   };
+  // Log words and their mode 
+  var words = [];
 
   // Byte parser
   for (var i = 0; i < code.length; i++) {
@@ -266,67 +279,113 @@ var parseCode = function(currentDep, code) {
     var cn = code[i+1];
 
     // Check previous char
-    escape = (cp === '\\')
+    escape = (cp === '\\') && !lastEscape;
+
 
     // Mode setters and unsetters
     if (mode !== 'code') {
-      if (mode === 'block-comment' && c == '*' && code[i+1] == '/') mode = 'code';
+      if (mode === 'block-comment' && c == '*' && cn == '/') mode = 'code';
       if (mode === 'line-comment' && c == '\n') mode = 'code';
       if (mode === 'double-string' && c == '"' && !escape) mode = 'code';
       if (mode === 'single-string' && c == "'" && !escape) mode = 'code';
     } else {
-      if (c == '/' && code[i+1] == '*') mode = 'block-comment';
-      if (c == '/' && code[i+1] == '/') mode = 'line-comment';
+      if (c == '/' && !escape && cn == '*') mode = 'block-comment';
+      if (c == '/' && !escape && cn == '/') mode = 'line-comment';
       if (c == '"' && !escape) mode = 'double-string';
       if (c == "'" && !escape) mode = 'single-string';
     }
 
+    if (c === '\n') {
+      // (debug === 1) && console.log(t);
+      // (debug === 1) && console.log(m);
+      t = '';
+      m = '';
+    } else {
+      t += c;
+      if (escape) {
+        m += 'E';
+      } else {
+        if (!isStringMode(lastMode) && isStringMode(mode)) {
+          charMode = lastMode;
+        } else {
+          charMode = mode;          
+        }
+        m += charMode[0];
+      }
+    }
 
-    // Keep lastWord upto
-    if (validCharsLookup[c]) {
+
+
+    // Check if the char is valid or if in string mode
+    if (validCharsLookup[c] || isStringMode(charMode)) {
+
+      lastCharMode = charMode;
       currentWord += c;
+     
     } else {
       // If we got an actual word we store this
       if (currentWord !== '') {
 
-        // If in code block
-        if (lastMode === 'code') {
-          // If we hit the word "define" Then add define descriptor
-          if (currentWord === 'define') {
-            foundDefine = true;
-            append = '\'' + currentDepName + '\', ';
+        words.push({
+          mode: lastCharMode,
+          text: currentWord
+        });
+        // Get the last and current words...
+        var last = words[words.length-2] || {};
+        var current = words[words.length-1];
+
+        // if (debug === 2) {
+        //   if (last.text === 'require(') {
+        //     var t = '';
+        //     for (var a = 1; a < 10; a++)
+        //       t = words[words.length - a].text + ' ' + t;
+        //     var m = '';
+        //     for (var a = 1; a < 10; a++)
+        //       m = words[words.length - a].mode + ' ' + m;
+        //     console.log(t);
+        //     console.log(m);
+        //     console.log(last, current);
+        //     console.log('-------');
+        //   }  
+        // }
+
+
+        // Find require code and dep string
+        if (last.mode === 'code' && last.text === 'require(' &&
+                (current.mode === 'single-string' ||
+                 current.mode === 'double-string')) {
+
+          if (current.text[0] == '.') {
+
+            // Resolve dependency
+            // Correct the dependency by removing the current word from the
+            // code buffer and insert the resolved dep name instead
+            var resolveDepName = resolveDepPath(currentDepPath, current.text);
+            // First char to overwrite
+            var newLength = result.code.length - current.text.length;
+            // Remove the origibal reference
+            result.code = result.code.substring(0, newLength);
+            // Add the full reference
+            result.code += resolveDepName;
+
+            //console.log(mode, currentDepPath, current.text, resolveDepName);
+            result.deps.push(resolveDepName);
+            
+            //console.log(resolveDepName);
+          } else {
+            // Do nothing to resolve - trust the user?
+            result.deps.push(current.text);
+            //console.log(current.text);
           }
+
         }
 
-        // If we just had a string
-        if (lastMode === 'double-string' || lastMode === 'single-string') {
-          // And last word was require 
-          if (lastWord === 'require') {
-            if (currentWord[0] == '.') {
-
-              // Resolve dependency
-              // Correct the dependency by removing the current word from the
-              // code buffer and insert the resolved dep name instead
-              var resolveDepName = resolveDepPath(currentDepPath, currentWord);
-              // First char to overwrite
-              var newLength = result.code.length - currentWord.length;
-              // Remove the origibal reference
-              result.code = result.code.substring(0, newLength);
-              // Add the full reference
-              result.code += resolveDepName;
-
-              //console.log(mode, currentDepPath, currentWord, resolveDepName);
-              result.deps.push(resolveDepName);
-              
-            } else {
-              // Do nothing to resolve - trust the user?
-              result.deps.push(currentWord);
-            }
-
-          }
+        if (current.mode === 'code' && current.text === 'define(') {          
+          foundDefine = true;
+          append = '\'' + currentDepName + '\', ';
+          // console.log(current.mode, current.text);
         }
 
-        lastWord = currentWord;
       }
       // Reset the current word
       currentWord = '';
@@ -336,11 +395,27 @@ var parseCode = function(currentDep, code) {
     result.code += c + append;
     // Reset append
     append = '';
-
     // Set carry for last mode
     lastMode = mode;
+    // remember the last escape
+    lastEscape = escape;
 
   }
+
+  // if (debug === 3) {
+  //   mode = 'code';
+  //   text = '';
+  //   for (var i = 0; i < words.length; i++) {
+  //     var word = words[i];
+  //     if (word.mode === mode) {
+  //       text += ' ' + word.text;
+  //     } else {
+  //       console.log(green, mode, normal, text);
+  //       mode = word.mode;
+  //       text = word.text;
+  //     }
+  //   }
+  // }
 
   // If no define is set then assume that we have unwrapped code
   if (!foundDefine)
