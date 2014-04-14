@@ -34,7 +34,6 @@ require = function(name) {
 };
 
 define = function(name, f) {
-  console.log('define', name);
   // Check for function
   if (typeof f !== 'function')
     throw new Error('Famono: library "' + name + '" require a function');
