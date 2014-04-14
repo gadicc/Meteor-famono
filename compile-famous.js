@@ -592,6 +592,27 @@ Plugin.registerSourceHandler("require", function (compileStep) {
     
   }
 
+  // Add the famous main css
+  var famousMainCss;
+  var famousMainCssPath;
+
+  for (var name in libraryDeps) {
+    // Construct the filename
+    var filename = path.join(famonoRepoFolder, name, 'core', 'famous.css');
+    // Check if we found the base css
+    if (!famousMainCss && fs.existsSync(filename)) famousMainCssPath = 'lib/' + name + '/core/famous.css', famousMainCss = filename;
+  }
+
+  if (famousMainCss) {
+    // Add the main css
+    compileStep.addStylesheet({
+      path: famousMainCssPath,
+      data: fs.readFileSync(famousMainCss, 'utf8'),
+      //sourceMap: 
+    });
+
+  }
+
 // console.log(loadDepsList);
 
 });
