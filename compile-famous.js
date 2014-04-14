@@ -507,6 +507,22 @@ var ensureDependencies = function(compileStep) {
 
 };
 
+var loadPackageRequire = function(folder, filename) {
+  var deps = [];
+  try {
+    // Load the package.require
+    var config = JSON.parse(fs.readFileSync(filename, 'utf8'));
+    // Set deps to the require array eg. { "require": ["foo/bar"] }
+    deps = config.require;
+  } catch(err) {
+    console.log(green, 'Famono:', normal, 'You have an error in your "package.require", file:', folder);
+    console.log(red, 'Error:', normal, err.message);
+    throw new Error('Famono: could not parse "package.require"');    
+  }
+  // Return deps array
+  return deps;
+};
+
 // Scan the users source code for dependencies...
 var sourceCodeDependencies = function() {
   // Source deps
@@ -528,6 +544,12 @@ var sourceCodeDependencies = function() {
         var result = parseCode(folder, code);
         // Store the source dependencies
         sourceDeps[folder] = result.deps;
+    } else if (/^\/packages\/\S.*\/package.require$/.test(folder)) {
+      // add deps from packages
+      // XXX: better add a git repo with an index.js? But for now allow meteor
+      // packages in the packages folder to add deps to famono...
+      sourceDeps[folder] = loadPackageRequire(folder, file.filename);
+      console.log('LOAD DEPS', sourceDeps[folder]);
     }
 
   });
