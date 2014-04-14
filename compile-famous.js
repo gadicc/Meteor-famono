@@ -8,6 +8,8 @@ var gray = '\u001b[2m';
 var white = '\u001b[1m';
 var normal = '\u001b[0m';
 
+var namespaceErrors = {};
+
 // Set the main famono folder for our work...
 var famonoRepoFolder = path.join(process.cwd(), '.meteor', '.famono-repos');
 // Make sure famonoRepoFolder exists
@@ -498,7 +500,10 @@ var loadDependenciesRegisters = function(sourceDeps) {
       try {
         result[dep.root] = JSON.parse(fs.readFileSync(filename, 'utf8'));
       } catch(err) {
-        console.log(green, 'Famono:', normal, 'Error, could not load library "' + dep.root + '"');
+        if (!namespaceErrors[dep.root])
+          console.log(green, 'Famono:', normal, 'Error, could not load library "' + dep.root + '"');
+        // Hinder more errors on the namespace...
+        namespaceErrors[dep.root] = true;
       }
       
     }
@@ -539,7 +544,10 @@ var resolveDependencies = function(wanted, libraryDeps, level) {
         resolveDependencies(nextWanted, libraryDeps, level+1);
         
       } else {
-        console.warn('Famono: Could not find library "' + name + '"');
+        if (!namespaceErrors[root])
+          console.warn(green, 'Famono:', normal, 'Could not find library namespace "' + root + '"');
+        // Hinder more error messages on the namespace
+        namespaceErrors[root] = true;
       }
     }
 
