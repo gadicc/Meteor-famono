@@ -26,6 +26,31 @@ var famonoLibFolder = path.join(famonoRepoFolder, 'lib');
 // Make sure famonoLibFolder exists
 if (!fs.existsSync(famonoLibFolder)) fs.mkdirSync(famonoLibFolder);
 
+
+
+var installationNote = function() {
+  console.log('');
+  console.log('', white);
+  console.log('F A M O N O', green);
+  console.log('-----------', normal);
+  console.log('The Famono package will rig the Famo.us package system into Meteor.js');
+  console.log('package system');
+  console.log('');
+  console.log('It adds the global "require" on the client');
+  console.log('It will rig dependencies on the client using "define"');
+  console.log('');
+  console.log('It also parses your source code when you change it, and figure');
+  console.log('out what libraries must be bundled for the client.');
+  console.log('');
+  console.log('You can add/remove libraries to the "lib/smart.require" and will');
+  console.log('download and keep the libraries updated via github.');
+  console.log('');
+  console.log('NOTE: Famono depends on', white, 'git!!', normal);
+  console.log('');
+  console.log('Kind regards Morten (aka raix)', green);
+  console.log('-----------', normal);
+};
+
 var installationGitIgnore = function() {
   var gitignoreFolder = path.join(process.cwd(), '.meteor', '.gitignore');
   var contents = '';
@@ -41,6 +66,40 @@ var installationGitIgnore = function() {
   // Write the file again...
   fs.writeFileSync(gitignoreFolder, contents, 'utf8');  
 };
+
+var installationCheck = function() {
+
+  // library folder to ensure load order
+  var libFolder = path.join(process.cwd(), 'lib');
+  // The filename of the smart.require
+  var filename = path.join(libFolder, 'smart.require');
+  
+  if (!fs.existsSync(libFolder))
+    fs.mkdirSync(libFolder);
+
+  if (!fs.existsSync(filename)) {
+    installationNote();
+    // Add to ignore
+    installationGitIgnore();
+    // Prepare the user and system on how this is going down...
+    console.log(green, 'Famono:', normal, 'Creating "lib/smart.require" config file, for you to edit');
+
+    var defaultDeps = JSON.stringify({
+      'famous': {
+        git: 'https://github.com/Famous/famous.git'
+      },
+      'famous-polyfills': {
+        git: 'https://github.com/Famous/polyfills.git'
+      }
+    }, null, '\t');
+
+    fs.writeFileSync(filename, defaultDeps, 'utf8');
+
+    
+  }
+  
+};
+
 
 /**
  * @method eachFile
@@ -674,6 +733,9 @@ var resolveDependencies = function(wanted, libraryDeps, level) {
   }
 };
 
+
+// Make sure the system is rigged
+installationCheck();
 
 // compileStep.appendDocument({ section: "head", data: results.head });
 
