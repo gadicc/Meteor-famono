@@ -30,11 +30,28 @@ When you install the package you will get a `lib/smart.require` in your main app
 ```
 *you can mount any git repo on a namespace, oh and in Meteor editing this file will trigger either an add/download or removal of the changed namespace - LIVE.*
 
+>Note: You can set either a branch or tag *(if both is set only tag is used)*
+> ```js
+>{
+>  "foo": {
+>    "git": "https://github.com/Foo/bar.git"
+>    "branch": "master",
+>    "tag": "v1.0.0",
+>    "recursive": false // default is true, true == load submodules
+>   }
+> }
+> 
+> ```
+
 This enables you to do:
 ```js
 // Make sure dom got a body...
 Meteor.startup(function() {
-    
+    // Rig some famo.us deps
+    require("famous-polyfills"); // Add polyfills
+    require("famous/core/famous"); // Add the default css file
+
+    // Basic deps
     var Engine           = require("famous/core/Engine");
     var Modifier         = require("famous/core/Modifier");
     var Surface          = require("famous/core/Surface");
