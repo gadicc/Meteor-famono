@@ -99,13 +99,4 @@ Force clean dep registry:
 ### Package creator?
 You can create a repo and have the user add it to the project just like the `Famo.us` packages.
 
-Or if your users use `mrt` or place packages in the app `packages` folder Famono will look for a `package.require`
-Eg.:
-```js
-{
-  "require": ["famous/core/Engine"]
-}
-```
-*This will load the deps for now - at some point one could read the `package.js` and check if it depends on famono, then get the client-side js and pass the code on to the famono code parser - Maybe in a future version.*
-
 Kind regards Morten (aka raix)
