@@ -24,6 +24,6 @@ Package.on_use(function(api) {
   api.add_files('famous-client.js', 'client');
 
   //api.export('Famous');
-  api.export('define', 'client');
-  api.export('require', 'client');
+  api.export('define');
+  api.export('require');
 });
