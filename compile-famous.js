@@ -668,45 +668,55 @@ Plugin.registerSourceHandler("require", function (compileStep) {
     resolveDependencies(deps, libraryDeps);
   }
 
+  // Make sure we only serve the dependencies once...
+  var isShipped = {};
 
   // Add the library javascript
   for (var i = 0; i < loadDepsList.length; i++) {
     var dep = loadDepsList[i];
 
-    // ADD JS
-    var filenameJS = path.join(famonoLibFolder, dep.name + '.js');
-    // Check if the ressource is found
-    if (fs.existsSync(filenameJS)) {
+    if (!isShipped[dep.name]) {
+      // Make sure we only serve things once
+      isShipped[dep.name] = true;
 
-      compileStep.addJavaScript({
-        path: 'lib/' + dep.name + '.js',
-        sourcePath: 'lib/' + dep.name + '.js',//filenameJS,
-        data: fs.readFileSync(filenameJS, 'utf8'),
-        bare: true
-      });
+      // ADD JS
+      var filenameJS = path.join(famonoLibFolder, dep.name + '.js');
 
-    } else {
-      // Add definition - we prop. only got a css file or something
-      compileStep.addJavaScript({
-        path: 'lib/' + dep.name + '.js',
-        sourcePath: 'lib/' + dep.name + '.js',//filenameJS,
-        data: 'define("' + dep.name + '", function() {});',
-        bare: true
-      });      
+      // Check if the ressource is found
+      if (fs.existsSync(filenameJS)) {
+
+        compileStep.addJavaScript({
+          path: 'lib/' + dep.name + '.js',
+          sourcePath: 'lib/' + dep.name + '.js',//filenameJS,
+          data: fs.readFileSync(filenameJS, 'utf8'),
+          bare: true
+        });
+
+      } else {
+        // Add definition - we prop. only got a css file or something
+        compileStep.addJavaScript({
+          path: 'lib/' + dep.name + '.js',
+          sourcePath: 'lib/' + dep.name + '.js',//filenameJS,
+          data: 'define("' + dep.name + '", function() {});',
+          bare: true
+        });      
+      }
+
+      // ADD CSS
+      var filenameCSS = path.join(famonoLibFolder, dep.name + '.css');
+      // Check if the ressource is found
+      if (fs.existsSync(filenameCSS)) {
+
+        compileStep.addStylesheet({
+          path: 'lib/' + dep.name + '.css',
+          data: fs.readFileSync(filenameCSS, 'utf8'),
+          //sourceMap: 
+        });
+        
+      }
+
     }
 
-    // ADD CSS
-    var filenameCSS = path.join(famonoLibFolder, dep.name + '.css');
-    // Check if the ressource is found
-    if (fs.existsSync(filenameCSS)) {
-
-      compileStep.addStylesheet({
-        path: 'lib/' + dep.name + '.css',
-        data: fs.readFileSync(filenameCSS, 'utf8'),
-        //sourceMap: 
-      });
-      
-    }
 
   }
 
