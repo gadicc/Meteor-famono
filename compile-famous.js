@@ -234,7 +234,7 @@ var isStringMode = function(mode) {
  */
 var parseCode = function(currentDep, code) {
 //console.log(code);
-  var validChars = '_.$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890()';
+  var validChars = '_.$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
   var validCharsLookup = {};
   var t = '';
   var m = '';
@@ -335,7 +335,7 @@ var parseCode = function(currentDep, code) {
         var current = words[words.length-1];
 
         // if (debug === 2) {
-        //   if (last.text === 'require(') {
+        //   if (last.text === 'require') {
         //     var t = '';
         //     for (var a = 1; a < 10; a++)
         //       t = words[words.length - a].text + ' ' + t;
@@ -351,7 +351,7 @@ var parseCode = function(currentDep, code) {
 
 
         // Find require()
-        if (last.mode === 'code' && last.text === 'require(' &&
+        if (last.mode === 'code' && last.text === 'require' &&
                 (current.mode === 'single-string' ||
                  current.mode === 'double-string')) {
 
@@ -381,7 +381,7 @@ var parseCode = function(currentDep, code) {
         }
 
         // Find define()
-        if (current.mode === 'code' && current.text === 'define(') {          
+        if (current.mode === 'code' && current.text === 'define') {          
           foundDefine = true;
           append = '\'' + currentDepName + '\', ';
           // console.log(current.mode, current.text);
