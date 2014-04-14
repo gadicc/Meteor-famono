@@ -136,6 +136,18 @@ var ensureFolder = function(folder) {
   }
 };
 
+var resolveDepPath = function(currentPath, depPath) {
+  var resolved = path.resolve(currentPath, depPath).substring(1);
+  // Sometimes people put extensions in here too - we will remove it if js or css
+  var list = resolved.split('.');
+  // Check if the last segment is js or css
+  if (/^js$|^css$/.test(list[list.length-1])) list.pop();
+  // Join the list into the resolved again
+  resolved = list.join('.');
+  // Return the resolved dep path
+  return resolved;
+};
+
 /**
  * @method parseCode
  * @param {string} code Tha code to modify and scan for deps
@@ -217,10 +229,10 @@ var parseCode = function(currentDep, code) {
           if (lastWord === 'require') {
             if (currentWord[0] == '.') {
 
-              var resolveDepName = path.resolve(currentDepPath, path.basename(currentWord, '.js')).substring(1);
-              // XXX: Todo resolve dependency
+              // Resolve dependency
               // Correct the dependency by removing the current word from the
               // code buffer and insert the resolved dep name instead
+              var resolveDepName = resolveDepPath(currentDepPath, currentWord);
               // First char to overwrite
               var newLength = result.code.length - currentWord.length;
               // Remove the origibal reference
