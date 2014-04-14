@@ -279,20 +279,48 @@ var updateDependencies = function(name) {
   removeFolder(libPath);
   // Iterate over the files
   eachFile(repoPath, function(file) {
-    if (file.ext === 'js') {
+    if (file.ext === 'js' || file.ext === 'css') {
       // Remove the famonoRepoFolder part from the filenames
       var depName = file.filename.substring(famonoRepoFolder.length + 1);
-      // console.log('RESOLVE DEPS IN: ' + depName);
-      // console.log('Copy modifyed dep into ', libPath);
-      // Parse and correct the code
-      var result = parseCode(depName, fs.readFileSync(file.filename, 'utf8'));
-      // Set deps relations
-      deps[result.current] = result.deps;
+
+      // Set empty result
+      var result = {};
+
+      // Check if we are handling js or css
+      if (file.ext === 'js') {
+
+        // Parse and correct the code
+        result = parseCode(depName, fs.readFileSync(file.filename, 'utf8'));
+        // Set deps relations
+        deps[result.current] = result.deps;
+        
+      } else {
+
+        // Get the base name
+        var currentBasename = path.basename(depName, '.css');
+        // Cut off the file name
+        var currentDepPath = path.join(path.sep, path.dirname(depName));
+        // Get current dep name
+        var currentDepName = path.join(currentDepPath, currentBasename).substring(1);
+
+        // Just load the code
+        var result = {
+          code: fs.readFileSync(file.filename, 'utf8'),
+          current: currentDepName
+        };
+        // Set deps relations
+        // Css dont have any relations but we set the deps if not set
+        // We could have a situation where only the css file is present so
+        // we deal with that. This is a weak set of the deps, they will be
+        // overwritten by js deps if found.
+        if (!deps[result.current]) deps[result.current] = [];
+
+      }
 
       // Create the paths
       var filename = path.join(famonoLibFolder, depName);
       var dirname = path.dirname(filename);
-      // XXX: Store the modifyed code to the famonoLibFolder
+      // Store the modifyed code to the famonoLibFolder
       // 1. create the base folder
       //console.log('ensureFolder', dirname);
       ensureFolder(dirname);
@@ -471,13 +499,12 @@ var sourceCodeDependencies = function() {
     if (!/^\/public\/|^\/private\/|^\/server\/|^\/package\//.test(folder) &&
             file.ext == 'js' && !file.isDotted) {
 
-      // Load the code
-      var code = fs.readFileSync(file.filename, 'utf8');
-      // Parse the file
-      var result = parseCode(folder, code);
-      // Store the source dependencies
-      sourceDeps[folder] = result.deps;
-
+        // Load the code
+        var code = fs.readFileSync(file.filename, 'utf8');
+        // Parse the file
+        var result = parseCode(folder, code);
+        // Store the source dependencies
+        sourceDeps[folder] = result.deps;
     }
 
   });
@@ -516,6 +543,7 @@ var loadDependenciesRegisters = function(sourceDeps) {
     if (typeof result[dep.root] === 'undefined') {
 
       var filename = path.join(famonoRepoFolder, '.' + dep.root);
+
       try {
         result[dep.root] = JSON.parse(fs.readFileSync(filename, 'utf8'));
       } catch(err) {
@@ -542,25 +570,37 @@ var resolveDependencies = function(wanted, libraryDeps, level) {
   // wanted = ['dep1', 'dep2']
   for (var i = 0; i < wanted.length; i++) {
     var name = wanted[i];
+
     if (typeof neededDeps[name] === 'undefined') {
       // Get the lib root
       var root = getDepRoot(name);
 
-      if (libraryDeps[root] && libraryDeps[root][name]) {
+      if (libraryDeps[root]) {
 
-        // Get the nested deps
-        var nextWanted = libraryDeps[root][name];
-        // Add the dep and resolve its deps
-        neededDeps[name] = level;
-        // Add the deps to the load list
-        loadDepsList.push({ 
-          name: name,
-          level: level,
-          index: neededDepsIndex++,
-          deps: nextWanted.length
-        });
-        // Resolve the deps
-        resolveDependencies(nextWanted, libraryDeps, level+1);
+        // Check if we are actually pointing to a folder? if it contains an
+        // index file then use that instead
+        if (libraryDeps[root][name + '/index']) name += '/index';
+
+        // Still make sure the library is found
+        if (libraryDeps[root][name]) {
+
+          // Get the nested deps
+          var nextWanted = libraryDeps[root][name];
+          // Add the dep and resolve its deps
+          neededDeps[name] = level;
+          // Add the deps to the load list
+          loadDepsList.push({ 
+            name: name,
+            level: level,
+            index: neededDepsIndex++,
+            deps: nextWanted.length
+          });
+          // Resolve the deps
+          resolveDependencies(nextWanted, libraryDeps, level+1);
+
+        } else {
+          console.warn('Famono: Could not find library "' + name + '"');
+        }
         
       } else {
         if (!namespaceErrors[root])
