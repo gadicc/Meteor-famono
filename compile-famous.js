@@ -886,7 +886,7 @@ Plugin.registerSourceHandler("require", function (compileStep) {
         compileStep.addJavaScript({
           path: 'lib/' + dep.name + '.js',
           sourcePath: 'lib/' + dep.name + '.js',//filenameJS,
-          data: 'define("' + dep.name + '", function() {});',
+          data: 'define(\'' + dep.name + '\', [], function() {});',
           bare: true
         });      
       }
