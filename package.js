@@ -13,6 +13,8 @@ Package._transitional_registerBuildPlugin({
   }
 });
 
+Npm.depends({ send: "0.1.4" });
+
 Package.on_use(function(api) {
   'use strict';
 
@@ -20,7 +22,11 @@ Package.on_use(function(api) {
   api.use('reload', 'client');
   api.use('routepolicy', 'server');
 
-  api.add_files('famous-server.js', 'server');
+  api.add_files([
+    'famous-server.js',
+    'serve-libraries-server.js'
+  ], 'server');
+
   api.add_files('famous-client.js', 'client');
 
   //api.export('Famous');
