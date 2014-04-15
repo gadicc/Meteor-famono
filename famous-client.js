@@ -12,7 +12,10 @@ var getLibrary = function(name) {
 };
 
 
-require = function(name) {
+require = function(name, callback) {
+  // XXX: Implement callback
+  // if set we check locally if the dep is loaded otherwise we lazy load from
+  // the server... We will load any dependencies too..
   if (typeof getLibrary(name) ==' undefined')
     throw new Error('Famono: library "' + name + '" not defined');
 
@@ -45,7 +48,10 @@ require = function(name) {
   return reqiredLibraries[name].exports;
 };
 
-define = function(name, f) {
+define = function(name, deps, f) {
+  // XXX: We should check deps to make sure all deps are loaded before loading
+  // this dep...
+
   // Check for function
   if (typeof f !== 'function')
     throw new Error('Famono: library "' + name + '" require a function');

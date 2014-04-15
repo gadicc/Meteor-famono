@@ -289,6 +289,10 @@ var parseCode = function(currentDep, code) {
   var currentDepPath = path.join(path.sep, path.dirname(currentDep));
   // Get current dep name
   var currentDepName = path.join(currentDepPath, currentBasename).substring(1);
+  // Set the define reference
+  var defineReference = '\'' + currentDepName + '\', ';
+  // Set the define statement string
+  var defineStatement = 'define(' + defineReference;  
   // Init result
   var result = {
     code: '',
@@ -412,7 +416,7 @@ var parseCode = function(currentDep, code) {
         // Find define()
         if (current.mode === 'code' && current.text === 'define') {          
           foundDefine = true;
-          append = '\'' + currentDepName + '\', ';
+          append = defineReference;
           // console.log(current.mode, current.text);
         }
 
@@ -449,7 +453,13 @@ var parseCode = function(currentDep, code) {
 
   // If no define is set then assume that we have unwrapped code
   if (!foundDefine)
-    result.code = 'define("' + result.current + '", function(require, exports, module) {\n' + result.code + '\n});';
+    result.code = defineStatement + 'function(require, exports, module) {\n' + result.code + '\n});';
+
+  // Add deps...
+  var depsString = JSON.stringify(result.deps);
+
+  // Update the code inserting the deps list
+  result.code = result.code.replace(defineStatement, defineStatement + depsString + ', ');
 
   // Return the result object
   return result;
