@@ -814,8 +814,6 @@ var resolveDependencies = function(filename, wanted, libraryDeps, level) {
 // Make sure the system is rigged
 installationCheck();
 
-// compileStep.appendDocument({ section: "head", data: results.head });
-
 Plugin.registerSourceHandler("require", function (compileStep) {
   compileStep.rootOutputPath = '/lib/';
   // We only care about generating client-side code...
@@ -847,6 +845,8 @@ Plugin.registerSourceHandler("require", function (compileStep) {
 
   // Make sure we only serve the dependencies once...
   var isShipped = {};
+  // Count the defines
+  var sumOfDefines = 0;
 
   // Add the library javascript
   for (var i = 0; i < loadDepsList.length; i++) {
@@ -855,6 +855,8 @@ Plugin.registerSourceHandler("require", function (compileStep) {
     if (!isShipped[dep.name]) {
       // Make sure we only serve things once
       isShipped[dep.name] = true;
+      // Inc counter
+      sumOfDefines++;
 
       // ADD JS
       var filenameJS = path.join(famonoLibFolder, dep.name + '.js');
@@ -896,6 +898,9 @@ Plugin.registerSourceHandler("require", function (compileStep) {
 
 
   }
+
+  // We set the count of defines and check load
+  //compileStep.appendDocument({ section: "body", data: '<script>\n  define(' + sumOfDefines + ');\n</script>\n' });
 
 // console.log(loadDepsList);
 
