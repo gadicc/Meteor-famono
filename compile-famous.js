@@ -9,6 +9,9 @@ var gray = '\u001b[2m';
 var white = '\u001b[1m';
 var normal = '\u001b[0m';
 
+// Changing this will force a rerun of deps - this makes it easier for the users
+var version = '0.0.22';
+
 // Set the main famono folder for our work...
 var famonoRepoFolder = path.join(process.cwd(), '.meteor', '.famono-repos');
 // Make sure famonoRepoFolder exists
@@ -24,7 +27,7 @@ var famonoLibFolder = path.join(famonoRepoFolder, 'lib');
 // Make sure famonoLibFolder exists
 if (!fs.existsSync(famonoLibFolder)) fs.mkdirSync(famonoLibFolder);
 
-
+var versionFile = path.join(famonoLibFolder, '.version');
 
 var installationNote = function() {
   console.log('');
@@ -670,8 +673,12 @@ var ensureDependencies = function(compileStep) {
   var requireFile = compileStep.read().toString('utf8');
   var lastRequireFile = (fs.existsSync(configFolder)) ? fs.readFileSync(configFolder, 'utf8') : '{}';
 
+  // Check the version and the versionFile to see if we have changed api
+  // and need to recreate libs etc.
+  var lastVersion = (fs.existsSync(versionFile)) ? fs.readFileSync(versionFile, 'utf8') : '';
+
   // We only want to handle if the config has actually changed
-  if (lastRequireFile !== requireFile) {
+  if (lastRequireFile !== requireFile || lastVersion !== version) {
 
     var newConfig, oldConfig;
 
@@ -696,6 +703,8 @@ var ensureDependencies = function(compileStep) {
     checkGitFolders(newConfig, oldConfig);
     // Update the last config
     fs.writeFileSync(configFolder, requireFile, 'utf8');
+    // Update the version file
+    fs.writeFileSync(versionFile, version, 'utf8');
 
   } else {
     // console.log('CONFIG NOT CHANGED');
