@@ -9,8 +9,6 @@ var gray = '\u001b[2m';
 var white = '\u001b[1m';
 var normal = '\u001b[0m';
 
-var namespaceErrors = {};
-
 // Set the main famono folder for our work...
 var famonoRepoFolder = path.join(process.cwd(), '.meteor', '.famono-repos');
 // Make sure famonoRepoFolder exists
@@ -100,7 +98,38 @@ var installationCheck = function() {
   
 };
 
+var namespaceErrors = {};
+var namespaceError  = function(name, filename) {
+  if (!namespaceErrors[name]) {
 
+    console.log(green, 'Famono:', normal, 'Error, could not load library namespace "' + name + '" file:', filename);
+    // Hinder more errors on the namespace...
+    namespaceErrors[name] = true;
+
+  }
+};
+
+var libraryErrors = {};
+var libraryError = function(name, lookup, filename) {
+  if (!libraryErrors[name]) {
+
+    console.log(green, 'Famono:', normal, 'Error, could not load library "' + name + '" file:', filename);
+
+    if (!lookup[name]) {
+      var found;
+      for (var key in lookup)
+        if (name.toLowerCase() == key.toLowerCase()) found = { key: key, name: name};
+
+      if (found)
+        console.log(green, 'Famono:', normal, 'Did you mean "' + found.key + '" instead of "' + found.name + '"?');
+    } else {
+      // Some other error
+    }
+    // Hinder more errors on the namespace...
+    libraryErrors[name] = true;
+
+  }
+};
 /**
  * @method eachFile
  * @param {Function} f callback(filename, name, level, index)
@@ -709,7 +738,7 @@ var eachSourceDeps = function(sourceDeps, f) {
   }
 };
 
-var loadDependenciesRegisters = function(sourceDeps) {
+var loadDependenciesRegisters = function(sourceDeps, libraries) {
   var result = {};
 
   eachSourceDeps(sourceDeps, function(dep) {
@@ -721,10 +750,7 @@ var loadDependenciesRegisters = function(sourceDeps) {
       try {
         result[dep.root] = JSON.parse(fs.readFileSync(filename, 'utf8'));
       } catch(err) {
-        if (!namespaceErrors[dep.root])
-          console.log(green, 'Famono:', normal, 'Error, could not load library "' + dep.root + '"');
-        // Hinder more errors on the namespace...
-        namespaceErrors[dep.root] = true;
+        namespaceError(dep.root, dep.filename);
       }
       
     }
@@ -738,7 +764,7 @@ var neededDeps = {};
 var neededDepsIndex = 0;
 var loadDepsList = [];
 
-var resolveDependencies = function(wanted, libraryDeps, level) {
+var resolveDependencies = function(filename, wanted, libraryDeps, level) {
   level = level || 0;
   // We check wanted
   // wanted = ['dep1', 'dep2']
@@ -770,17 +796,14 @@ var resolveDependencies = function(wanted, libraryDeps, level) {
             deps: nextWanted.length
           });
           // Resolve the deps
-          resolveDependencies(nextWanted, libraryDeps, level+1);
+          resolveDependencies(filename, nextWanted, libraryDeps, level+1);
 
         } else {
-          console.warn('Famono: Could not find library "' + name + '"');
+          libraryError(name, libraryDeps[root], filename);
         }
         
       } else {
-        if (!namespaceErrors[root])
-          console.warn(green, 'Famono:', normal, 'Could not find library namespace "' + root + '"');
-        // Hinder more error messages on the namespace
-        namespaceErrors[root] = true;
+        namespaceError(root, filename);
       }
     }
 
@@ -819,7 +842,7 @@ Plugin.registerSourceHandler("require", function (compileStep) {
     // Get the deps pr. file
     var deps = sourceDeps[file];
     // Resolve the files
-    resolveDependencies(deps, libraryDeps);
+    resolveDependencies(file, deps, libraryDeps);
   }
 
   // Make sure we only serve the dependencies once...
