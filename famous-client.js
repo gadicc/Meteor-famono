@@ -48,6 +48,14 @@ require = function(name, callback) {
   return reqiredLibraries[name].exports;
 };
 
+require.load = function(deps, f) {
+  throw new Error('Not implemented');
+  // XXX: deps can be a string or an array of strings
+  // 1. ensure all deps are loaded by checking library[]
+  // 2. ensure all deps are initialized by checking reqiredLibraries[]
+  // 3. run f
+};
+
 define = function(name, deps, f) {
   // XXX: We should check deps to make sure all deps are loaded before loading
   // this dep...
