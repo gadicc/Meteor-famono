@@ -1,6 +1,6 @@
 {
 	"name": "famono",
-	"description": "Adds require bundler to Meteor use with Famo.us",
+	"description": "Famono adds require bundler to Meteor use with Famo.us",
 	"homepage": "https://github.com/raix/Meteor-famono",
 	"author": "Morten Henriksen  (http://gi-software.com)",
 	"version": "0.0.20",
