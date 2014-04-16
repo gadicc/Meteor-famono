@@ -813,6 +813,8 @@ var resolveDependencies = function(filename, wanted, libraryDeps, level) {
           var nextWanted = libraryDeps[root][name];
           // Add the dep and resolve its deps
           neededDeps[name] = level;
+          // Resolve the deps
+          resolveDependencies(filename, nextWanted, libraryDeps, level+1);
           // Add the deps to the load list
           loadDepsList.push({ 
             name: name,
@@ -820,8 +822,6 @@ var resolveDependencies = function(filename, wanted, libraryDeps, level) {
             index: neededDepsIndex++,
             deps: nextWanted.length
           });
-          // Resolve the deps
-          resolveDependencies(filename, nextWanted, libraryDeps, level+1);
 
         } else {
           libraryError(name, libraryDeps[root], filename);
