@@ -82,7 +82,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
       // Get the extension
       var ext = lib.ext;
 
-      console.log(namespace);
+      // console.log(namespace);
       var currentNS = registry[namespace];
       // Check that we have the namespace
       if (currentNS) {
