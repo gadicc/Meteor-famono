@@ -3,7 +3,7 @@ FAMONO
 
 ### What is it?
 
-Well in short it's a Famo.us package system inside of the Meteor.js Package system - or is it requireJS? one could actually remove the `standard-app-packages` from the app and have a pure Famo.us app.
+Well in short it's a Famo.us package system inside of the Meteor.js Package system - or is it requireJS/commonJS or AMD? one could actually remove the `standard-app-packages` from the app and have a pure Famo.us app.
 
 ### Install
 ```bash
@@ -101,7 +101,36 @@ You can set either a branch or tag *(if both is set only tag is used)*
 
 > Note: "git" can be set to local folders too if developing locally. But you may have to force reset if referenced code has changed.
 
+### Lazy loading modules
+Not sure if its needed - but its added..
+```js
+  define('famous/core/Surface', function(Surface) {
+    // This code will be called when all dependencies and their deps
+    // are loaded and ready.
+  });
+```
+
+### Define modules in client code
+```js
+  define('module', ['dep1', .. , 'depn'], function(require, exports, module) {
+    // Using require in here will throw an error if the dependencies are not
+    // ready / defined...
+  });
+```
+*In library code its parsed*
+
 ### Package creator?
 You can create a repo and have the user add it to the project just like the `Famo.us` packages.
+
+Something like: *(foo.js)*
+```js
+  // Famono will parse the module for dependencies and transform this before
+  // its sent to the client.
+  define(function(require, exports, module) {
+    // Some code...
+    module.exports = 'bar';
+  });
+```
+
 
 Kind regards Morten (aka raix)
