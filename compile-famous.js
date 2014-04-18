@@ -138,7 +138,15 @@ var libraryError = function(name, lookup, filename) {
  * @param {Function} f callback(filename, name, level, index)
  * @returns {Array} list of javascript filenames in the bundle
  */
-var eachFile = function(folder, f, dotted, level) {
+var eachFile = function(folder, f, dotted, level, crawledFolders) {
+  // Build on the crawled folders or create new object
+  crawledFolders = crawledFolders || {};
+  // Make sure we dont crawl stuff already crawled
+  if (typeof crawledFolders[folder] !== 'undefined')
+    return;
+  // Remember the url
+  crawledFolders[folder] = true;
+  // Get the list of files
   var fileList = fs.readdirSync(folder);
   // Make sure we have a proper level
   level = level || 0;
@@ -174,7 +182,7 @@ var eachFile = function(folder, f, dotted, level) {
     // Meteor only cares about top level folders so we allow all names at
     // greater levels than 0
     if (showDotted && stats.isDirectory())
-      eachFile(filename, f, dotted, level + 1);
+      eachFile(filename, f, dotted, level + 1, crawledFolders);
   }
 };
 
