@@ -825,6 +825,17 @@ var resolveDependencies = function(filename, wanted, libraryDeps, level) {
           });
 
         } else {
+          // Add the deps to the load list - Note, we cant find it - but
+          // we dont want to upset the client because of our limitations
+          // it could be that the code uses eg. require('name' + foo); this
+          // cannot be resolved by us - the client may know more than we...
+          loadDepsList.push({ 
+            name: name,
+            level: level,
+            index: neededDepsIndex++,
+            deps: 0
+          });   
+          // And we warn about an error...       
           libraryError(name, libraryDeps[root], filename);
         }
         
