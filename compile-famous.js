@@ -139,6 +139,8 @@ var libraryError = function(name, lookup, filename) {
  * @returns {Array} list of javascript filenames in the bundle
  */
 var eachFile = function(folder, f, dotted, level, crawledFolders) {
+  // Make sure we get the real path, credit @gadicc
+  folder = fs.realpathSync(folder);
   // Build on the crawled folders or create new object
   crawledFolders = crawledFolders || {};
   // Make sure we dont crawl stuff already crawled
