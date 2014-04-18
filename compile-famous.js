@@ -364,7 +364,8 @@ var parseCode = function(currentDep, code) {
 
         words.push({
           mode: lastCharMode,
-          text: currentWord
+          text: currentWord,
+          end: i
         });
         // Get the last and current words...
         var last = words[words.length-2] || {};
@@ -417,10 +418,15 @@ var parseCode = function(currentDep, code) {
         }
 
         // Find define()
-        if (current.mode === 'code' && current.text === 'define') {          
-          foundDefine = true;
-          append = defineReference;
-          // console.log(current.mode, current.text);
+        if (last.mode === 'code' && last.text === 'define') {         
+
+          if (current.mode === 'code' && current.text === 'function') {
+            // We got define(function...
+            var rest = result.code.slice(last.end + 1);
+            result.code = result.code.substring(0, last.end + 1) + defineReference + rest;
+            foundDefine = true;
+          }
+
         }
 
       }
@@ -454,15 +460,19 @@ var parseCode = function(currentDep, code) {
   //   }
   // }
 
-  // If no define is set then assume that we have unwrapped code
-  if (!foundDefine)
-    result.code = defineStatement + 'function(require, exports, module) {\n' + result.code + '\n});';
-
   // Add deps...
   var depsString = JSON.stringify(result.deps);
 
-  // Update the code inserting the deps list
-  result.code = result.code.replace(defineStatement, defineStatement + depsString + ', ');
+  // If no define is set then assume that we have unwrapped code
+  if (foundDefine) {
+    // Update the code inserting the deps list
+    result.code = result.code.replace(defineStatement, defineStatement + depsString + ', ');
+  } else {
+    // Wrap in module
+    result.code = defineStatement + depsString + ', function(require, exports, module) {\n' + result.code + '\n});';
+  }
+
+
 
   // Return the result object
   return result;
