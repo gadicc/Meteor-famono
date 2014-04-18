@@ -2,8 +2,10 @@
 var modules = {};
 
 var getModule = function(name) {
+  var last = '/' + name.split('/').pop();
   // We either return the module or init an empty module for tracking
-  return modules[name] || modules[name + '/index'] || (modules[name] = { exports: {}, callbacks: [], loaded: null });
+  return modules[name] || modules[name + '/index'] || modules[name + last] ||
+        (modules[name] = { exports: {}, callbacks: [], loaded: null });
 };
 
 /**

@@ -751,9 +751,10 @@ var sourceCodeDependencies = function() {
   return sourceDeps;  
 };
 
-var getDepRoot = function(depName) {
+var getDepRoot = function(depName, last) {
   var list = depName.split('/');
-  return list[0];
+  var index = (last) ? list.length - 1 : 0;
+  return list[index];
 };
 
 var eachSourceDeps = function(sourceDeps, f) {
@@ -810,12 +811,20 @@ var resolveDependencies = function(filename, wanted, libraryDeps, level) {
     if (typeof neededDeps[name] === 'undefined') {
       // Get the lib root
       var root = getDepRoot(name);
+      var suffix = getDepRoot(name, true);
+
 
       if (libraryDeps[root]) {
 
         // Check if we are actually pointing to a folder? if it contains an
         // index file then use that instead
-        if (libraryDeps[root][name + '/index']) name += '/index';
+        if (libraryDeps[root][name + '/index']) {
+          name += '/index';
+        } else if (libraryDeps[root][name + '/' + suffix]) {
+         name += '/' + suffix;
+        }
+
+
 
         // Still make sure the library is found
         if (libraryDeps[root][name]) {
