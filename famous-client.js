@@ -3,7 +3,7 @@ var modules = {};
 
 var getModule = function(name) {
   // We either return the module or init an empty module for tracking
-  return modules[name] || modules[name + '/index'] || (modules[name] = { callbacks: [], loaded: null });
+  return modules[name] || modules[name + '/index'] || (modules[name] = { exports: {}, callbacks: [], loaded: null });
 };
 
 /**
