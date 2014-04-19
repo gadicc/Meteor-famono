@@ -78,6 +78,20 @@ This enables you to do:
 
 Nope - the package scans your code and figure outs dependencies at your edit.
 
+### Additional libraries
+You can add additional libraries like
+```js
+  "moment": {
+    "git": "https://github.com/moment/moment.git"
+  },
+  "underscore": {
+    "git": "https://github.com/jashkenas/underscore.git"
+  },
+  "numeral": {
+    "git": "https://github.com/adamwdraper/Numeral-js"
+  }
+```
+
 ### Force a reset of the dependency registry
 Force clean dep registry:
 

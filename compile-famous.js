@@ -294,6 +294,8 @@ var parseCode = function(currentDep, code) {
   var currentWord = '';
   var append = '';
   var foundDefine = false;
+  var foundCommonJS = false;
+  var fountAMD = false;
   var debug = 0;
 
   // Get the base name
@@ -396,6 +398,15 @@ var parseCode = function(currentDep, code) {
         //   }  
         // }
 
+        // Test for amd compability
+        if (!foundDefine && current.mode === 'code' && current.text === 'require.amd') {
+          fountAMD = true;
+        }
+
+        // Test for commonJS compability
+        if (!foundDefine && current.mode === 'code' && current.text === 'module.exports') {
+          foundCommonJS = true;
+        }
 
         // Find require()
         if (last.mode === 'code' && last.text === 'require' &&
@@ -428,7 +439,7 @@ var parseCode = function(currentDep, code) {
         }
 
         // Find define()
-        if (last.mode === 'code' && last.text === 'define') {         
+        if (!foundCommonJS && last.mode === 'code' && last.text === 'define') {         
 
           if (current.mode === 'code' && current.text === 'function') {
             // We got define(function...
@@ -474,15 +485,16 @@ var parseCode = function(currentDep, code) {
   var depsString = JSON.stringify(result.deps);
 
   // If no define is set then assume that we have unwrapped code
-  if (foundDefine) {
+  if (!foundCommonJS && foundDefine) {
     // Update the code inserting the deps list
+    // XXX: work differently if AMD compatible - Its a nice to have feature - 
+    // But commonJS is also broadly supported. I think we may have to have a
+    // new parse algoritme checking any define statements?
     result.code = result.code.replace(defineStatement, defineStatement + depsString + ', ');
   } else {
     // Wrap in module
     result.code = defineStatement + depsString + ', function(require, exports, module) {\n' + result.code + '\n});';
   }
-
-
 
   // Return the result object
   return result;
