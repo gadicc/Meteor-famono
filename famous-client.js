@@ -2,10 +2,16 @@
 var modules = {};
 
 var getModule = function(name) {
-  var last = '/' + name.split('/').pop();
-  // We either return the module or init an empty module for tracking
-  return modules[name] || modules[name + '/index'] || modules[name + last] ||
-        (modules[name] = { exports: {}, callbacks: [], loaded: null });
+  if (name) {
+
+    var last = '/' + name.split('/').pop();
+    // We either return the module or init an empty module for tracking
+    return modules[name] || modules[name + '/index'] || modules[name + last] ||
+          (modules[name] = { exports: {}, callbacks: [], loaded: null });
+    
+  } else {
+    return {};
+  }
 };
 
 /**
@@ -207,8 +213,21 @@ _defineModule = function(name, deps, f) {
   loadLibraries(deps, function(done) {
     // Mark this module as loaded
     done(name, f);
+    // Check if this is a global?
+    if (name === null) f(require, {}, { exports: window });
   });
 }
+
+/**
+ * @method _defineGlobal
+ * @param {String} name Name of module
+ * @param {Array} deps List of dependencies to load
+ * @param {Function} f The module
+ */
+_defineGlobal = function(f) {  
+  // Define a global thing...
+  define(null, [], f);
+};
 
 /**
  * @method define
@@ -219,8 +238,12 @@ _defineModule = function(name, deps, f) {
  * > If no name is passed then deps are passed to f as arguments
  */
 define = function(/* name, deps, f or deps, f */) {
+  if (arguments.length === 1) {
+    // Return the load module
+    return _defineGlobal.apply(this, arguments);
+
   // define([deps, ... , deps], function() {});
-  if (arguments.length === 2) {
+  } else if (arguments.length === 2) {
     // Return the load module
     return _loadModule.apply(this, arguments);
 
