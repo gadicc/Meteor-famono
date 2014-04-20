@@ -295,7 +295,8 @@ var parseCode = function(currentDep, code) {
   var append = '';
   var foundDefine = false;
   var foundCommonJS = false;
-  var fountAMD = false;
+  var foundAMD = false;
+  var amdDefineAt = { start: 0, end: 0 };
   var debug = 0;
 
   // Get the base name
@@ -399,19 +400,18 @@ var parseCode = function(currentDep, code) {
         // }
 
         // Test for amd compability
-        if (!foundDefine && current.mode === 'code' && current.text === 'require.amd') {
-          fountAMD = true;
+        if (!foundDefine && current.mode === 'code' && current.text === 'define.amd') {
+          foundAMD = true;
         }
 
         // Test for commonJS compability
-        if (!foundDefine && current.mode === 'code' && current.text === 'module.exports') {
+        if ( (!foundDefine || foundAMD) &&
+                current.mode === 'code' && current.text === 'module.exports') {
           foundCommonJS = true;
         }
 
         // Find require()
-        if (last.mode === 'code' && last.text === 'require' &&
-                (current.mode === 'single-string' ||
-                 current.mode === 'double-string')) {
+        if (last.mode === 'code' && last.text === 'require' && isStringMode(current.mode)) {
 
           if (current.text[0] == '.') {
 
@@ -441,11 +441,24 @@ var parseCode = function(currentDep, code) {
         // Find define()
         if (!foundCommonJS && last.mode === 'code' && last.text === 'define') {         
 
-          if (current.mode === 'code' && current.text === 'function') {
-            // We got define(function...
-            var rest = result.code.slice(last.end + 1);
-            result.code = result.code.substring(0, last.end + 1) + defineReference + rest;
+          if (foundAMD) {
+
+            // So amd is supported, this means some define declaration that may
+            // spoil everything - we need to find it a correct it
+            if (!amdDefineAt.start) amdDefineAt.start = last.end + 1;
             foundDefine = true;
+
+          } else {
+            // If we got define(function() {}) and no require.amd or commonJS
+            // then assume we got something like the Famo.us libraries and deal
+            // with it
+            if (current.mode === 'code' && current.text === 'function') {
+              // We got define(function...
+              var rest = result.code.slice(last.end + 1);
+              result.code = result.code.substring(0, last.end + 1) + defineReference + rest;
+              foundDefine = true;
+            }
+
           }
 
         }
@@ -486,11 +499,15 @@ var parseCode = function(currentDep, code) {
 
   // If no define is set then assume that we have unwrapped code
   if (!foundCommonJS && foundDefine) {
-    // Update the code inserting the deps list
-    // XXX: work differently if AMD compatible - Its a nice to have feature - 
-    // But commonJS is also broadly supported. I think we may have to have a
-    // new parse algoritme checking any define statements?
-    result.code = result.code.replace(defineStatement, defineStatement + depsString + ', ');
+    if (foundAMD && amdDefineAt.start) {
+      // XXX: work differently if AMD compatible - Its a nice to have feature - 
+      // But commonJS is also broadly supported. I think we may have to have a
+      // new parse algoritme checking any define statements?
+      console.log(result.code.substring(amdDefineAt.start, amdDefineAt.start+10));
+    } else {
+      // Update the code inserting the deps list
+      result.code = result.code.replace(defineStatement, defineStatement + depsString + ', ');
+    }
   } else {
     // Wrap in module
     result.code = defineStatement + depsString + ', function(require, exports, module) {\n' + result.code + '\n});';
