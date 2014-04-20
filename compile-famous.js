@@ -10,7 +10,7 @@ var white = '\u001b[1m';
 var normal = '\u001b[0m';
 
 // Changing this will force a rerun of deps - this makes it easier for the users
-var version = '0.0.22';
+var version = '0.1.0';
 
 // Set the main famono folder for our work...
 var famonoRepoFolder = path.join(process.cwd(), '.meteor', '.famono-repos');
