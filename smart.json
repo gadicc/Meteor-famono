@@ -3,7 +3,7 @@
 	"description": "Famono adds require bundler to Meteor use with Famo.us",
 	"homepage": "https://github.com/raix/Meteor-famono",
 	"author": "Morten Henriksen  (http://gi-software.com)",
-	"version": "0.0.30",
+	"version": "0.1.0",
 	"git": "https://github.com/raix/Meteor-famono.git",
 	"packages": {}
 }
