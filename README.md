@@ -6,6 +6,12 @@ FAMONO
 Well in short it's a Famo.us package system inside of the Meteor.js Package system - or is it requireJS/commonJS or AMD? one could actually remove the `standard-app-packages` from the app and have a pure Famo.us app.
 
 ### Install
+__Command line tool__
+```bash
+$ npm install famono -g
+```
+
+__Meteor package__
 ```bash
 $ mrt add famono
 ```
@@ -79,7 +85,15 @@ This enables you to do:
 Nope - the package scans your code and figure outs dependencies at your edit.
 
 ### Additional libraries
-You can add additional libraries like
+You can add additional libraries like `moment`/`underscore` etc.
+Use the `famono` CLI tool:
+```bash
+$ famono -a moment
+```
+*Uses the Bower database as lookup*
+
+or edit `lib/smart.require` manually:
+
 ```js
   "moment": {
     "git": "https://github.com/moment/moment.git"
