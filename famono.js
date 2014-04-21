@@ -26,7 +26,7 @@ var scriptPath = path.dirname(require.main.filename);
 var configPath = path.join(currentPath, './lib/smart.require');
 
 program
-  .version('0.0.1')
+  .version('0.0.2')
   .option('-a, --add <name>', 'Add library')
   .option('-d, --del <name>', 'Remove library')
   .option('-l, --list', 'List of used libraries')
