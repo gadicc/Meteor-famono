@@ -29,6 +29,7 @@ program
   .version('0.0.1')
   .option('-a, --add <name>', 'Add library')
   .option('-d, --del <name>', 'Remove library')
+  .option('-l, --list', 'List of used libraries')
   .option('-p, --path <path>', 'use git or local path')
 
   .parse(process.argv);
@@ -129,4 +130,16 @@ if (program.add) {
   // Remove the package
   setConfig(program.del);
 
+} else if (program.list) {
+  var config = loadFromJSON(configPath);
+  if (config) {
+    
+    console.log('Used libraries:');
+    
+    for (var name in config)
+      console.log('-', name);
+
+  } else {
+    console.log('Famono: Error, could not load smart.require');
+  }
 }
