@@ -209,6 +209,9 @@ _defineModule = function(name, deps, f) {
   if (module.loaded === true)
     throw new Error('Famono: library "' + name + '" already defined');
 
+  // Set waiting flag, make sure we dont load while resolving deps...
+  module.loaded = false;
+
   // 1. Make sure the deps are loaded
   loadLibraries(deps, function(done) {
     // Mark this module as loaded
