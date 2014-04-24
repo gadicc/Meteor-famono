@@ -91,6 +91,9 @@ var installationCheck = function() {
       },
       'famous-polyfills': {
         git: 'https://github.com/Famous/polyfills.git'
+      },
+      'library': {
+        git: 'https://github.com/raix/library.git'
       }
     }, null, '\t');
 
