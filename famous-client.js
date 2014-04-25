@@ -1,13 +1,13 @@
 // The library contains all the dependencies, they are not initialized
 var modules = {};
 
-var getModule = function(name) {
+var getModule = function(name, isDefining) {
   if (name) {
 
     var last = '/' + name.split('/').pop();
     // We either return the module or init an empty module for tracking
     return modules[name] || modules[name + '/index'] || modules[name + last] ||
-          (modules[name] = { exports: {}, callbacks: [], loaded: null });
+          (modules[name] = { exports: {}, callbacks: [], loaded: (isDefining)? false : null });
     
   } else {
     return {};
@@ -200,7 +200,7 @@ _loadModule = function(deps, f) {
  */
 _defineModule = function(name, deps, f) {
   // Get module
-  var module = getModule(name);
+  var module = getModule(name, true);
   // Check for function
   if (typeof f !== 'function')
     throw new Error('Famono: library "' + name + '" require a function');
@@ -208,9 +208,6 @@ _defineModule = function(name, deps, f) {
   // Check library
   if (module.loaded === true)
     throw new Error('Famono: library "' + name + '" already defined');
-
-  // Set waiting flag, make sure we dont load while resolving deps...
-  module.loaded = false;
 
   // 1. Make sure the deps are loaded
   loadLibraries(deps, function(done) {
