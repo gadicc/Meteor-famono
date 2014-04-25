@@ -108,7 +108,7 @@ var namespaceErrors = {};
 var namespaceError  = function(name, filename) {
   if (!namespaceErrors[name]) {
 
-    console.log(green, 'Famono:', normal, 'Error, could not load library namespace "' + name + '" file:', filename);
+    console.log(green, 'Famono:', normal, 'Warning, could not load library namespace "' + name + '" file:', filename);
     // Hinder more errors on the namespace...
     namespaceErrors[name] = true;
 
@@ -119,7 +119,7 @@ var libraryErrors = {};
 var libraryError = function(name, lookup, filename) {
   if (!libraryErrors[name]) {
 
-    console.log(green, 'Famono:', normal, 'Error, could not load library "' + name + '" file:', filename);
+    console.log(green, 'Famono:', normal, 'Warning, could not load library "' + name + '" file:', filename);
 
     if (!lookup[name]) {
       var found;
