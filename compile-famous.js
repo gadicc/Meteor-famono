@@ -958,9 +958,17 @@ Plugin.registerSourceHandler("require", function (compileStep) {
 
       // ADD JS
       var filenameJS = path.join(famonoLibFolder, dep.name + '.js');
+      // ADD CSS
+      var filenameCSS = path.join(famonoLibFolder, dep.name + '.css');
+      // ADD HTML
+      var filenameHTML = path.join(famonoLibFolder, dep.name + '.html');
+
+      var foundJS = fs.existsSync(filenameJS);
+      var foundCSS = fs.existsSync(filenameCSS);
+      var foundHTML = fs.existsSync(filenameHTML)
 
       // Check if the ressource is found
-      if (fs.existsSync(filenameJS)) {
+      if (foundJS) {
 
         compileStep.addJavaScript({
           path: 'lib/' + dep.name + '.js',
@@ -970,19 +978,24 @@ Plugin.registerSourceHandler("require", function (compileStep) {
         });
 
       } else {
-        // Add definition - we prop. only got a css file or something
-        compileStep.addJavaScript({
-          path: 'lib/' + dep.name + '.js',
-          sourcePath: 'lib/' + dep.name + '.js',//filenameJS,
-          data: 'define(\'' + dep.name + '\', [], function() {});',
-          bare: true
-        });      
+        if (foundCSS || foundHTML) {
+
+          // Add definition - we prop. only got a css file or something
+          compileStep.addJavaScript({
+            path: 'lib/' + dep.name + '.js',
+            sourcePath: 'lib/' + dep.name + '.js',//filenameJS,
+            data: 'define(\'' + dep.name + '\', [], function() {});',
+            bare: true
+          });      
+          
+        } else {
+          // Warn again that reference not found?
+        }
+        
       }
 
-      // ADD CSS
-      var filenameCSS = path.join(famonoLibFolder, dep.name + '.css');
       // Check if the ressource is found
-      if (fs.existsSync(filenameCSS)) {
+      if (foundCSS) {
 
         compileStep.addStylesheet({
           path: 'lib/' + dep.name + '.css',
@@ -991,6 +1004,19 @@ Plugin.registerSourceHandler("require", function (compileStep) {
         });
         
       }
+
+      // Check if the ressource is found
+      if (foundHTML) {
+
+        // XXX: Figure out how to add html
+        //
+        // compileStep.addStylesheet({
+        //   path: 'lib/' + dep.name + '.css',
+        //   data: fs.readFileSync(filenameCSS, 'utf8'),
+        //   //sourceMap: 
+        // });
+        
+      }      
 
     }
 
