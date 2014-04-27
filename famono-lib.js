@@ -102,11 +102,17 @@ var setConfigObject = function(obj) {
       
     }
 
-    // Store the config
-    if (saveToJSON(configPath, config)) {
-      console.log('Famono: Added "' + namelist.join('", "') + '"');
+    if (namelist.length) {
+
+      // Store the config
+      if (saveToJSON(configPath, config)) {
+        console.log('Famono: Added "' + namelist.join('", "') + '"');
+      } else {
+        console.log('Famono: Could not update the library registry');
+      }
+
     } else {
-      console.log('Famono: Could not update the library registry');
+      // Well nothing to work with really...
     }
   } else {
     // No smart.require found
