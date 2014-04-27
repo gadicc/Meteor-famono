@@ -34,7 +34,7 @@ if (program.add) {
 
   } else {
 
-    getBowerData(program.add, function(err, result) {
+    lib.getBowerData(program.add, function(err, result) {
 
       if (err) {
         console.log('Could not resolve package name "' + program.add + '", ' + err.message);

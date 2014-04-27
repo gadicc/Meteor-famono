@@ -83,10 +83,42 @@ var setConfig = function(name, pathName) {
   }
 };
 
+var setConfigObject = function(obj) {
+  // Load config
+  var config = loadFromJSON(configPath);
+  // if config found
+  if (config) {
+    var namelist = [];
+
+    for (var name in obj) {
+      // Add to the name list
+      namelist.push(name);
+
+      // Get the pathname
+      var pathName = obj[name];
+
+      // Add the package
+      config[name] = { git: pathName }
+      
+    }
+
+    // Store the config
+    if (saveToJSON(configPath, config)) {
+      console.log('Famono: Added "' + namelist.join('", "') + '"');
+    } else {
+      console.log('Famono: Could not update the library registry');
+    }
+  } else {
+    // No smart.require found
+    console.log('Famono: Error, could not load the library registry');
+  }
+};
+
 module.exports = {
   loadFromJSON: loadFromJSON,
   saveToJSON: saveToJSON,
   getBowerData: getBowerData,
   loadConfig: loadConfig,
-  setConfig: setConfig
+  setConfig: setConfig,
+  setConfigObject: setConfigObject
 };

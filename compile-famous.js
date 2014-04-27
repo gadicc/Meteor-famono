@@ -2,6 +2,7 @@
 var fs = Npm.require('fs');
 var path = Npm.require('path');
 var exec = Npm.require('sync-exec');
+var lib = Npm.require('famono');
 
 var red = '\u001b[31m';
 var green = '\u001b[32m';
@@ -940,6 +941,46 @@ Plugin.registerSourceHandler("require", function (compileStep) {
     // Resolve the files
     resolveDependencies(file, deps, libraryDeps);
   }
+
+
+  // Check if we have namespace errors, we try to resolve these by looking them
+  // up in the bower db
+  var missingNamespaces = Object.keys(namespaceErrors).length;
+
+  if (missingNamespaces) {
+
+    // Checkcounter is request returned counter
+    var checkCounter = 0;
+
+    // Object over the namespaces / libraries to add in the config
+    var namespacesToAdd = {};
+
+    // Iterate over the namespaces we could not find
+    for (var namespace in namespaceErrors) {
+
+      // Lookup the namespace in the bower db
+      lib.getBowerData(namespace, function(err, result) {
+
+        if (err) {
+          console.log(green, 'Famono:', normal, 'Could not resolve namespace "' + namespace + '" in Bower database');
+        } else {
+          // Add the package
+          namespacesToAdd[result.name] = result.url;
+        }
+
+        // We are doing this async - and want to check that all requests have
+        // returned
+        if (++checkCounter == missingNamespaces) lib.setConfigObject(namespacesToAdd);
+
+      });
+
+    }
+
+  } // EO missing namespaces
+
+
+
+  //##### Add dependency library code to the bundle ######
 
   // Make sure we only serve the dependencies once...
   var isShipped = {};
