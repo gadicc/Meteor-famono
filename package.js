@@ -10,7 +10,7 @@ Package._transitional_registerBuildPlugin({
   ],
   npmDependencies: {
     'sync-exec': '0.3.2',
-    'famono': '0.0.3'
+    'famono': '0.0.5'
   }
 });
 
