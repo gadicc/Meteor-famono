@@ -1,17 +1,3 @@
-#!/usr/bin/env node
-/*
-
-  We create jsdoc into gh-pages submodule in folder "docs" and auto push changes
-
-*/
-
-
-// CLI Options
-var program = require('commander');
-// CLI Colored text
-var colors = require('colors');
-// CLI Progress bar
-var ProgressBar = require('progress');
 // Filesystem
 var fs = require('fs');
 // Path
@@ -24,16 +10,6 @@ var currentPath = path.resolve();
 var scriptPath = path.dirname(require.main.filename);
 // The smart.require - if not found we are not in a famono app...
 var configPath = path.join(currentPath, './lib/smart.require');
-
-program
-  .version('0.0.2')
-  .option('-a, --add <name>', 'Add library')
-  .option('-d, --del <name>', 'Remove library')
-  .option('-l, --list', 'List of used libraries')
-  .option('-p, --path <path>', 'use git or local path')
-
-  .parse(process.argv);
-
 
 if (!fs.existsSync(configPath)) {
   console.log('Famono: Error, cannot find famono in this folder');
@@ -76,6 +52,10 @@ var getBowerData = function(name, callback) {
   });
 };
 
+var loadConfig = function() {
+  return loadFromJSON(configPath);
+};
+
 var setConfig = function(name, pathName) {
   // Load config
   var config = loadFromJSON(configPath);
@@ -103,43 +83,10 @@ var setConfig = function(name, pathName) {
   }
 };
 
-if (program.add) {
-
-  if (program.path) {
-
-    // Add the package
-    setConfig(program.add, program.path);
-
-  } else {
-
-    getBowerData(program.add, function(err, result) {
-
-      if (err) {
-        console.log('Could not resolve package name "' + program.add + '", ' + err.message);
-      } else {
-        // Add the package
-        setConfig(result.name, result.url);
-      }
-
-    });
-
-  }
-
-} else if (program.del) {
-
-  // Remove the package
-  setConfig(program.del);
-
-} else if (program.list) {
-  var config = loadFromJSON(configPath);
-  if (config) {
-    
-    console.log('Used libraries:');
-    
-    for (var name in config)
-      console.log('-', name);
-
-  } else {
-    console.log('Famono: Error, could not load smart.require');
-  }
-}
+module.exports = {
+  loadFromJSON: loadFromJSON,
+  saveToJSON: saveToJSON,
+  getBowerData: getBowerData,
+  loadConfig: loadConfig,
+  setConfig: setConfig
+};
