@@ -37,7 +37,7 @@ var installationNote = function() {
   console.log('', white);
   console.log('F A M O N O', green);
   console.log('-----------', normal);
-  console.log('The Famono package will rig the Famo.us package system into Meteor.js');
+  console.log('The Famono package will rig the requirejs package system into Meteor.js');
   console.log('package system');
   console.log('');
   console.log('It adds the global "require" on the client');

@@ -1,12 +1,12 @@
 Package.describe({
-    summary: 'Adds require bundler to Meteor use with Famo.us'
+    summary: 'Add RequireJS support to Meteor. To support the use of frameworks like Famo.us.'
 });
 
 Package._transitional_registerBuildPlugin({
-  name: "compileFamous",
+  name: 'compileRequirejs',
   use: [],
   sources: [
-    'compile-famous.js'
+    'compile_requirejs.js'
   ],
   npmDependencies: {
     'sync-exec': '0.3.2',
@@ -14,7 +14,7 @@ Package._transitional_registerBuildPlugin({
   }
 });
 
-Npm.depends({ send: "0.1.4" });
+Npm.depends({ send: '0.1.4' });
 
 Package.on_use(function(api) {
   'use strict';
@@ -24,13 +24,12 @@ Package.on_use(function(api) {
   api.use('routepolicy', 'server');
 
   api.add_files([
-    'famous-server.js',
-    'serve-libraries-server.js'
+      'requirejs_server.js',
+      'requirejs_libraries_server.js'
   ], 'server');
 
-  api.add_files('famous-client.js', 'client');
+  api.add_files('requirejs_client.js', 'client');
 
-  //api.export('Famous');
   api.export('define');
   api.export('require');
 });
