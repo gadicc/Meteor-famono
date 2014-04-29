@@ -11,10 +11,14 @@ var scriptPath = path.dirname(require.main.filename);
 // The smart.require - if not found we are not in a famono app...
 var configPath = path.join(currentPath, './lib/smart.require');
 
-if (!fs.existsSync(configPath)) {
-  console.log('Famono: Error, cannot find famono in this folder');
-  process.exit(0);
-}
+var cliTestForFamono = function() {
+
+  if (!fs.existsSync(configPath)) {
+    console.log('Famono: Error, cannot find famono in this folder');
+    process.exit(0);
+  }
+
+};
 
 var loadFromJSON = function(pathName) {
   try {
@@ -126,5 +130,6 @@ module.exports = {
   getBowerData: getBowerData,
   loadConfig: loadConfig,
   setConfig: setConfig,
-  setConfigObject: setConfigObject
+  setConfigObject: setConfigObject,
+  cliTestForFamono: cliTestForFamono
 };

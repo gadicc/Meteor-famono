@@ -24,6 +24,8 @@ program
 
   .parse(process.argv);
 
+// Make sure we are in the right folder
+cliTestForFamono();
 
 if (program.add) {
 
