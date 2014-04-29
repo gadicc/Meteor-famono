@@ -3,7 +3,11 @@ FAMONO
 
 ### What is it?
 
-Well in short it's a Famo.us package system inside of the Meteor.js Package system - or is it requireJS/commonJS or AMD? one could actually remove the `standard-app-packages` from the app and have a pure Famo.us app.
+RequireJS support for Meteor.js.
+
+It was built to support Famo.us in Meteor (examples below) but it can support any RequireJS library.
+
+If you want a "pure" app without the meteor libraries just remove `standard-app-packages`.
 
 ### Install
 __Command line tool__
@@ -15,11 +19,11 @@ __Meteor package__
 ```bash
 $ mrt add famono
 ```
-*Requires: `Meteor`, `Meteorite` and ofcourse `git` all easy to install*
+*Requires: `Meteor`, `Meteorite` and of course `git`*
 
 ### Edit the library register
 __What?__
-Well - you can add any library code you want to - even none Famo.us stuff.
+Well - you can add any library code you want to.
 
 __How:__
 When you install the package you will get a `lib/smart.require` in your main app folder, and it would look something like:

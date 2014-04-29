@@ -13,7 +13,7 @@ var colors = require('colors');
 // CLI Progress bar
 var ProgressBar = require('progress');
 // Use the famono lib
-var lib = require('./famono-lib');
+var lib = require('./famono_lib');
 
 program
   .version('0.0.3')
