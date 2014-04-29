@@ -1,6 +1,6 @@
 {
   "name": "famono",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "preferGlobal": "true",
   "description": "Famono Library CLI tool for Meteor.js",
   "keywords": [
@@ -22,7 +22,7 @@
   "bin": {
     "famono": "famono.js"
   },
-  "main": "famono-lib",
+  "main": "famono_lib",
   "dependencies": {
     "commander": "=2.0.0",
     "colors": "=0.6.2",
