@@ -778,9 +778,10 @@ var ensureDependencies = function(compileStep) {
 
 };
 
-// The packages used in the application defined in the .meteor/packages file.
+// Iterate through the packages used by the application
+// that are defined in the .meteor/packages file.
 // Essentially project.getPackages https://github.com/meteor/meteor/blob/64e02f2f56d1588d9daad09634d579eb61bf91ab/tools/project.js#L41
-var getPackages = function(appDir) {
+var eachPackage = function(appDir, callback) {
   var ret = [];
 
   var file = path.join(appDir, '.meteor', 'packages');
@@ -796,10 +797,12 @@ var getPackages = function(appDir) {
       var folder = path.join(appDir, 'packages', line);
       // Check if the package is in the packages folder
       if (fs.existsSync(folder)) {
-        ret.push({
-          name: line,
-          folder: folder
-        });
+        if (callback) {
+          callback({
+            name: line,
+            folder: folder
+          });
+        }
       }
     }
   }
@@ -882,17 +885,16 @@ var readPackagejs = function(packagejsSource) {
 };
 
 // Return all the files from packages that depend on famono.
-var dependentPackageFiles = function(packages) {
+var dependentPackageFiles = function(appDir) {
   var dependentClientFiles = [];
 
-  packages.forEach(function(packag) {
+  eachPackage(appDir, function(packag) {
     if (packag.name === 'famono') return;
 
     var packagejs = path.join(packag.folder, 'package.js');
 
     // Ignore folders that are missing a package.js.
     if (!fs.existsSync(packagejs)) return;
-
 
     // Read the package.js file.
     packagejs = fs.readFileSync(packagejs, 'utf8');
@@ -946,32 +948,21 @@ var sourceCodeDependencies = function() {
   // Get the app directory
   var appDir = process.cwd();
 
-  var packages = getPackages(appDir);
+  // Check the application's client source code for dependencies.
+  // We assume famous is included in .meteor/packages because
+  // the plugin is run off of lib/smart.require (in the application).
 
-  var applicationDependsOnFamono = false;
-  packages.forEach(function(packag) {
-    if (packag.name === 'famono') applicationDependsOnFamono = true;
-  });
+  // Ignore public, private, server and packages
+  var ignoreFolders = [path.join(appDir, 'public'), path.join(appDir, 'private'),
+    path.join(appDir, 'server'), path.join(appDir, 'packages')];
 
-  // If the application depends on famono include
-  // the app directory's client source code.
-  // This is always true right now because build plugins
-  // must be included in .meteor/packages.
-  if (applicationDependsOnFamono) {
-
-    // Ignore public, private, server and packages
-    var ignoreFolders = [path.join(appDir, 'public'), path.join(appDir, 'private'),
-      path.join(appDir, 'server'), path.join(appDir, 'packages')];
-
-    // Scan the source files to find the dependency list
-    eachFile(appDir, function(file) {
-      storeFileDependencies(file, sourceDeps);
-    }, null, null, null, ignoreFolders);
-
-  }
+  // Scan the source files to find the dependency list
+  eachFile(appDir, function(file) {
+    storeFileDependencies(file, sourceDeps);
+  }, null, null, null, ignoreFolders);
 
   // If any packages depend on famono scan their source code.
-  var packageFiles = dependentPackageFiles(packages);
+  var packageFiles = dependentPackageFiles(appDir);
   packageFiles.forEach(function(file) {
     storeFileDependencies(file, sourceDeps);
   });
@@ -1195,7 +1186,7 @@ Plugin.registerSourceHandler("require", function(compileStep) {
       var foundCSS = fs.existsSync(filenameCSS);
       var foundHTML = fs.existsSync(filenameHTML)
 
-      // Check if the ressource is found
+      // Check if the resource is found
       if (foundJS) {
 
         compileStep.addJavaScript({
