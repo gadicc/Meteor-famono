@@ -791,7 +791,7 @@ var trimLine = function(line) {
 
 // The packages used in the application defined in the .meteor/packages file.
 // Essentially project.getPackages https://github.com/meteor/meteor/blob/64e02f2f56d1588d9daad09634d579eb61bf91ab/tools/project.js#L41
-var packages = function(appDir) {
+var getPackages = function(appDir) {
   var ret = [];
 
   var file = path.join(appDir, '.meteor', 'packages');
@@ -883,12 +883,8 @@ var readPackagejs = function(packagejsSource) {
   return reader(PackageApi, NpmApi);
 };
 
-
 // Return all the files from packages that depend on famono.
-// We check every folder in /packages for a famono dependency.
-// XXX only check the packages that are depended on in
-// .meteor/packages and those package's dependencies.
-var dependentPackageFiles = function(appDir) {
+var dependentPackageFiles = function(appDir, packages) {
   var dependentClientFiles = [];
 
   var packagesDirectory = path.join(appDir, 'packages');
@@ -897,6 +893,9 @@ var dependentPackageFiles = function(appDir) {
   var packages = _.chain(fs.readdirSync(packagesDirectory))
     // Remove famono.
     .without('famono')
+    // We only want to check the packages that are
+    // passed in (the ones from .meteor/packages).
+    .intersection(packages)
     .map(function(name) {
       return {
         name: name,
@@ -968,11 +967,13 @@ var sourceCodeDependencies = function() {
   // Get the app directory
   var appDir = process.cwd();
 
+  var packages = getPackages(appDir);
+
   // If the application's .meteor/packages contains famono
   // include source code from the app directory.
   // This is always true right now because build
   // plugins must be included in .meteor/packages.
-  if (_.contains(packages(appDir), 'famono')) {
+  if (_.contains(packages, 'famono')) {
 
     // Ignore public, private, server and packages
     var ignoreFolders = [appDir + '/public', appDir + '/private',
@@ -986,7 +987,7 @@ var sourceCodeDependencies = function() {
   }
 
   // If any packages depend on famono scan their source code.
-  var packageFiles = dependentPackageFiles(appDir);
+  var packageFiles = dependentPackageFiles(appDir, packages);
   _.each(packageFiles, function(file) {
     storeFileDependencies(file, sourceDeps);
   });
