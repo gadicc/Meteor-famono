@@ -5,8 +5,6 @@ var lib = Npm.require('famono');
 
 var http = Npm.require('http');
 
-var _ = Npm.require('underscore');
-
 var red = '\u001b[31m';
 var green = '\u001b[32m';
 var gray = '\u001b[2m';
@@ -201,7 +199,7 @@ var eachFile = function(folder, callback, dotted, level, crawledFolders, ignoreF
 
     if (showDotted && stats.isDirectory()) {
       // continue if the folder should be ignored
-      if (_.contains(ignoreFolders, file.filename)) continue;
+      if (ignoreFolders && ignoreFolders.indexOf(file.filename) > -1) continue;
       eachFile(file.filename, callback, dotted, level + 1, crawledFolders);
     }
   }
@@ -798,7 +796,10 @@ var getPackages = function(appDir) {
       var folder = path.join(appDir, 'packages', line);
       // Check if the package is in the packages folder
       if (fs.existsSync(folder)) {
-        ret.push(line);
+        ret.push({
+          name: line,
+          folder: folder
+        });
       }
     }
   }
@@ -881,30 +882,17 @@ var readPackagejs = function(packagejsSource) {
 };
 
 // Return all the files from packages that depend on famono.
-var dependentPackageFiles = function(appDir, packages) {
+var dependentPackageFiles = function(packages) {
   var dependentClientFiles = [];
 
-  var packagesDirectory = path.join(appDir, 'packages');
-  if (!fs.existsSync(packagesDirectory)) return [];
+  packages.forEach(function(packag) {
+    if (packag.name === 'famono') return;
 
-  // Get the package directories.
-  var packages = _.chain(fs.readdirSync(packagesDirectory))
-    // Remove famono.
-    .without('famono')
-    .map(function(name) {
-      return {
-        name: name,
-        folder: path.join(appDir, 'packages', name)
-      };
-    })
-    .value();
-
-  // Find all the packages that depend on famono.
-  _.filter(packages, function(packag) {
     var packagejs = path.join(packag.folder, 'package.js');
 
     // Ignore folders that are missing a package.js.
-    if (!fs.existsSync(packagejs)) return false;
+    if (!fs.existsSync(packagejs)) return;
+
 
     // Read the package.js file.
     packagejs = fs.readFileSync(packagejs, 'utf8');
@@ -960,11 +948,16 @@ var sourceCodeDependencies = function() {
 
   var packages = getPackages(appDir);
 
-  // If the application's .meteor/packages contains famono
-  // include source code from the app directory.
-  // This is always true right now because build
-  // plugins must be included in .meteor/packages.
-  if (packages.indexOf('famono') > -1) {
+  var applicationDependsOnFamono = false;
+  packages.forEach(function(packag) {
+    if (packag.name === 'famono') applicationDependsOnFamono = true;
+  });
+
+  // If the application depends on famono include
+  // the app directory's client source code.
+  // This is always true right now because build plugins
+  // must be included in .meteor/packages.
+  if (applicationDependsOnFamono) {
 
     // Ignore public, private, server and packages
     var ignoreFolders = [path.join(appDir, 'public'), path.join(appDir, 'private'),
@@ -978,7 +971,7 @@ var sourceCodeDependencies = function() {
   }
 
   // If any packages depend on famono scan their source code.
-  var packageFiles = dependentPackageFiles(appDir, packages);
+  var packageFiles = dependentPackageFiles(packages);
   packageFiles.forEach(function(file) {
     storeFileDependencies(file, sourceDeps);
   });
