@@ -23,7 +23,7 @@ var cliTestForFamono = function() {
 var loadFromJSON = function(pathName) {
   try {
     return JSON.parse(fs.readFileSync(pathName, 'utf8'));
-  } catch(err) {
+  } catch (err) {
     return null;
   }
 };
@@ -32,7 +32,7 @@ var saveToJSON = function(pathName, obj) {
   try {
     fs.writeFileSync(pathName, JSON.stringify(obj, null, '\t'), 'utf8');
     return true;
-  } catch(err) {
+  } catch (err) {
     console.log('Error', err.message);
     return null;
   }
@@ -40,20 +40,20 @@ var saveToJSON = function(pathName, obj) {
 
 var getBowerData = function(name, callback) {
   var data = '';
-  http.get('http://bower.herokuapp.com/packages/' + name, function(res) {
-    res.on('data', function (chunk) {
+  http.get('http://bower.herokuapp.com/packages/' + name,function(res) {
+    res.on('data', function(chunk) {
       data += chunk;
     });
-    res.on('end', function (chunk) {
+    res.on('end', function(chunk) {
       try {
         callback(null, JSON.parse(data));
-      }catch(err) {
+      } catch (err) {
         callback(new Error('Invalid JSON'));
       }
     });
   }).on('error', function(e) {
-    callback(e);
-  });
+      callback(e);
+    });
 };
 
 var loadConfig = function() {
@@ -77,9 +77,9 @@ var setConfig = function(name, pathName) {
 
     // Store the config
     if (saveToJSON(configPath, config)) {
-      console.log('Famono: ' + ((pathName)?'Added':'Removed') + ' package "' + name + '"');
+      console.log('Famono: ' + ((pathName) ? 'Added' : 'Removed') + ' package "' + name + '"');
     } else {
-      console.log('Famono: Could not ' + ((pathName)?'add':'remove') + ' package name "' + name + '"');
+      console.log('Famono: Could not ' + ((pathName) ? 'add' : 'remove') + ' package name "' + name + '"');
     }
   } else {
     // No smart.require found
@@ -103,7 +103,7 @@ var setConfigObject = function(obj) {
 
       // Add the package
       config[name] = { git: pathName }
-      
+
     }
 
     if (namelist.length) {

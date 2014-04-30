@@ -7,8 +7,8 @@ var getModule = function(name, isDefining) {
     var last = '/' + name.split('/').pop();
     // We either return the module or init an empty module for tracking
     return modules[name] || modules[name + '/index'] || modules[name + last] ||
-          (modules[name] = { exports: {}, callbacks: [], loaded: (isDefining)? false : null });
-    
+      (modules[name] = { exports: {}, callbacks: [], loaded: (isDefining) ? false : null });
+
   } else {
     return {};
   }
@@ -23,7 +23,7 @@ var getModule = function(name, isDefining) {
  */
 require = function(name) {
   // Get the module
-  var module = getModule(name);  
+  var module = getModule(name);
   // Check that the module is loaded
   if (module.loaded === true) {
 
@@ -69,10 +69,14 @@ var _loadScript = function(libraryName, callback) {
   var script = document.createElement('script');
 
   // Set the onload event
-  script.onload = function() { callback(null, libraryName); };
+  script.onload = function() {
+    callback(null, libraryName);
+  };
 
   // Set the on error event
-  script.onerror = function(err) { callback(err, libraryName); };
+  script.onerror = function(err) {
+    callback(err, libraryName);
+  };
 
   // Set the type to js
   script.type = 'text/javascript';
@@ -81,7 +85,7 @@ var _loadScript = function(libraryName, callback) {
   script.src = '/lib/' + libraryName;
 
   // Inject the script tag
-  head.appendChild(script);  
+  head.appendChild(script);
 };
 
 /**
@@ -133,7 +137,7 @@ var moduleDefineDone = function(name, f) {
     // Set loaded flag
     module.loaded = true;
     // Register the library
-    module.f = f;    
+    module.f = f;
     // Call back all listeners
     while (module.callbacks.length) {
       // We pop out the listener callbacks
@@ -179,7 +183,7 @@ _loadModule = function(deps, f) {
   if (typeof f !== 'function')
     throw new Error('Famono: define require a function');
   // Convert strings to array of string
-  if (deps === ''+deps) deps = [deps];
+  if (deps === '' + deps) deps = [deps];
   // XXX: deps can be a string or an array of strings
   // 1. ensure all deps are loaded by checking modules[]
   loadLibraries(deps, function(done) {
@@ -224,7 +228,7 @@ _defineModule = function(name, deps, f) {
  * @param {Array} deps List of dependencies to load
  * @param {Function} f The module
  */
-_defineGlobal = function(f) {  
+_defineGlobal = function(f) {
   // Define a global thing...
   define(null, [], f);
 };
@@ -242,17 +246,17 @@ define = function(/* name, deps, f or deps, f */) {
     // Return the load module
     return _defineGlobal.apply(this, arguments);
 
-  // define([deps, ... , deps], function() {});
+    // define([deps, ... , deps], function() {});
   } else if (arguments.length === 2) {
     // Return the load module
     return _loadModule.apply(this, arguments);
 
-  // define('name', [deps, ... , deps], function() {});
+    // define('name', [deps, ... , deps], function() {});
   } else if (arguments.length == 3) {
     // Return the define module
     return _defineModule.apply(this, arguments);
 
-  // Invalid arguments
+    // Invalid arguments
   } else {
     throw new Error('define got invalid number of arguments');
   }

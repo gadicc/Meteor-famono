@@ -1,7 +1,7 @@
-require = function() {
+require = function () {
   throw new Error('Famous "require" cannot run on the server');
 }
 
-define = function() {
+define = function () {
   throw new Error('Famous "define" cannot run on the server');
 };
