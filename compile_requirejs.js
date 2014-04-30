@@ -3,8 +3,10 @@ var fs = Npm.require('fs');
 var path = Npm.require('path');
 var exec = Npm.require('sync-exec');
 var lib = Npm.require('famono');
-// http
+
 var http = Npm.require('http');
+
+var _ = Npm.require('underscore');
 
 var red = '\u001b[31m';
 var green = '\u001b[32m';
@@ -15,19 +17,19 @@ var normal = '\u001b[0m';
 // Changing this will force a rerun of deps - this makes it easier for the users
 var version = '0.1.2';
 
-// Set the main famono folder for our work...
+// Set the main famono folder for our work -- to hold the uncompiled requirejs repositories.
 var famonoRepoFolder = path.join(process.cwd(), '.meteor', '.famono-repos');
 // Make sure famonoRepoFolder exists
 if (!fs.existsSync(famonoRepoFolder)) fs.mkdirSync(famonoRepoFolder);
 
-// Make sure we can work here...
+// Make sure we can work here.
 if (!fs.existsSync(famonoRepoFolder))
   throw new Error('Famono cannot create any files - make sure you have the necessary rights to the filesystem');
 
 var configFolder = path.join(famonoRepoFolder, '.config');
 var famonoLibFolder = path.join(famonoRepoFolder, 'lib');
 
-// Make sure famonoLibFolder exists
+// Make sure famonoLibFolder exists.
 if (!fs.existsSync(famonoLibFolder)) fs.mkdirSync(famonoLibFolder);
 
 var versionFile = path.join(famonoLibFolder, '.version');
@@ -43,7 +45,7 @@ var installationNote = function() {
   console.log('It adds the global "require" on the client');
   console.log('It will rig dependencies on the client using "define"');
   console.log('');
-  console.log('It also parses your source code when you change it, and figure');
+  console.log('It also parses your source code when you change it, and figures');
   console.log('out what libraries must be bundled for the client.');
   console.log('');
   console.log('You can add/remove libraries to the "lib/smart.require" and will');
@@ -68,7 +70,7 @@ var installationGitIgnore = function() {
   // Add the .famono-repos
   contents += '.famono-repos\n';
   // Write the file again...
-  fs.writeFileSync(gitignoreFolder, contents, 'utf8');  
+  fs.writeFileSync(gitignoreFolder, contents, 'utf8');
 };
 
 var installationCheck = function() {
@@ -77,7 +79,7 @@ var installationCheck = function() {
   var libFolder = path.join(process.cwd(), 'lib');
   // The filename of the smart.require
   var filename = path.join(libFolder, 'smart.require');
-  
+
   if (!fs.existsSync(libFolder))
     fs.mkdirSync(libFolder);
 
@@ -102,9 +104,9 @@ var installationCheck = function() {
 
     fs.writeFileSync(filename, defaultDeps, 'utf8');
 
-    
+
   }
-  
+
 };
 
 var namespaceErrors = {};
@@ -139,12 +141,26 @@ var libraryError = function(name, lookup, filename) {
 
   }
 };
+
+var fileProperties = function (folder, name) {
+  // Split the file name by '.'
+  var split = name.split('.');
+
+  return {
+    folder: folder,
+    name: name,
+    filename: path.join(folder, name),
+    ext: split[split.length-1].toLowerCase(),
+    isDotted: (split[0] === '')
+  };
+};
+
 /**
  * @method eachFile
- * @param {Function} f callback(filename, name, level, index)
+ * @param {Function} callback ({folder, filename, name, level, index, ext, isDotted})
  * @returns {Array} list of javascript filenames in the bundle
  */
-var eachFile = function(folder, f, dotted, level, crawledFolders) {
+var eachFile = function(folder, callback, dotted, level, crawledFolders, ignoreFolders) {
   // Make sure we get the real path, credit @gadicc
   folder = fs.realpathSync(folder);
   // Build on the crawled folders or create new object
@@ -159,38 +175,36 @@ var eachFile = function(folder, f, dotted, level, crawledFolders) {
   // Make sure we have a proper level
   level = level || 0;
 
+  ignoreFolders = ignoreFolders || [];
+
   for (var i = 0; i < fileList.length; i++) {
     // Keep nice reference to the filename
     var name = fileList[i];
-    // Split the file name by '.'
-    var sn = name.split('.');
-    // Get the full filename
-    var filename = path.join(folder, name);
-    // Set dotted
-    var isDotted = (sn[0] === '');
+
+    var file = fileProperties(folder, name);
+
     // Get the file stats
-    var stats = fs.statSync(filename);
+    var stats = fs.statSync(file.filename);
     // Show this dotted, if dotted is true we dig into dotted folders
-    var showDotted = (dotted === true && isDotted) || (!isDotted);
+    var showDotted = (dotted === true && file.isDotted) || (!file.isDotted);
     // We only iterate over non-dotted javascript files - this should be
     // recursive, avoiding private, public and server folders
     if (stats.isFile())
-      f({
+      callback({
         folder: folder,
-        filename: filename,
+        filename: file.filename,
         name: name,
         level: level,
         index: i,
-        ext: sn[sn.length-1].toLowerCase(),
-        isDotted: isDotted,
+        ext: file.ext,
+        isDotted: file.isDotted
       });
-    // If we are dealing with a sub folder then chek that we are not in a server
-    // folder - we dont care about the server side, public or private code at
-    // all here...
-    // Meteor only cares about top level folders so we allow all names at
-    // greater levels than 0
-    if (showDotted && stats.isDirectory())
-      eachFile(filename, f, dotted, level + 1, crawledFolders);
+
+    if (showDotted && stats.isDirectory()) {
+      // continue if the folder should be ignored
+      if (_.contains(ignoreFolders, file.filename)) continue;
+      eachFile(file.filename, callback, dotted, level + 1, crawledFolders);
+    }
   }
 };
 
@@ -314,14 +328,14 @@ var parseCode = function(currentDep, code) {
   // Set the define reference
   var defineReference = '\'' + currentDepName + '\', ';
   // Set the define statement string
-  var defineStatement = 'define(' + defineReference;  
+  var defineStatement = 'define(' + defineReference;
   // Init result
   var result = {
     code: '',
     current: currentDepName,
     deps: []
   };
-  // Log words and their mode 
+  // Log words and their mode
   var words = [];
 
   // Byte parser
@@ -363,7 +377,7 @@ var parseCode = function(currentDep, code) {
         if (!isStringMode(lastMode) && isStringMode(mode)) {
           charMode = lastMode;
         } else {
-          charMode = mode;          
+          charMode = mode;
         }
         m += charMode[0];
       }
@@ -376,7 +390,7 @@ var parseCode = function(currentDep, code) {
 
       lastCharMode = charMode;
       currentWord += c;
-     
+
     } else {
       // If we got an actual word we store this
       if (currentWord !== '') {
@@ -402,7 +416,7 @@ var parseCode = function(currentDep, code) {
         //     console.log(m);
         //     console.log(last, current);
         //     console.log('-------');
-        //   }  
+        //   }
         // }
 
         // Test for amd compability
@@ -434,7 +448,7 @@ var parseCode = function(currentDep, code) {
 
             //console.log(mode, currentDepPath, current.text, resolveDepName);
             result.deps.push(resolveDepName);
-            
+
             //console.log(resolveDepName);
           } else {
             // Do nothing to resolve - trust the user?
@@ -445,7 +459,7 @@ var parseCode = function(currentDep, code) {
         }
 
         // Find define()
-        if (!foundCommonJS && last.mode === 'code' && last.text === 'define') {         
+        if (!foundCommonJS && last.mode === 'code' && last.text === 'define') {
 
           if (foundAMD) {
 
@@ -506,7 +520,7 @@ var parseCode = function(currentDep, code) {
   // If no define is set then assume that we have unwrapped code
   if (!foundCommonJS && foundDefine) {
     if (foundAMD && amdDefineAt.start) {
-      // XXX: work differently if AMD compatible - Its a nice to have feature - 
+      // XXX: work differently if AMD compatible - Its a nice to have feature -
       // But commonJS is also broadly supported. I think we may have to have a
       // new parse algoritme checking any define statements?
       console.log(result.code.substring(amdDefineAt.start, amdDefineAt.start+10));
@@ -530,18 +544,20 @@ var parseCode = function(currentDep, code) {
  */
 var updateDependencies = function(name) {
   // Set repo path
-  var repoPath = path.join(famonoRepoFolder, name);  
+  var repoPath = path.join(famonoRepoFolder, name);
   // Set repo path
-  var libPath = path.join(famonoLibFolder, name);  
+  var libPath = path.join(famonoLibFolder, name);
   // Set deps path
   var depsPath = path.join(famonoRepoFolder, '.' + name);
-  // Init deps object       
+  // Init deps object
   var deps = {};
   // Remove the deps in lib
   removeFolder(libPath);
   // Iterate over the files
   eachFile(repoPath, function(file) {
     if (file.ext === 'js' || file.ext === 'css') {
+      console.log(file);
+
       // Remove the famonoRepoFolder part from the filenames
       var depName = file.filename.substring(famonoRepoFolder.length + 1);
 
@@ -555,7 +571,7 @@ var updateDependencies = function(name) {
         result = parseCode(depName, fs.readFileSync(file.filename, 'utf8'));
         // Set deps relations
         deps[result.current] = result.deps;
-        
+
       } else {
 
         // Get the base name
@@ -652,7 +668,7 @@ var checkGitFolders = function(newConfig, oldConfig) {
           var result = exec('git pull', { cwd: repoPath });
           if (result.status == 0) {
             if (result.stdout !== 'Already up-to-date.\n') {
-              console.log(green, 'Famono:', normal, 'updating dependencies "' + name + '" ');          
+              console.log(green, 'Famono:', normal, 'updating dependencies "' + name + '" ');
               updateDependencies(name);
             } else {
               console.log(green, 'Famono:', normal, 'git update "' + name + '" is up-to-date');
@@ -666,7 +682,7 @@ var checkGitFolders = function(newConfig, oldConfig) {
           } else {
             console.log(green, 'Famono:', normal, 'git update "' + name + '" ' + repoPath, ' Error!!');
           }
-          //console.log(name, status);          
+          //console.log(name, status);
         } else {
           // Its not in the new repo so we remove it...
           console.log(green, 'Famono:', normal, 'remove dep "' + name + '" ' + repoPath);
@@ -709,7 +725,7 @@ var checkGitFolders = function(newConfig, oldConfig) {
 
             updateDependencies(name);
           }
-        } 
+        }
       }
     } else {
       console.error('Famono could not find repo for "' + name + '", please set "git"');
@@ -767,33 +783,218 @@ var ensureDependencies = function(compileStep) {
 
 };
 
-// Scan the users source code for dependencies...
+var trimLine = function (line) {
+    var match = line.match(/^([^#]*)#/);
+    if (match)
+        line = match[1];
+    line = line.replace(/^\s+|\s+$/g, ''); // leading/trailing whitespace
+    return line;
+};
+
+// The packages used in the application defined in the .meteor/packages file.
+// Essentially project.getPackages https://github.com/meteor/meteor/blob/64e02f2f56d1588d9daad09634d579eb61bf91ab/tools/project.js#L41
+var packages = function (appDir) {
+    var ret = [];
+
+    var file = path.join(appDir, '.meteor', 'packages');
+
+    var raw = fs.readFileSync(file, 'utf8');
+    var lines = raw.split(/\r*\n\r*/);
+
+    _.each(lines, function (line) {
+        line = trimLine(line);
+        if (line !== '')
+            ret.push(line);
+    });
+
+    // strip blank lines at the end
+    while (lines.length) {
+        var line = lines[lines.length - 1];
+        if (line.match(/\S/))
+            break;
+        lines.pop();
+    }
+
+    return ret;
+};
+
+// Read the package.js file to find the client files of packages that depend on famono.
+var readPackagejs = function (packagejsSource) {
+
+  var empty = function () {};
+
+  // Create our own Package api
+  var PackageApi = function (ret) {
+
+    var use = function (names, where) {
+      // Only use famono if it is depended on the client.
+      if (where && where !== 'client' && !_.contains(where, 'client')) return;
+
+      if (names === 'famono' || _.contains(names, 'famono')) {
+        ret.useFamono = true;
+      }
+    };
+
+    var addFiles = function (paths, where, fileOptions) {
+
+      // Ignore asset files.
+      if (fileOptions && fileOptions.isAsset) return;
+
+      // Only add client files.
+      if (where && where !== 'client' && !_.contains(where, 'client')) return;
+
+      _.each(paths, function (relativePath) {
+        ret.clientFiles.push(relativePath);
+      });
+    };
+
+    return {
+      describe: empty,
+      on_test: empty,
+      on_use: function (f) {
+        f({
+          use: use,
+          imply: use,
+          add_files: addFiles,
+          export: empty
+        });
+      },
+      _transitional_registerBuildPlugin: empty
+    };
+  };
+
+  // Create an empty Npm api
+  var NpmApi = function () {
+    return {
+      depends: empty,
+      require: empty
+    };
+  };
+
+  var packageReaderStart = 'return function (package, npm) {' +
+    'var ret = { clientFiles: [], useFamono: false };' +
+    'var Package = package(ret);' +
+    'var Npm = npm();';
+
+  // body will be the package.js file
+
+  var packageReaderEnd = 'return ret; };';
+
+  var reader = new Function(packageReaderStart + '\n' + packagejsSource + packageReaderEnd)();
+  return reader(PackageApi, NpmApi);
+};
+
+
+
+// Return all the files from packages that depend on famono.
+// We check every folder in /packages for a famono dependency.
+// XXX only check the packages that are depended on in
+// .meteor/packages and those package's dependencies.
+var dependentPackageFiles = function (appDir) {
+  var dependentClientFiles = [];
+
+  var packagesDirectory = path.join(appDir, 'packages');
+  if (!fs.existsSync(packagesDirectory)) return [];
+
+  var packages = _.chain(fs.readdirSync(packagesDirectory))
+    // Remove famono.
+    .without('famono')
+    .map(function(name){
+      return {
+        name: name,
+        folder: path.join(appDir, 'packages', name)
+      };
+    })
+    // Only return directories.
+    .filter(function(packag) {
+      return fs.statSync(packag.folder).isDirectory();
+    })
+    .value();
+
+  // Find all the packages that depend on famono.
+  _.filter(packages, function(packag) {
+    var packagejs = path.join(packag.folder, 'package.js');
+
+    // Ignore folders that are missing a package.js.
+    if (!fs.existsSync(packagejs)) return false;
+
+    // Read the package.js file.
+    packagejs = fs.readFileSync(packagejs, 'utf8');
+
+    try {
+      var results = readPackagejs(packagejs);
+
+      // Make sure the package depends on famono.
+      if (results.useFamono) {
+
+        // Return all the package's client files.
+        _.each(results.clientFiles, function (relativeClientFile) {
+          var folder = packag.folder + '/' + relativeClientFile;
+          folder = path.dirname(folder);
+          var file = relativeClientFile.substring(relativeClientFile.lastIndexOf('/') + 1);
+
+          dependentClientFiles.push(fileProperties(folder, file));
+        });
+      }
+    } catch (e) {
+      console.log('Famono: problem reading package.js for "' + packag.name + '" package.');
+    }
+  });
+
+  return dependentClientFiles;
+};
+
+// Scan a source file for require statements and store them on sourceDeps.
+var storeFileDependencies = function (file, sourceDeps) {
+
+  // Only scan javascript and coffeescript files
+  // that are not prefixed dotted.
+  if (/^js$|^coffee$|^litcoffee$|^coffee.md$/.test(file.ext) &&
+    !file.isDotted) {
+
+    // Load the code
+    var code = fs.readFileSync(file.filename, 'utf8');
+
+    // Parse the file
+    var result = parseCode(file.folder, code);
+
+    // Store the source dependencies
+    sourceDeps[file.folder] = result.deps;
+  }
+};
+
+// Scan the application's source code for requirejs dependencies.
 var sourceCodeDependencies = function() {
   // Source deps
   var sourceDeps = {};
-  // Get the main code folder
-  var codeFolder = process.cwd();
-  // Scan the source files to find the dependency list
-  eachFile(codeFolder, function(file) {
-    // Get the folder
-    var folder = file.filename.substring(codeFolder.length);
 
-    // We dont care about public, private, server or package root folders
-    // And we want javascript files and they may not be prefixed dotted
-    if (!/^\/public\/|^\/private\/|^\/server\//.test(folder) &&
-            /^js$|^coffee$|^litcoffee$|^coffee.md$/.test(file.ext) &&
-            !file.isDotted) {
-        // Load the code
-        var code = fs.readFileSync(file.filename, 'utf8');
-        // Parse the file
-        var result = parseCode(folder, code);
-        // Store the source dependencies
-        sourceDeps[folder] = result.deps;
-    }
+  // Get the app directory
+  var appDir = process.cwd();
 
+  // If the application's .meteor/packages contains famono
+  // include source code from the app directory.
+  // This is always true right now because build
+  // plugins must be included in .meteor/packages.
+  if (_.contains(packages(appDir), 'famono')) {
+
+    // Ignore public, private, server and packages
+    var ignoreFolders = [appDir + '/public', appDir + '/private',
+      appDir + '/server', appDir + '/packages'];
+
+    // Scan the source files to find the dependency list
+    eachFile(appDir, function(file) {
+      storeFileDependencies(file, sourceDeps);
+    }, null, null, null, ignoreFolders);
+
+  }
+
+  // If any packages depend on famono scan their source code.
+  var packageFiles = dependentPackageFiles(appDir);
+  _.each(packageFiles, function(file) {
+    storeFileDependencies(file, sourceDeps);
   });
 
-  return sourceDeps;  
+  return sourceDeps;
 };
 
 var getDepRoot = function(depName, last) {
@@ -814,7 +1015,7 @@ var eachSourceDeps = function(sourceDeps, f) {
       f({
         filename: file,
         name: depName,
-        root: getDepRoot(depName),
+        root: getDepRoot(depName)
       });
     }
   }
@@ -834,7 +1035,7 @@ var loadDependenciesRegisters = function(sourceDeps, libraries) {
       } catch(err) {
         namespaceError(dep.root, dep.filename);
       }
-      
+
     }
 
   });
@@ -881,7 +1082,7 @@ var resolveDependencies = function(filename, wanted, libraryDeps, level) {
           // Resolve the deps
           resolveDependencies(filename, nextWanted, libraryDeps, level+1);
           // Add the deps to the load list
-          loadDepsList.push({ 
+          loadDepsList.push({
             name: name,
             level: level,
             index: neededDepsIndex++,
@@ -893,16 +1094,16 @@ var resolveDependencies = function(filename, wanted, libraryDeps, level) {
           // we dont want to upset the client because of our limitations
           // it could be that the code uses eg. require('name' + foo); this
           // cannot be resolved by us - the client may know more than we...
-          loadDepsList.push({ 
+          loadDepsList.push({
             name: name,
             level: level,
             index: neededDepsIndex++,
             deps: 0
-          });   
-          // And we warn about an error...       
+          });
+          // And we warn about an error...
           libraryError(name, libraryDeps[root], filename);
         }
-        
+
       } else {
         namespaceError(root, filename);
       }
@@ -923,18 +1124,14 @@ Plugin.registerSourceHandler("require", function (compileStep) {
 
   console.log('\nEnsure dependencies...');
   // We check if the config has changes and load / unload dependencies
-  // accordingly          
+  // accordingly
   ensureDependencies(compileStep);
 
-  // Scan the user code for require statements...
+  // Scan the user code for require statements.
   var sourceDeps = sourceCodeDependencies();
-
-// console.log(sourceDeps);
 
   // Load libraries registers
   var libraryDeps = loadDependenciesRegisters(sourceDeps);
-
-//console.log(libraryDeps);
 
   // Load needed deps list
   for (var file in sourceDeps) {
@@ -1037,26 +1234,26 @@ Plugin.registerSourceHandler("require", function (compileStep) {
             sourcePath: 'lib/' + dep.name + '.js',//filenameJS,
             data: 'define(\'' + dep.name + '\', [], function() {});',
             bare: true
-          });      
-          
+          });
+
         } else {
           // Warn again that reference not found?
         }
-        
+
       }
 
-      // Check if the ressource is found
+      // Check if the resource is found
       if (foundCSS) {
 
         compileStep.addStylesheet({
           path: 'lib/' + dep.name + '.css',
           data: fs.readFileSync(filenameCSS, 'utf8'),
-          //sourceMap: 
+          //sourceMap:
         });
-        
+
       }
 
-      // Check if the ressource is found
+      // Check if the resource is found
       if (foundHTML) {
 
         // XXX: Figure out how to add html
@@ -1064,10 +1261,10 @@ Plugin.registerSourceHandler("require", function (compileStep) {
         // compileStep.addStylesheet({
         //   path: 'lib/' + dep.name + '.css',
         //   data: fs.readFileSync(filenameCSS, 'utf8'),
-        //   //sourceMap: 
+        //   //sourceMap:
         // });
-        
-      }      
+
+      }
 
     }
 

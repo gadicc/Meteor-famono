@@ -1,5 +1,5 @@
 Package.describe({
-    summary: 'Add RequireJS support to Meteor. To support the use of frameworks like Famo.us.'
+    summary: 'RequireJS bundler plugin for Meteor -- to support the use of frameworks like Famo.us.'
 });
 
 Package._transitional_registerBuildPlugin({
