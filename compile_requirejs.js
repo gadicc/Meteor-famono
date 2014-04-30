@@ -887,21 +887,15 @@ var dependentPackageFiles = function(appDir, packages) {
   var packagesDirectory = path.join(appDir, 'packages');
   if (!fs.existsSync(packagesDirectory)) return [];
 
+  // Get the package directories.
   var packages = _.chain(fs.readdirSync(packagesDirectory))
     // Remove famono.
     .without('famono')
-    // We only want to check the packages that are
-    // passed in (the ones from .meteor/packages).
-    .intersection(packages)
     .map(function(name) {
       return {
         name: name,
         folder: path.join(appDir, 'packages', name)
       };
-    })
-    // Only return directories.
-    .filter(function(packag) {
-      return fs.statSync(packag.folder).isDirectory();
     })
     .value();
 
@@ -922,7 +916,7 @@ var dependentPackageFiles = function(appDir, packages) {
       if (results.useFamono) {
 
         // Return all the package's client files.
-        _.each(results.clientFiles, function(relativeClientFile) {
+        results.clientFiles.forEach(function(relativeClientFile) {
           var folder = packag.folder + '/' + relativeClientFile;
           folder = path.dirname(folder);
           var file = relativeClientFile.substring(relativeClientFile.lastIndexOf('/') + 1);
@@ -985,7 +979,7 @@ var sourceCodeDependencies = function() {
 
   // If any packages depend on famono scan their source code.
   var packageFiles = dependentPackageFiles(appDir, packages);
-  _.each(packageFiles, function(file) {
+  packageFiles.forEach(function(file) {
     storeFileDependencies(file, sourceDeps);
   });
 
