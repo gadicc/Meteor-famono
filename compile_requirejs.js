@@ -554,7 +554,6 @@ var updateDependencies = function(name) {
   // Iterate over the files
   eachFile(repoPath, function(file) {
     if (file.ext === 'js' || file.ext === 'css') {
-      console.log(file);
 
       // Remove the famonoRepoFolder part from the filenames
       var depName = file.filename.substring(famonoRepoFolder.length + 1);
@@ -781,14 +780,6 @@ var ensureDependencies = function(compileStep) {
 
 };
 
-var trimLine = function(line) {
-  var match = line.match(/^([^#]*)#/);
-  if (match)
-    line = match[1];
-  line = line.replace(/^\s+|\s+$/g, ''); // leading/trailing whitespace
-  return line;
-};
-
 // The packages used in the application defined in the .meteor/packages file.
 // Essentially project.getPackages https://github.com/meteor/meteor/blob/64e02f2f56d1588d9daad09634d579eb61bf91ab/tools/project.js#L41
 var getPackages = function(appDir) {
@@ -799,18 +790,17 @@ var getPackages = function(appDir) {
   var raw = fs.readFileSync(file, 'utf8');
   var lines = raw.split(/\r*\n\r*/);
 
-  _.each(lines, function(line) {
-    line = trimLine(line);
-    if (line !== '')
-      ret.push(line);
-  });
-
-  // strip blank lines at the end
-  while (lines.length) {
-    var line = lines[lines.length - 1];
-    if (line.match(/\S/))
-      break;
-    lines.pop();
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    if (/^#/.test(line)) {
+      // Noop we got a comment
+    } else if (line.length && line !== ' ') {
+      var folder = path.join(appDir, 'packages', line);
+      // Check if the package is in the packages folder
+      if (fs.existsSync(folder)) {
+        ret.push(line);
+      }
+    }
   }
 
   return ret;
@@ -826,10 +816,14 @@ var readPackagejs = function(packagejsSource) {
   var PackageApi = function(ret) {
 
     var use = function(names, where) {
-      // Only use famono if it is depended on the client.
-      if (where && where !== 'client' && !_.contains(where, 'client')) return;
+      // Check this is depended on the client.
+      if (where && where !== 'client' && where.indexOf('client') < 0) return;
 
-      if (names === 'famono' || _.contains(names, 'famono')) {
+      // Check famono is depended on.
+      // Parse the package names into a checkable string ex. /session/ejson/
+      names = '/' + ((names === '' + names) ? names : names.join('/')) + '/';
+
+      if (/\/famono\//.test(names)) {
         ret.useFamono = true;
       }
     };
@@ -840,9 +834,12 @@ var readPackagejs = function(packagejsSource) {
       if (fileOptions && fileOptions.isAsset) return;
 
       // Only add client files.
-      if (where && where !== 'client' && !_.contains(where, 'client')) return;
+      if (where && where !== 'client' && where.indexOf('client') < 0) return;
 
-      _.each(paths, function(relativePath) {
+      // Ensure paths is an array
+      paths = (paths === '' + paths) ? [paths] : paths;
+
+      paths.forEach(function(relativePath) {
         ret.clientFiles.push(relativePath);
       });
     };
@@ -934,7 +931,7 @@ var dependentPackageFiles = function(appDir, packages) {
         });
       }
     } catch (e) {
-      console.log('Famono: problem reading package.js for "' + packag.name + '" package.');
+      console.log(green, 'Famono:', normal, 'problem reading package.js for "' + packag.name + '" package.', e);
     }
   });
 
@@ -973,11 +970,11 @@ var sourceCodeDependencies = function() {
   // include source code from the app directory.
   // This is always true right now because build
   // plugins must be included in .meteor/packages.
-  if (_.contains(packages, 'famono')) {
+  if (packages.indexOf('famono') > -1) {
 
     // Ignore public, private, server and packages
-    var ignoreFolders = [appDir + '/public', appDir + '/private',
-      appDir + '/server', appDir + '/packages'];
+    var ignoreFolders = [path.join(appDir, 'public'), path.join(appDir, 'private'),
+      path.join(appDir, 'server'), path.join(appDir, 'packages')];
 
     // Scan the source files to find the dependency list
     eachFile(appDir, function(file) {

@@ -9,7 +9,7 @@ It was built to support Famo.us in Meteor (examples below) but it can support an
 
 If you want a "pure" app without the meteor libraries just remove `standard-app-packages`.
 
-### Install
+### Install it
 __Command line tool__
 ```bash
 $ npm install famono -g
@@ -21,12 +21,10 @@ $ mrt add famono
 ```
 *Requires: `Meteor`, `Meteorite` and of course `git`*
 
-### Edit the library register
-__What?__
-Well - you can add any library code you want to.
+### Use it
 
 __How:__
-When you install the package you will get a `lib/smart.require` in your main app folder, and it would look something like:
+When you install famono it will add a `lib/smart.require` file to your main app folder:
 
 ```js
 {
@@ -38,7 +36,8 @@ When you install the package you will get a `lib/smart.require` in your main app
   }
 }
 ```
-*you can mount any git repo on a namespace, oh and in Meteor editing this file will trigger either an add/download or removal of the changed namespace - LIVE.*
+
+The `lib/smart.require` library registry comes with references to `famous` and `famous-polyfills` repos by default.
 
 This enables you to do:
 ```js
@@ -84,19 +83,20 @@ This enables you to do:
   });
 ```
 
-### Will all the stuff be loaded to the client??
+### Will the entire repo be loaded to the client??
 
-Nope - the package scans your code and figure outs dependencies at your edit.
+Nope - the package scans your code and figure outs dependencies based on your calls to `require`.
 
-### Additional libraries
-You can add additional libraries like `moment`/`underscore` etc.
-Use the `famono` CLI tool:
+### Adding additional libraries
+You can add additional libraries like `moment`/`underscore` etc
+
+With the `famono` CLI tool:
 ```bash
 $ famono -a moment
 ```
 *Uses the Bower database as lookup*
 
-or edit `lib/smart.require` manually:
+Or by editing `lib/smart.require` manually:
 
 ```js
   "moment": {
@@ -109,6 +109,7 @@ or edit `lib/smart.require` manually:
     "git": "https://github.com/adamwdraper/Numeral-js"
   }
 ```
+*Famono will add/download or removal of the changed namespace LIVE*
 
 ### Force a reset of the dependency registry
 Force clean dep registry:
