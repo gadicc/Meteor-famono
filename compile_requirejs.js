@@ -1190,7 +1190,7 @@ Plugin.registerSourceHandler("require", function(compileStep) {
 
       var foundJS = fs.existsSync(filenameJS);
       var foundCSS = fs.existsSync(filenameCSS);
-      var foundHTML = fs.existsSync(filenameHTML)
+      var foundHTML = fs.existsSync(filenameHTML);
 
       // Check if the resource is found
       if (foundJS) {
