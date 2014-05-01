@@ -5,7 +5,6 @@ var send = Npm.require('send');
 // Set the main famono folder for our work...
 var famonoRepoFolder = path.resolve(process.cwd(), '../../../../.famono-repos');
 
-var configFolder = path.join(famonoRepoFolder, '.config');
 var famonoLibFolder = path.join(famonoRepoFolder, 'lib');
 
 var config;
@@ -19,14 +18,14 @@ if (!fs.existsSync(famonoLibFolder)) {
 
   try {
     config = JSON.parse(fs.readFileSync(path.join(famonoRepoFolder, '.config'), 'utf8'));
-  } catch(err) {
+  } catch (err) {
     throw new Error('Famono: Error could not parse .config json, ' + err.message);
   }
 
   for (var ns in config) {
     try {
       registry[ns] = JSON.parse(fs.readFileSync(path.join(famonoRepoFolder, '.' + ns), 'utf8'));
-    } catch(err) {
+    } catch (err) {
       console.log('Famono: Error namespace config load failed "' + ns + '"');
     }
   }
@@ -96,12 +95,12 @@ WebApp.connectHandlers.use(function(req, res, next) {
           // Serve the file
           send(req, filename)
             //.maxage(maxAge)
-            .on('error', function (err) {
+            .on('error', function(err) {
               Log.error('Error serving library "' + name + '", file: ' + filename + ' ' + err);
               res.writeHead(500);
               res.end();
             })
-            .on('directory', function () {
+            .on('directory', function() {
               Log.error("Unexpected directory " + filename);
               res.writeHead(500);
               res.end();
@@ -118,7 +117,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
 
           if (found) {
             // Show nicer error message
-            res.end('Famono: Error, did you mean "' + found.key + '" instead of "' + found.name + '"?');            
+            res.end('Famono: Error, did you mean "' + found.key + '" instead of "' + found.name + '"?');
           } else {
             // If no config loaded then report as an error
             res.end('Famono: Error, library not found in "' + name + '"');
@@ -129,7 +128,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
         // Set error
         res.writeHead(400);
         // If no config loaded then report as an error
-        res.end('Famono: Error namespace not found "' + namespace + '"');        
+        res.end('Famono: Error namespace not found "' + namespace + '"');
       }
     }
 

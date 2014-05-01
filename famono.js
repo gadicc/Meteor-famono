@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /*
 
-  We create jsdoc into gh-pages submodule in folder "docs" and auto push changes
+ We create jsdoc into gh-pages submodule in folder "docs" and auto push changes
 
-*/
+ */
 
 
 // CLI Options
@@ -57,9 +57,9 @@ if (program.add) {
 } else if (program.list) {
   var config = lib.loadConfig();
   if (config) {
-    
+
     console.log('Used libraries:');
-    
+
     for (var name in config)
       console.log('-', name);
 

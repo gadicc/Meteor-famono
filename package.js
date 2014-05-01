@@ -1,5 +1,5 @@
 Package.describe({
-    summary: 'Add RequireJS support to Meteor. To support the use of frameworks like Famo.us.'
+  summary: 'RequireJS bundler plugin for Meteor -- to support the use of frameworks like Famo.us.'
 });
 
 Package._transitional_registerBuildPlugin({
@@ -24,8 +24,8 @@ Package.on_use(function(api) {
   api.use('routepolicy', 'server');
 
   api.add_files([
-      'requirejs_server.js',
-      'requirejs_libraries_server.js'
+    'requirejs_server.js',
+    'requirejs_libraries_server.js'
   ], 'server');
 
   api.add_files('requirejs_client.js', 'client');
