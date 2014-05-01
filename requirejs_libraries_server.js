@@ -87,8 +87,12 @@ WebApp.connectHandlers.use(function(req, res, next) {
       var currentNS = registry[namespace];
       // Check that we have the namespace
       if (currentNS) {
-        // Check if we need to add index
-        if (currentNS[name + '/index']) name += '/index';
+        // Check if we need to add index or name
+        if (currentNS[name + '/index']) {
+          name += '/index';
+        } if (currentNS[name + '/' + name]) {
+          name += '/' + name;
+        }
 
         // Check that we have the dependency
         if (currentNS[name]) {
