@@ -1209,6 +1209,15 @@ Plugin.registerSourceHandler("require", function(compileStep) {
 
         } else {
           // Warn again that reference not found?
+          // Add definition - we prop. only got a css file or something
+          compileStep.addJavaScript({
+            path: 'lib/' + dep.name + '.js',
+            sourcePath: 'lib/' + dep.name + '.js',//filenameJS,
+            // XXX: Should we actually throw an error instead of a console warning?
+            // The user is clearly doing something wrong.
+            data: 'define(\'' + dep.name + '\', [], function() { console.warn(\'Famono: Warning, could not find "' + dep.name + '"\'); });',
+            bare: true
+          });          
         }
 
       }
