@@ -1,6 +1,7 @@
 var fs = Npm.require('fs');
 var path = Npm.require('path');
 var send = Npm.require('send');
+var useragent = Npm.require('useragent');
 
 // Set the main famono folder for our work...
 var famonoRepoFolder = path.resolve(process.cwd(), '../../../../.famono-repos');
@@ -96,8 +97,31 @@ WebApp.connectHandlers.use(function(req, res, next) {
 
         // Check that we have the dependency
         if (currentNS[name]) {
+          // XXX: If we want to add client specific compilation
+          // We should have some conversion table eg.
+          // Chrome -> CH
+          // FireFox -> FF
+          // IE, SAF, OP etc. ?
+          //
+          // Then have feature detection as a set of UA conditions
+          //
+          // The userAgent format:
+          //
+          // { family: 'Firefox',
+          //   major: '28',
+          //   minor: '0',
+          //   patch: '0',
+          //   source: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:28.0) Gecko/20100101 Firefox/28.0'
+          // }
+          //
+          var userAgent = useragent.lookup(req.headers['user-agent']);
+
           // Get the filename of the dependency
           var filename = path.join(famonoLibFolder, name + (ext || '.js'));
+
+          // XXX: We could compile any UA / Feature compiler conditions before
+          // sending the file to the client?
+
           // Serve the file
           send(req, filename)
             //.maxage(maxAge)

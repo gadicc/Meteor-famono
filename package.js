@@ -14,7 +14,10 @@ Package._transitional_registerBuildPlugin({
   }
 });
 
-Npm.depends({ send: '0.1.4' });
+Npm.depends({
+  send: '0.1.4',
+  useragent: "2.0.7"
+});
 
 Package.on_use(function(api) {
   'use strict';
