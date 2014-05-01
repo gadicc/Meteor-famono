@@ -23,8 +23,14 @@ if (!fs.existsSync(famonoRepoFolder)) fs.mkdirSync(famonoRepoFolder);
 if (!fs.existsSync(famonoRepoFolder))
   throw new Error('Famono cannot create any files - make sure you have the necessary rights to the filesystem');
 
-var configFolder = path.join(famonoRepoFolder, '.config');
-var famonoLibFolder = path.join(famonoRepoFolder, 'lib');
+var famonoBaseFolder = path.join(process.cwd(), '.meteor', '.famono-base');
+// Make sure famonoBaseFolder exists
+if (!fs.existsSync(famonoBaseFolder)) fs.mkdirSync(famonoBaseFolder);
+
+// We move this out of the way - making sure we have a full namespace in the
+// famono-repo
+var configFolder = path.join(famonoBaseFolder, '.config');
+var famonoLibFolder = path.join(famonoBaseFolder, 'lib');
 
 // Make sure famonoLibFolder exists.
 if (!fs.existsSync(famonoLibFolder)) fs.mkdirSync(famonoLibFolder);

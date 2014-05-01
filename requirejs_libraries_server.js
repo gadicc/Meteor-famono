@@ -5,7 +5,9 @@ var send = Npm.require('send');
 // Set the main famono folder for our work...
 var famonoRepoFolder = path.resolve(process.cwd(), '../../../../.famono-repos');
 
-var famonoLibFolder = path.join(famonoRepoFolder, 'lib');
+var famonoBaseFolder = path.resolve(process.cwd(), '../../../../.famono-base');
+
+var famonoLibFolder = path.join(famonoBaseFolder, 'lib');
 
 var config;
 var registry = {};
@@ -17,7 +19,7 @@ if (!fs.existsSync(famonoLibFolder)) {
   // Load config and registry into mem
 
   try {
-    config = JSON.parse(fs.readFileSync(path.join(famonoRepoFolder, '.config'), 'utf8'));
+    config = JSON.parse(fs.readFileSync(path.join(famonoBaseFolder, '.config'), 'utf8'));
   } catch (err) {
     throw new Error('Famono: Error could not parse .config json, ' + err.message);
   }
