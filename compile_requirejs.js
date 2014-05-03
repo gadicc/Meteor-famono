@@ -873,7 +873,7 @@ var readPackagejs = function(packagejsSource) {
   var NpmApi = function() {
     return {
       depends: empty,
-      require: empty
+      require: Npm.require
     };
   };
 
