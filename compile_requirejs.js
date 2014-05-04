@@ -148,13 +148,15 @@ var libraryError = function(name, lookup, filename) {
 var fileProperties = function(folder, name) {
   // Split the file name by '.'
   var split = name.split('.');
+  // Add support for coffee.md
+  if (/coffee\.md$/.test(name)) split.push('coffee.md');
 
   return {
     folder: folder,
     name: name,
     filename: path.join(folder, name),
-    ext: split[split.length - 1].toLowerCase(),
-    isDotted: (split[0] === '')
+    isDotted: (split[0] === ''),
+    ext: split.pop().toLowerCase()
   };
 };
 
