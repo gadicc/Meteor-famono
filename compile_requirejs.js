@@ -940,11 +940,17 @@ var storeFileDependencies = function(file, sourceDeps) {
     // Load the code
     var code = fs.readFileSync(file.filename, 'utf8');
 
+    // Calculate the depName - in this case its the filename without extension
+    var depNameLength = file.filename.length - file.ext.length - 1;
+
+    // Dependency name
+    var depName = file.filename.substring(0, depNameLength);
+
     // Parse the file
-    var result = parseCode(file.folder, code);
+    var result = parseCode(depName, code);
 
     // Store the source dependencies
-    sourceDeps[file.folder] = result.deps;
+    sourceDeps[depName] = result.deps;
   }
 };
 
