@@ -706,7 +706,7 @@ var checkGitFolders = function(newConfig, oldConfig) {
           // Set the git reference
           gitParams.push(item.git);
           // Set the target path
-          gitParams.push(repoPath);
+          gitParams.push('"' + repoPath + '"');
           // We dive into submodules
           if (item.recursive !== false) gitParams.push('--recursive');
           // Set the branch but make sure that the user havent set tag already
