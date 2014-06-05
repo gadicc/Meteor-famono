@@ -13,6 +13,13 @@ var normal = '\u001b[0m';
 
 // Changing this will force a rerun of deps - this makes it easier for the users
 var version = '0.1.3';
+// This object will contain the library registry when compiling
+var libraryRegistry = {};
+// This array will contain library globals, at the moment we got stuff like
+// famous-polyfills its should really be famous.polyfills or something with an
+// alias "famous-polyfills" - this way we get a proper js scope and compability
+// with requirejs reference model.
+var libraryGlobals = [];
 
 // Set the main famono folder for our work -- to hold the uncompiled requirejs repositories.
 var famonoRepoFolder = path.join(process.cwd(), '.meteor', '.famono-repos');
@@ -338,7 +345,8 @@ var parseCode = function(currentDep, code) {
   var result = {
     code: '',
     current: currentDepName,
-    deps: []
+    deps: [],
+    globals: []
   };
   // Log words and their mode
   var words = [];
@@ -422,6 +430,50 @@ var parseCode = function(currentDep, code) {
         //     console.log('-------');
         //   }
         // }
+
+        // Ok we try something new - we start looking for library globals
+        // this is a much cooler way of thinking libraries in js
+        if (last.mode === 'code') {
+          var globalDependency = {};
+
+          for (var globalIndex = 0; globalIndex < libraryGlobals.length; globalIndex++) {
+            // Create a helper for current global
+            var currentGlobal = libraryGlobals[globalIndex];
+            // So there is actually two ways of dealing with this - we could
+            // have an exact match or we could have a relative match
+            // further more we actually want the last item in the library
+            // registry to overrule previous ones - allowing overwrites
+            if (last.text === currentGlobal) {
+              result.globals.push({
+                library: currentGlobal,
+                dependency: last.text
+              });
+            } else {
+              // Create check for relative global usage
+              // XXX: at some point we may have a full library registry to make
+              // an exact match only - this way we can make a better error
+              // message if dependency is not found.
+              var currentCheck = new RegExp('^' + currentGlobal + '\\.');
+              if (currentCheck.test(last.text)) {
+
+                result.globals.push({
+                  library: currentGlobal,
+                  dependency: last.text
+                });
+
+              }
+            }
+          }
+
+          if (globalDependency.global) {
+            console.log(globalDependency);
+          }
+
+          // if (/^famous\./.test(last.text)) {
+          //   console.log('I got "famous." !!!', last.text);
+          // }
+        }
+
 
         // Test for amd compability
         if (!foundDefine && current.mode === 'code' && current.text === 'define.amd') {
@@ -536,6 +588,8 @@ var parseCode = function(currentDep, code) {
     // Wrap in module
     result.code = defineStatement + depsString + ', function(require, exports, module) {\n' + result.code + '\n});';
   }
+
+  result.globals.length && console.log(result.globals);
 
   // Return the result object
   return result;
@@ -751,18 +805,19 @@ var ensureDependencies = function(compileStep) {
   // and need to recreate libs etc.
   var lastVersion = (fs.existsSync(versionFile)) ? fs.readFileSync(versionFile, 'utf8') : '';
 
+  var newConfig, oldConfig;
+
+  try {
+    newConfig = JSON.parse(requireFile);
+  } catch (err) {
+    console.log(green, 'Famono:', normal, 'You have an error in your "lib/smart.require"');
+    console.log(red, 'Error:', normal, err.message);
+    throw new Error('Famono: could not parse "lib/smart.require"');
+  }
+
   // We only want to handle if the config has actually changed
   if (lastRequireFile !== requireFile || lastVersion !== version) {
 
-    var newConfig, oldConfig;
-
-    try {
-      newConfig = JSON.parse(requireFile);
-    } catch (err) {
-      console.log(green, 'Famono:', normal, 'You have an error in your "lib/smart.require"');
-      console.log(red, 'Error:', normal, err.message);
-      throw new Error('Famono: could not parse "lib/smart.require"');
-    }
 
     try {
       oldConfig = JSON.parse(lastRequireFile);
@@ -782,6 +837,16 @@ var ensureDependencies = function(compileStep) {
 
   } else {
     // console.log('CONFIG NOT CHANGED');
+  }
+
+  libraryRegistry = newConfig;
+
+  // XXX: Library globals should be in a finegrained preparsed library registry
+  for (var key in libraryRegistry) {
+    // convert / or - into dot seperator
+    var newKey = key.replace(/\/|-/g, '.');
+    // Set the globals
+    libraryGlobals.push(newKey);
   }
 
 };
