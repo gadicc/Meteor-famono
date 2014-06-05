@@ -1101,6 +1101,9 @@ var resolveDependencies = function(filename, wanted, libraryDeps, level) {
 
 // Make sure the system is rigged
 installationCheck();
+// XXX:
+// We should perhaps also update the repos if we are running on latests version
+// in the library registry
 
 Plugin.registerSourceHandler("require", function(compileStep) {
   compileStep.rootOutputPath = '/lib/';
