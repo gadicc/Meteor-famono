@@ -705,9 +705,16 @@ var checkGitFolders = function(newConfig, oldConfig) {
     // Set repo path
     var repoPath = path.join(famonoRepoFolder, name);
     // Check if we have a repo
-    if (item.git) {
-      // Check if the git is different
-      if (newConfig[name] && oldConfig[name] && newConfig[name].git !== oldConfig[name].git) {
+    if (item.git || item.bower) {
+      // Check if item found in both old and new config
+      var foundInBoth = newConfig[name] && oldConfig[name];
+      // Check if git value has changed
+      var gitIsChanged = foundInBoth && newConfig[name].git !== oldConfig[name].git;
+      // Check if bower value has changed
+      var bowerIsChanged = foundInBoth && newConfig[name].bower !== oldConfig[name].bower;
+
+      // Check if the git or bower has changed
+      if (gitIsChanged || bowerIsChanged) {
         // The repo has changed - so remove the repo folder
         console.log(green, 'Famono:', normal, 'The new repo has changed for "' + name + '"', repoPath);
         // Remove the repo path
@@ -749,43 +756,80 @@ var checkGitFolders = function(newConfig, oldConfig) {
       } else {
         // So the repo is not found then check if its in the new config
         if (newConfig[name]) {
-          // We have to create the folder then
-          fs.mkdirSync(repoPath);
-          // Guess so then clone the repo to the repo folder
-          console.log(green, 'Famono:', normal, 'downloading "' + item.git + '"');
-          // Set git params
-          var gitParams = [];
-          // Set the base command
-          gitParams.push('git clone');
-          // Set the git reference
-          gitParams.push(item.git);
-          // Set the target path
-          gitParams.push('"' + repoPath + '"');
-          // We dive into submodules
-          if (item.recursive !== false) gitParams.push('--recursive');
-          // Set the branch but make sure that the user havent set tag already
-          // tags overrule the branch in Famono...
-          if (item.branch && !item.tag) gitParams.push('--branch ' + item.branch);
-          // Set the branch
-          if (item.tag) gitParams.push('--branch tags/' + item.tag);
 
-          // Clone the repo
-          var result = exec(gitParams.join(' '));
-          // Check if we have exited correctly
-          if (result.status !== 0) {
-            // Remove the folder
-            removeRepoFolder(name);
-            // Throw an error
-            throw new Error('Famono: Error could not clone "' + name + '" ' + item.git + ': ' + result.stderr);
-          } else {
-            console.log(green, 'Famono:', normal, 'Scan the folder and create a dependency file for the repo');
+          // XXX: extract this function and have name and item be passed in
+          // as arguments
+          var fetchFromGithub = function() {
+            // We have to create the folder then
+            fs.mkdirSync(repoPath);
 
-            updateDependencies(name);
+            // Guess so then clone the repo to the repo folder
+            console.log(green, 'Famono:', normal, 'downloading "' + item.git + '"');
+            // Set git params
+            var gitParams = [];
+            // Set the base command
+            gitParams.push('git clone');
+            // Set the git reference
+            gitParams.push(item.git);
+            // Set the target path
+            gitParams.push('"' + repoPath + '"');
+            // We dive into submodules
+            if (item.recursive !== false) gitParams.push('--recursive');
+            // Set the branch but make sure that the user havent set tag already
+            // tags overrule the branch in Famono...
+            if (item.branch && !item.tag) gitParams.push('--branch ' + item.branch);
+            // Set the branch
+            if (item.tag) gitParams.push('--branch tags/' + item.tag);
+
+            // Clone the repo
+            var result = exec(gitParams.join(' '));
+            // Check if we have exited correctly
+            if (result.status !== 0) {
+              // Remove the folder
+              removeRepoFolder(name);
+              // Throw an error
+              throw new Error('Famono: Error could not clone "' + name + '" ' + item.git + ': ' + result.stderr);
+            } else {
+              console.log(green, 'Famono:', normal, 'Scan the folder and create a dependency file for the repo');
+
+              updateDependencies(name);
+            }
+          }; // EO fetchFromGitHub
+
+          if (item.git) {
+            // Normal procedure
+            fetchFromGithub();
+          } else if (item.bower) {
+            // Ok we have to fetch the git repo path from the bower db...
+
+
+            console.log(green, 'Famono:', normal, 'Looking up "' + item.bower + '" in Bower database');
+            // Lookup the namespace in the bower db
+            // could we do this sync?
+            var Fiber = Npm.require('fibers');
+            var fiber = Fiber.current;
+
+            lib.getBowerData(item.bower, function(err, result) {
+
+              if (err) {
+                console.log(green, 'Famono:', normal, 'Could not resolve namespace "' + namespace + '" in Bower database');
+              } else {
+                // Add the package
+                item.git = result.url;
+                // This should work eh?
+                fetchFromGithub();
+              }
+              fiber.run();
+            });
+            Fiber.yield();
+
+
           }
+
         }
       }
     } else {
-      console.error('Famono could not find repo for "' + name + '", please set "git"');
+      console.error('Famono could not find repo for "' + name + '", please set "git" or "bower"');
     }
   }
 };
@@ -1220,7 +1264,7 @@ Plugin.registerSourceHandler("require", function(compileStep) {
       // Check if namespace is loaded / library installed or not
       if (libraryDeps[namespace]) {
         // We already have the namespace - no need to look it up in the bower db
-        if (++checkCounter == missingNamespaces) lib.setConfigObject(namespacesToAdd);
+        //if (++checkCounter == missingNamespaces) lib.setConfigObject(namespacesToAdd);
 
       } else {
         console.log(green, 'Famono:', normal, 'Could not resolve namespace "' + namespace + '"')

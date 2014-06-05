@@ -9,12 +9,7 @@ It was built to support Famo.us in Meteor (examples below) but it can support an
 
 If you want a "pure" app without the meteor libraries just remove `standard-app-packages`.
 
-### Install it
-__Command line tool__
-```bash
-$ npm install famono -g
-```
-> Note: At some point we are going to deprecate the CLI tool in its current form. We want things to be easy and automated if possible.
+### Installing it
 
 __Meteor package__
 ```bash
@@ -91,38 +86,20 @@ Nope - the package scans your code and figure outs dependencies based on your ca
 ### Adding additional libraries
 You can add additional libraries like `moment`/`underscore` etc
 
-Simply start using the namespace / module you want and let Famono get it for you:
-```js
-  // If we don't have underscore in our library Famono
-  // will lookup underscore in the Bower database and
-  // fetch it if found... That's how we want to work
-  // right?
-  var _ = require('underscore');
-  // Now I got underscore...
-```
-*Famono will add/download or removal of the changed namespace LIVE*
-
-__You may also do a manual addition in the library registry or use the CLI__
-
-With the `famono` CLI tool:
-```bash
-$ famono -a moment
-```
-*Uses the Bower database as lookup*
-
-Or by editing `lib/smart.require` manually:
+By editing `lib/smart.require` manually:
 
 ```js
+  "underscore": {
+    "bower": "underscore"
+  },
   "moment": {
     "git": "https://github.com/moment/moment.git"
-  },
-  "underscore": {
-    "git": "https://github.com/jashkenas/underscore.git"
   },
   "numeral": {
     "git": "https://github.com/adamwdraper/Numeral-js"
   }
 ```
+*Famono will add/download or removal of the changed namespace LIVE*
 
 
 ### Force a reset of the dependency registry
