@@ -1046,7 +1046,12 @@ var resolveDependencies = function(filename, wanted, libraryDeps, level) {
       var root = getDepRoot(name);
       var suffix = getDepRoot(name, true);
 
-
+      // XXX: Improve this check - at the moment we assume that the name is
+      // eg. "famous" but we could have sub repos like "famous/core" so at the
+      // moment we would check for "famous" and it would fail if we define
+      // sub libraries in the library registry... So this would trigger failure
+      // Note: we should check that folder creation still works if subfoldered
+      // library names are used.
       if (libraryDeps[root]) {
 
         // Check if we are actually pointing to a folder? if it contains an
