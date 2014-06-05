@@ -1148,22 +1148,22 @@ Plugin.registerSourceHandler("require", function(compileStep) {
         if (++checkCounter == missingNamespaces) lib.setConfigObject(namespacesToAdd);
 
       } else {
+        console.log(green, 'Famono:', normal, 'Could not resolve namespace "' + namespace + '"')
+        // // Lookup the namespace in the bower db
+        // lib.getBowerData(namespace, function(err, result) {
 
-        // Lookup the namespace in the bower db
-        lib.getBowerData(namespace, function(err, result) {
+        //   if (err) {
+        //     console.log(green, 'Famono:', normal, 'Could not resolve namespace "' + namespace + '" in Bower database');
+        //   } else {
+        //     // Add the package
+        //     namespacesToAdd[result.name] = result.url;
+        //   }
 
-          if (err) {
-            console.log(green, 'Famono:', normal, 'Could not resolve namespace "' + namespace + '" in Bower database');
-          } else {
-            // Add the package
-            namespacesToAdd[result.name] = result.url;
-          }
+        //   // We are doing this async - and want to check that all requests have
+        //   // returned
+        //   if (++checkCounter == missingNamespaces) lib.setConfigObject(namespacesToAdd);
 
-          // We are doing this async - and want to check that all requests have
-          // returned
-          if (++checkCounter == missingNamespaces) lib.setConfigObject(namespacesToAdd);
-
-        });
+        // });
 
       }
 
