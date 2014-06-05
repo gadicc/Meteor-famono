@@ -1113,6 +1113,8 @@ installationCheck();
 Plugin.registerSourceHandler("require", function(compileStep) {
   compileStep.rootOutputPath = '/lib/';
   // We only care about generating client-side code...
+  // XXX: at the moment, but it would be nice if we could get arcs etc. maybe
+  // a "cordova" set so we could adapt the library code depending on the target
   if (compileStep.arch !== 'browser')
     return;
 
