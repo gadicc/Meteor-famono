@@ -76,7 +76,8 @@ if (Meteor.isClient) {
 
 }
 ```
-*NOTE: You can still do regular `var Surface = require('famous/core/Surface');`*
+
+> NOTE: You can still do regular `var Surface = require('famous/core/Surface');`
 
 ### Will the entire repo be loaded to the client??
 
@@ -98,7 +99,8 @@ By editing `lib/smart.require` manually:
     "git": "https://github.com/adamwdraper/Numeral-js"
   }
 ```
-*Famono will add/download or removal of the changed namespace LIVE - Note that you can use bower and github as source*
+
+> Famono will add/download or removal of the changed namespace LIVE - Note that you can use bower and github as source
 
 
 ### Force a reset of the dependency registry
