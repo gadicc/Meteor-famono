@@ -838,6 +838,30 @@ var checkGitFolders = function(newConfig, oldConfig) {
   }
 };
 
+// This is an important piece of the global dependencies since this converts
+// the path to a js variable name
+var convertRequreToGlobalName = function(requireName) {
+  // requireName.replace(/\/|-/g, '.');
+  var result = '';
+  for (var i = 0; i < requireName.length; i++) {
+    // Current char helper
+    var c = requireName[i];
+    // Last char helper
+    var l = requireName[i-1];
+
+    // Check for slashes
+    if (c == '/') {
+      // Convert slash to dot
+      result += '.';
+    } else if (c !== '-') {
+      // We skip "-" but add the rest with the twist of camelcasing the letter
+      // following a "-" eg. famous-polyfill -> famousPolyfill
+      result += (l == '-') ? c.toUpperCase() : c;
+    }
+  }
+
+  return result;
+};
 
 var ensureDependencies = function(compileStep) {
   // We only want to deal with one require file at this moment... and it has to
