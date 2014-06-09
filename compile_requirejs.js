@@ -1591,6 +1591,13 @@ Plugin.registerSourceHandler("require", function(compileStep) {
 
   } // EO missing namespaces
 
+//console.log(libraryGlobalRoot);
+//console.log(convertGlobalDependenciesIntoString());
+
+  // Add the "globals to load" to the require loader
+  for (var i = 0; i < libraryGlobalsToLoad.length; i++) {
+    loadDepsList.push({ name: libraryGlobalsToLoad[i].requireName });
+  }
 
   //##### Add dependency library code to the bundle ######
 
