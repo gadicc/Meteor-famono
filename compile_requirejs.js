@@ -330,6 +330,7 @@ var parseCode = function(currentDep, code) {
   var foundAMD = false;
   var amdDefineAt = { start: 0, end: 0 };
   var debug = 0;
+  var lineNumber = 1;
 
   // Get the base name
   var currentBasename = path.basename(currentDep, '.js');
@@ -362,7 +363,7 @@ var parseCode = function(currentDep, code) {
 
     // Check previous char
     escape = (cp === '\\') && !lastEscape;
-
+    if (c === '\n') lineNumber++;
 
     // Mode setters and unsetters
     if (mode !== 'code') {
