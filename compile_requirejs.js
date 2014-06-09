@@ -1695,6 +1695,16 @@ Plugin.registerSourceHandler("require", function(compileStep) {
 
   }
 
+  // Add the global object to the bundle - this is after all dependencies should
+  // be ready in code
+  compileStep.addJavaScript({
+    path: 'lib/global-definitions.js',
+    sourcePath: 'lib/global-definitions.js',
+    // We add the textified global dependency declaration
+    data: convertGlobalDependenciesIntoString(),
+    bare: true
+  });
+
   // We set the count of defines and check load
   //compileStep.appendDocument({ section: "body", data: '<script>\n  define(' + sumOfDefines + ');\n</script>\n' });
 
