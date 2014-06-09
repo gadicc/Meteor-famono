@@ -912,13 +912,15 @@ var ensureDependencies = function(compileStep) {
   }
 
   libraryRegistry = newConfig;
+  libraryGlobals = [];
 
   // XXX: Library globals should be in a finegrained preparsed library registry
   for (var key in libraryRegistry) {
     // convert / or - into dot seperator
-    var newKey = key.replace(/\/|-/g, '.');
+    var newKey = convertRequreToGlobalName(key); // key.replace(/\/|-/g, '.');
     // Set the globals
-    libraryGlobals.push(newKey);
+    //libraryGlobals.push({ globalName: newKey, requireName: key });
+    libraryGlobals.push({ globalName: newKey });
   }
 
 };
