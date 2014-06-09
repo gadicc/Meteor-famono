@@ -1119,7 +1119,280 @@ var sourceCodeDependencies = function() {
   });
 
   return sourceDeps;
+/////////////////////////////////////////////////////////
+// LIBRARY GLOBALS //////////////////////////////////////
+/////////////////////////////////////////////////////////
+
+
+/////// Get the specific library dependency registry
+var libraries = {};
+
+var getLibrary = function(libraryName) {
+
+  if (typeof libraries[libraryName] === 'undefined') {
+    var filename = path.join(famonoRepoFolder, '.' + libraryName);
+    try {
+      libraries[libraryName] = JSON.parse(fs.readFileSync(filename, 'utf8'));
+    } catch (err) {
+      namespaceError(libraryName, filename);
+    }
+  }
+
+  return libraries[libraryName];
 };
+
+// Library globals tree
+var libraryGlobalRoot = {};
+
+// Library globals to load
+var libraryGlobalsToLoad = [];
+
+var addLibraryGlobalDependency = function(depRequireName) {
+  // So we simply create the global tree, we only get the dependency in the
+  // require naming format
+  //
+  // The strategy is really simple, we check if its already set if so then dont
+  // do anything
+  // If not then set the global and call addLibraryGlobalDependency on all its
+  // dependencies - pretty basic eh?
+
+  // Get the global name
+  var depGlobalName = convertRequreToGlobalName(depRequireName);
+  // Parse the dep name into parts for us to check
+  var parts = depGlobalName.split('.');
+
+  // Global var pointer, it points at root and digs deeper as we proceed
+  var globalPointer = libraryGlobalRoot;
+
+  // Great now we have a list of names to test...
+  for (var i = 0; i < parts.length; i++) {
+
+    // Current name
+    var currentName = parts[i];
+
+    // Check if this level i global name exists, if not then create
+    if (typeof globalPointer[currentName] === 'undefined') {
+
+      // If this is the last item we set the dependency otherwice create an
+      // object
+      if (i == parts.length-1) {
+        // Set the ending require reference - should we set this differently
+        // eg. if we would allow for overwrites and extends? At the moment
+        // it would overwrite - but we could have cases where we set some vars
+        // but also want n x dep extendsions. Question would be: How to tell the
+        // difference between the expected library behaviour.
+        // We could have a reference like { extends: {}, container: {} } but
+        // this would again complicate things, right?
+        // /famous would imply all inclusive eg. /famous/core etc.
+        //
+        // Set the ending require reference
+        // XXX: We commented this out since this is performed by the globals to
+        // load instead - this could change depending on the dependency, eg. if
+        // the dep is not a define but a function/variable/object that we
+        // simply insert directly - it would be the cleanest dependency
+        // definition possible?
+        // globalPointer[currentName] = depRequireName;
+
+        // So we have to call addLibraryGlobalDependency for each dependency
+        // of this dependency to make sure they are added!
+
+        // Get the library descriptor for the library
+        var descriptor = getLibrary(parts[0]);
+
+        // Get the dependency array
+        var deps = descriptor[depRequireName];
+
+        if (deps) {
+
+          // Add each dependency in array
+          for (var a = 0; a < deps.length; a++) {
+            // Add the library global dependency...
+            addLibraryGlobalDependency(deps[a]);
+          }
+
+        } // Else we could be loading a root dependency...
+
+        // We load the dependency via require statements for starters
+        // XXX: This will change in the future to be directly injected functions
+        // or raw "defines"
+        // eg. famous.core.Surface = (function() { dep })(scope);
+        // It will be the require() functions job (if used for lazyloading) to
+        // check globals first if not found then load dependencies.
+        libraryGlobalsToLoad.push({ requireName: depRequireName, globalName: depGlobalName });
+      } else {
+        // Set an object ready for nested globals
+        globalPointer[currentName] = {};
+      }
+
+    }
+
+    // Dig deeper
+    globalPointer = globalPointer[currentName];
+  }
+
+};
+
+// Find the matching dependencies for globals
+var loadGlobalDependenciesRegisters = function(globalDeps, libraries) {
+  var result = {};
+
+
+  for (var fileName in globalDeps) {
+    // Create helper for the file object
+    var file = globalDeps[fileName];
+
+  // console.log('FILE:', fileName, file);
+
+    for (var i = 0; i < file.length; i++) {
+      // Create dependency reference
+      var dep = file[i];
+
+      // Get the needle eg. "famous.core.Surface"
+      var needle = dep.dependency;
+
+      // Get the library descriptor an object eg.
+      // {
+      // "famous/core/ElementAllocator": [],
+      // "famous/core/Engine": [
+      //   "famous/core/Context",
+      //   "famous/core/EventHandler",
+      //   "famous/core/OptionsManager"
+      // ]
+      // }
+      // Note: at the moment its using slash as seperator, but in the future
+      // this could change to the dot annotation - but for now we keep compliant
+      // with requireJS etc.
+      //
+      var haystack = getLibrary(dep.library);
+
+      // Hmmm, okay so now we got the needle = dep.dependency and the
+      // haystack = library
+      
+      // So the fastest strategy for solving this problem would be to split into
+      // a list then join using slash and keep popping an item retrying until
+      // nothings left - if so then throw a warning...
+
+      // Create the needle list
+      var needleList = needle.split('.');
+
+      // We just add the odd case of index files
+      needleList.push('index');
+
+      // The found dep...
+      var found = false;
+
+      // Iterate over the name until its found or not
+      while (!found && haystack && needleList.length) {
+
+        // Get the coresponding requireJS dep name at this search level
+        var current = needleList.join('/');
+        // console.log('GOT:', current);
+
+        // If we got the needle then return found
+        if (haystack[current]) found = current;
+
+        // Loose the last item eg. famous/core/Surface -> famous/core
+        needleList.pop();
+      }
+
+      if (found) {
+        // console.log('FOUND:', needle, '->', found);
+
+        // Add the library global dependency
+        addLibraryGlobalDependency(found);
+        // We should have an easy way of simply adding the dependency in a
+        // depencency tree for creating the global object loader
+        // We should create a json.stringify that addds the require statements
+        // in the future it would be the code it self being added directly...
+      } else {
+        console.log(green, 'Famono:', normal, 'Could not find the global reference "' + needle + '"');
+      }
+
+    }
+
+  }
+
+  return result;
+};
+
+// Converts any object with functions etc. into a text code block
+var comleteTextify = function(obj, level) {
+  // XXX: We should create our own stringify for this - but currently this works
+  // for "define" cases - not direct dependencies
+  var result = '';
+  if (!level) level = 0;
+
+  var keys = Object.keys(obj);
+
+  for (var a = 0; a < keys.length; a++) {
+    var key = keys[a];
+    var val = obj[key];
+    result += key + ((level) ? ':': '=');
+
+    if (val === ''+val) {
+      // String
+      result += "'" + val + "'";
+    } else if (val === +val) {
+      // Number
+      result += ''+val;
+    } else if (val === null) {
+      // null
+      result += 'null';
+    } else if (typeof val === 'function') {
+      // function
+      result += val.toString();
+    } else if (typeof val === 'undefined') {
+      // undefined
+      result += 'undefined';
+    } else if (Array.isArray(val)) {
+      // array
+      result += '[';
+      for (var i = 0; i < val.length; i++) {
+        // Get the text pr. item
+        result += comleteTextify(val[i], level+1) + ((i == val.length-1) ? '':',');
+      }
+      result += ']';
+    } else if (typeof val === 'object') {
+      // Got an object
+      result += '{';
+      result += comleteTextify(val, level+1);
+      result += '}';
+    } else {
+      throw new Error('Error parsing type');
+    }
+
+    if (a < keys.length-1) result += ',';
+  }
+
+  return result + ((level == 0)? ';\n':'');
+};
+
+// This function is run after all deps are resolved and will generate the code
+// initialising the global objects dependencies
+var convertGlobalDependenciesIntoString = function() {
+  // libraryGlobalsToLoad and libraryGlobalRoot are the ones we work on, we
+  // return a string
+
+  // For starters we stringify the library
+  var result = comleteTextify(libraryGlobalRoot);
+
+  // Next we add all the requre definitions
+  for (var i = 0; i < libraryGlobalsToLoad.length; i++) {
+    // The text we want to add to the result is something like:
+    // famous.core.Surface = (function() { /* DEPS CODE */ })();
+    // Get the require name
+    var dep = libraryGlobalsToLoad[i];
+
+    //result += dep.globalName + ' = (function() { /* DEPS CODE ' +  dep.requireName + '*/ })();\n';
+    result += dep.globalName + ' = require(\'' +  dep.requireName + '\');\n';
+  }
+
+  return result;
+};
+
+/////////////////////////////////////////////////////////
+// END OF LIBRARY GLOBALS ///////////////////////////////
+/////////////////////////////////////////////////////////
 
 var getDepRoot = function(depName, last) {
   var list = depName.split('/');
