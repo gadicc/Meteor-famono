@@ -1068,7 +1068,7 @@ var dependentPackageFiles = function(appDir) {
 };
 
 // Scan a source file for require statements and store them on sourceDeps.
-var storeFileDependencies = function(file, sourceDeps) {
+var storeFileDependencies = function(file, sourceDeps, globalDeps) {
 
   // Only scan javascript and coffeescript files
   // that are not prefixed dotted.
@@ -1088,6 +1088,9 @@ var storeFileDependencies = function(file, sourceDeps) {
 
     // Store the source dependencies
     sourceDeps[depName] = result.deps;
+
+    // Store the global dependencies
+    globalDeps[depName] = result.globals;
   }
 };
 
@@ -1095,6 +1098,9 @@ var storeFileDependencies = function(file, sourceDeps) {
 var sourceCodeDependencies = function() {
   // Source deps
   var sourceDeps = {};
+
+  // Global deps
+  var globalDeps = {};
 
   // Get the app directory
   var appDir = process.cwd();
@@ -1109,16 +1115,21 @@ var sourceCodeDependencies = function() {
 
   // Scan the source files to find the dependency list
   eachFile(appDir, function(file) {
-    storeFileDependencies(file, sourceDeps);
+    storeFileDependencies(file, sourceDeps, globalDeps);
   }, null, null, null, ignoreFolders);
 
   // If any packages depend on famono scan their source code.
   var packageFiles = dependentPackageFiles(appDir);
   packageFiles.forEach(function(file) {
-    storeFileDependencies(file, sourceDeps);
+    storeFileDependencies(file, sourceDeps, globalDeps);
   });
 
-  return sourceDeps;
+  return {
+    sourceDeps: sourceDeps,
+    globalDeps: globalDeps
+  };
+};
+
 /////////////////////////////////////////////////////////
 // LIBRARY GLOBALS //////////////////////////////////////
 /////////////////////////////////////////////////////////
