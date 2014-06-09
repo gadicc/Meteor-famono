@@ -5,7 +5,8 @@ FAMONO
 
 RequireJS support for Meteor.js.
 
-It was built to support Famo.us in Meteor (examples below) but it can support any RequireJS library.
+It was built to support Famo.us in Meteor (examples below)
+But target has become libraries in general.
 
 If you want a "pure" app without the meteor libraries just remove `standard-app-packages`.
 
@@ -27,36 +28,31 @@ When you install famono it will add a `lib/smart.require` file to your main app 
   "famous": {
     "git": "https://github.com/Famous/famous.git"
   },
-  "famous-polyfills": {
+  "famousPolyfills": {
     "git": "https://github.com/Famous/polyfills.git"
   }
 }
 ```
 
-The `lib/smart.require` library registry comes with references to `famous` and `famous-polyfills` repos by default.
+The `lib/smart.require` library registry comes with references to `famous` and `famousPolyfills` repos by default.
 
 This enables you to do:
 ```js
-  // Rig some famo.us deps
-  require("famous-polyfills"); // Add polyfills
-  require("famous/core/famous"); // Add the default css file
+if (Meteor.isClient) {
 
-  // Basic deps
-  var Engine           = require("famous/core/Engine");
-  var Modifier         = require("famous/core/Modifier");
-  var RenderController = require("famous/views/RenderController");
+  // Rig some famo.us deps
+  famousPolyfills;
+  famous.core.famous;
 
   // Make sure dom got a body...
   Meteor.startup(function() {
-    var Surface = require("famous/core/Surface"); // This one needs document.body
-
-    var mainContext = Engine.createContext();
-    var renderController = new RenderController();
+    var mainContext = famous.core.Engine.createContext();
+    var renderController = new famous.views.RenderController();
     var surfaces = [];
     var counter = 0;
 
     for (var i = 0; i < 10; i++) {
-        surfaces.push(new Surface({
+        surfaces.push(new famous.core.Surface({
              content: "Surface: " + (i + 1),
              size: [200, 200],
              properties: {
@@ -69,15 +65,18 @@ This enables you to do:
 
     renderController.show(surfaces[0]);
 
-    Engine.on("click", function() {
+    famous.core.Engine.on("click", function() {
         var next = (counter++ + 1) % surfaces.length;
         this.show(surfaces[next]);
     }.bind(renderController));
 
-    mainContext.add(new Modifier({origin: [.5, .5]})).add(renderController);
+    mainContext.add(new famous.core.Modifier({origin: [.5, .5]})).add(renderController);
 
   });
+
+}
 ```
+*NOTE: You can still do regular `var Surface = require('famous/core/Surface');`*
 
 ### Will the entire repo be loaded to the client??
 

@@ -104,7 +104,7 @@ var installationCheck = function() {
       'famous': {
         git: 'https://github.com/Famous/famous.git'
       },
-      'famous-polyfills': {
+      'famousPolyfills': {
         git: 'https://github.com/Famous/polyfills.git'
       },
       'library': {
