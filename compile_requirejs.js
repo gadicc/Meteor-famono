@@ -434,8 +434,7 @@ var parseCode = function(currentDep, code) {
 
         // Ok we try something new - we start looking for library globals
         // this is a much cooler way of thinking libraries in js
-        if (last.mode === 'code') {
-          var globalDependency = {};
+        if (current.mode === 'code') {
 
           for (var globalIndex = 0; globalIndex < libraryGlobals.length; globalIndex++) {
             // Create a helper for current global
@@ -444,35 +443,39 @@ var parseCode = function(currentDep, code) {
             // have an exact match or we could have a relative match
             // further more we actually want the last item in the library
             // registry to overrule previous ones - allowing overwrites
-            if (last.text === currentGlobal) {
-              result.globals.push({
-                library: currentGlobal,
-                dependency: last.text
-              });
+            if (current.text === currentGlobal.globalName) {
+              if (last.mode === 'code' && last.text === 'var') {
+                console.log(green, 'Famono:', normal, 'Warning: Global "' + current.text + '" is being overwritten at ' + currentDep + '.js:L'+ lineNumber);
+              } else {
+                result.globals.push({
+                  //requireName: currentGlobal.requireName,
+                  library: currentGlobal.globalName,
+                  dependency: current.text
+                });
+              }
+
             } else {
               // Create check for relative global usage
               // XXX: at some point we may have a full library registry to make
               // an exact match only - this way we can make a better error
               // message if dependency is not found.
-              var currentCheck = new RegExp('^' + currentGlobal + '\\.');
-              if (currentCheck.test(last.text)) {
+              var currentCheck = new RegExp('^' + currentGlobal.globalName + '\\.');
+              if (currentCheck.test(current.text)) {
 
-                result.globals.push({
-                  library: currentGlobal,
-                  dependency: last.text
-                });
+                if (last.mode === 'code' && last.text === 'var') {
+                  console.log(green, 'Famono:', normal, 'Warning: Global "' + current.text + '" is being overwritten at ' + currentDep + '.js:L'+ lineNumber);
+                } else {
+                  result.globals.push({
+                    //requireName: currentGlobal.requireName,
+                    library: currentGlobal.globalName,
+                    dependency: current.text
+                  });
+                }
 
               }
             }
           }
 
-          if (globalDependency.global) {
-            console.log(globalDependency);
-          }
-
-          // if (/^famous\./.test(last.text)) {
-          //   console.log('I got "famous." !!!', last.text);
-          // }
         }
 
 
@@ -590,7 +593,7 @@ var parseCode = function(currentDep, code) {
     result.code = defineStatement + depsString + ', function(require, exports, module) {\n' + result.code + '\n});';
   }
 
-  result.globals.length && console.log(result.globals);
+  // result.globals.length && console.log(result.globals);
 
   // Return the result object
   return result;
