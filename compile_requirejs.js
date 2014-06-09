@@ -1310,14 +1310,24 @@ Plugin.registerSourceHandler("require", function(compileStep) {
 
       // ADD JS
       var filenameJS = path.join(famonoLibFolder, dep.name + '.js');
+      var filenameIndexJS = path.join(famonoLibFolder, dep.name, 'index.js');
       // ADD CSS
       var filenameCSS = path.join(famonoLibFolder, dep.name + '.css');
       // ADD HTML
       var filenameHTML = path.join(famonoLibFolder, dep.name + '.html');
 
       var foundJS = fs.existsSync(filenameJS);
+      var foundIndexJS = fs.existsSync(filenameIndexJS);
       var foundCSS = fs.existsSync(filenameCSS);
       var foundHTML = fs.existsSync(filenameHTML);
+
+      // I guess we are pointing at a folder since we got an index.js file we
+      // use this instead...
+      if (!foundJS && foundIndexJS) {
+        foundJS = foundIndexJS;
+        filenameJS = filenameIndexJS;
+      }
+
 
       // Check if the resource is found
       if (foundJS) {
