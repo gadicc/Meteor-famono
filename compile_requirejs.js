@@ -1431,27 +1431,18 @@ var eachSourceDeps = function(sourceDeps, f) {
   }
 };
 
-var loadDependenciesRegisters = function(sourceDeps, libraries) {
+var loadRequireDependenciesRegisters = function(sourceDeps, libraries) {
   var result = {};
 
   eachSourceDeps(sourceDeps, function(dep) {
 
-    if (typeof result[dep.root] === 'undefined') {
-
-      var filename = path.join(famonoRepoFolder, '.' + dep.root);
-
-      try {
-        result[dep.root] = JSON.parse(fs.readFileSync(filename, 'utf8'));
-      } catch (err) {
-        namespaceError(dep.root, dep.filename);
-      }
-
-    }
+    result[dep.root] = getLibrary(dep.root);
 
   });
 
   return result;
 };
+
 
 var neededDeps = {};
 var neededDepsIndex = 0;
@@ -1547,17 +1538,24 @@ Plugin.registerSourceHandler("require", function(compileStep) {
   ensureDependencies(compileStep);
 
   // Scan the user code for require statements.
-  var sourceDeps = sourceCodeDependencies();
+  var dependencies = sourceCodeDependencies();
+  // Get the source require deps
+  var sourceDeps = dependencies.sourceDeps;
+  // Get the source global deps
+  var globalDeps = dependencies.globalDeps;
 
   // Load libraries registers
-  var libraryDeps = loadDependenciesRegisters(sourceDeps);
+  var libraryRequireDeps = loadRequireDependenciesRegisters(sourceDeps);
+
+  var libraryGlobalsDeps = loadGlobalDependenciesRegisters(globalDeps);
+
 
   // Load needed deps list
   for (var file in sourceDeps) {
     // Get the deps pr. file
     var deps = sourceDeps[file];
     // Resolve the files
-    resolveDependencies(file, deps, libraryDeps);
+    resolveDependencies(file, deps, libraryRequireDeps);
   }
 
   // Check if we have namespace errors, we try to resolve these by looking them
@@ -1576,7 +1574,7 @@ Plugin.registerSourceHandler("require", function(compileStep) {
     for (var namespace in namespaceErrors) {
 
       // Check if namespace is loaded / library installed or not
-      if (libraryDeps[namespace]) {
+      if (libraryRequireDeps[namespace]) {
         // We already have the namespace - no need to look it up in the bower db
         //if (++checkCounter == missingNamespaces) lib.setConfigObject(namespacesToAdd);
 
