@@ -1154,6 +1154,12 @@ var getLibrary = function(libraryName) {
   return libraries[libraryName];
 };
 
+var DependencyLoad = function(depRequireName, depGlobalName) {
+  var self = this;
+  self.requireName = depRequireName;
+  self.globalName = depGlobalName;
+};
+
 // Library globals tree
 var libraryGlobalRoot = {};
 
@@ -1232,6 +1238,7 @@ var addLibraryGlobalDependency = function(depRequireName) {
         // It will be the require() functions job (if used for lazyloading) to
         // check globals first if not found then load dependencies.
         libraryGlobalsToLoad.push({ requireName: depRequireName, globalName: depGlobalName });
+        globalPointer[currentName] = new DependencyLoad(depRequireName, depGlobalName);
       } else {
         // Set an object ready for nested globals
         globalPointer[currentName] = {};
@@ -1342,7 +1349,9 @@ var comleteTextify = function(obj, level) {
     var val = obj[key];
     result += key + ((level) ? ':': '=');
 
-    if (val === ''+val) {
+    if (val instanceof DependencyLoad) {
+      result += 'require(\'' + val.requireName + '\')';
+    } else if (val === ''+val) {
       // String
       result += "'" + val + "'";
     } else if (val === +val) {
@@ -1383,22 +1392,11 @@ var comleteTextify = function(obj, level) {
 // This function is run after all deps are resolved and will generate the code
 // initialising the global objects dependencies
 var convertGlobalDependenciesIntoString = function() {
-  // libraryGlobalsToLoad and libraryGlobalRoot are the ones we work on, we
+  // libraryGlobalRoot are the ones we work on, we
   // return a string
 
-  // For starters we stringify the library
-  var result = comleteTextify(libraryGlobalRoot);
-
-  // Next we add all the requre definitions
-  for (var i = 0; i < libraryGlobalsToLoad.length; i++) {
-    // The text we want to add to the result is something like:
-    // famous.core.Surface = (function() { /* DEPS CODE */ })();
-    // Get the require name
-    var dep = libraryGlobalsToLoad[i];
-
-    //result += dep.globalName + ' = (function() { /* DEPS CODE ' +  dep.requireName + '*/ })();\n';
-    result += dep.globalName + ' = require(\'' +  dep.requireName + '\');\n';
-  }
+  // We simply stringify the library
+  var result = comleteTextify(libraryGlobalRoot, 0, true);
 
   return result;
 };
