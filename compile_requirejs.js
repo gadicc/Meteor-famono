@@ -1335,8 +1335,16 @@ var loadGlobalDependenciesRegisters = function(globalDeps, libraries) {
   return result;
 };
 
+var prettyIndent = function(i) {
+  var indent = '';
+  for (var a = 0; a < i; a++) {
+    indent += '  ';
+  }
+  return indent;
+};
+
 // Converts any object with functions etc. into a text code block
-var comleteTextify = function(obj, level) {
+var comleteTextify = function(obj, level, pretty) {
   // XXX: We should create our own stringify for this - but currently this works
   // for "define" cases - not direct dependencies
   var result = '';
@@ -1347,7 +1355,15 @@ var comleteTextify = function(obj, level) {
   for (var a = 0; a < keys.length; a++) {
     var key = keys[a];
     var val = obj[key];
-    result += key + ((level) ? ':': '=');
+
+    // Add pretty indent
+    if (pretty) result += prettyIndent(level);
+
+    if (pretty) {
+      result += key + ((level) ? ': ': ' = ');
+    } else {
+      result += key + ((level) ? ':': '=');
+    }
 
     if (val instanceof DependencyLoad) {
       result += 'require(\'' + val.requireName + '\')';
@@ -1369,21 +1385,32 @@ var comleteTextify = function(obj, level) {
     } else if (Array.isArray(val)) {
       // array
       result += '[';
+      // When pretty printing we add lines
+      if (pretty) result += '\n';
       for (var i = 0; i < val.length; i++) {
         // Get the text pr. item
-        result += comleteTextify(val[i], level+1) + ((i == val.length-1) ? '':',');
+        result += comleteTextify(val[i], level+1, pretty) + ((i == val.length-1) ? '':',');
       }
+      // Add pretty indent
+      if (pretty) result += prettyIndent(level);      
       result += ']';
     } else if (typeof val === 'object') {
       // Got an object
       result += '{';
-      result += comleteTextify(val, level+1);
+      // When pretty printing we add lines
+      if (pretty) result += '\n';
+      result += comleteTextify(val, level+1, pretty);
+      // Add pretty indent
+      if (pretty) result += prettyIndent(level);      
       result += '}';
     } else {
       throw new Error('Error parsing type');
     }
 
     if (a < keys.length-1) result += ',';
+
+    // When pretty printing we add lines
+    if (pretty) result += '\n';
   }
 
   return result + ((level == 0)? ';\n':'');
