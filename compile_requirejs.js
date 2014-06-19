@@ -454,7 +454,8 @@ var parseCode = function(currentDep, code) {
                 result.globals.push({
                   //requireName: currentGlobal.requireName,
                   library: currentGlobal.globalName,
-                  dependency: current.text
+                  dependency: current.text,
+                  isChecked: (last.mode === 'code' && last.text === 'typeof')
                 });
               }
 
@@ -472,7 +473,8 @@ var parseCode = function(currentDep, code) {
                   result.globals.push({
                     //requireName: currentGlobal.requireName,
                     library: currentGlobal.globalName,
-                    dependency: current.text
+                    dependency: current.text,
+                    isChecked: (last.mode === 'code' && last.text === 'typeof')
                   });
                 }
 
@@ -1329,7 +1331,16 @@ var loadGlobalDependenciesRegisters = function(globalDeps, libraries) {
         // We should create a json.stringify that addds the require statements
         // in the future it would be the code it self being added directly...
       } else {
-        console.log(green, 'Famono:', normal, 'Could not find the global reference "' + needle + '" in "' + fileName + '"');
+        if (dep.isChecked) {
+          // This dep is actually just being checked so we dont care about this
+          // too much. It could be some code testing for a library scope in this
+          // case we try to resolve but dont throw an error if not resolved.
+        } else if (typeof needle === 'undefined') {
+          // This is kindof an odd case, but if it happens we wont go complaining
+          // about it since the user can't really do much about it?
+        } else {
+          console.log(green, 'Famono:', normal, 'Could not find the global reference "' + needle + '" in "' + fileName + '"');
+        }
       }
 
     }
