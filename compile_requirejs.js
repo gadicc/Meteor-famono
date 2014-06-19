@@ -1184,7 +1184,7 @@ var libraryGlobalRoot = {};
 // Library globals to load
 var libraryGlobalsToLoad = [];
 
-var addLibraryGlobalDependency = function(depRequireName) {
+var addLibraryGlobalDependency = function(libraryName, depRequireName) {
   // So we simply create the global tree, we only get the dependency in the
   // require naming format
   //
@@ -1234,7 +1234,7 @@ var addLibraryGlobalDependency = function(depRequireName) {
         // of this dependency to make sure they are added!
 
         // Get the library descriptor for the library
-        var descriptor = getLibrary(parts[0]);
+        var descriptor = getLibrary(libraryName);
 
         // Get the dependency array
         var deps = descriptor[depRequireName];
@@ -1244,7 +1244,7 @@ var addLibraryGlobalDependency = function(depRequireName) {
           // Add each dependency in array
           for (var a = 0; a < deps.length; a++) {
             // Add the library global dependency...
-            addLibraryGlobalDependency(deps[a]);
+            addLibraryGlobalDependency(libraryName, deps[a]);
           }
 
         } // Else we could be loading a root dependency...
@@ -1287,7 +1287,6 @@ var loadGlobalDependenciesRegisters = function(globalDeps, libraries) {
 
       // Get the needle eg. "famous.core.Surface"
       var needle = dep.dependency;
-
       // Get the library descriptor an object eg.
       // {
       // "famous/core/ElementAllocator": [],
@@ -1337,7 +1336,7 @@ var loadGlobalDependenciesRegisters = function(globalDeps, libraries) {
         // console.log('FOUND:', needle, '->', found);
 
         // Add the library global dependency
-        addLibraryGlobalDependency(found);
+        addLibraryGlobalDependency(dep.library, found);
         // We should have an easy way of simply adding the dependency in a
         // depencency tree for creating the global object loader
         // We should create a json.stringify that addds the require statements
