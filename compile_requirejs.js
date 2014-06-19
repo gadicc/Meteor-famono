@@ -853,7 +853,7 @@ var checkGitFolders = function(newConfig, oldConfig) {
 
 // This is an important piece of the global dependencies since this converts
 // the path to a js variable name
-var convertRequreToGlobalName = function(requireName) {
+var convertRequireToGlobalName = function(requireName) {
   // requireName.replace(/\/|-/g, '.');
   var result = '';
   for (var i = 0; i < requireName.length; i++) {
@@ -930,7 +930,7 @@ var ensureDependencies = function(compileStep) {
   // XXX: Library globals should be in a finegrained preparsed library registry
   for (var key in libraryRegistry) {
     // convert / or - into dot seperator
-    var newKey = convertRequreToGlobalName(key); // key.replace(/\/|-/g, '.');
+    var newKey = convertRequireToGlobalName(key); // key.replace(/\/|-/g, '.');
     // Set the globals
     //libraryGlobals.push({ globalName: newKey, requireName: key });
     libraryGlobals.push({ globalName: newKey });
@@ -1189,7 +1189,7 @@ var addLibraryGlobalDependency = function(depRequireName) {
   // dependencies - pretty basic eh?
 
   // Get the global name
-  var depGlobalName = convertRequreToGlobalName(depRequireName);
+  var depGlobalName = convertRequireToGlobalName(depRequireName);
   // Parse the dep name into parts for us to check
   var parts = depGlobalName.split('.');
 
