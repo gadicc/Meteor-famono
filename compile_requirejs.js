@@ -455,7 +455,9 @@ var parseCode = function(currentDep, code) {
                   //requireName: currentGlobal.requireName,
                   library: currentGlobal.globalName,
                   dependency: current.text,
-                  isChecked: (last.mode === 'code' && last.text === 'typeof')
+                  isChecked: (last.mode === 'code' && last.text === 'typeof'),
+                  file: currentDep,
+                  lineNumber: lineNumber
                 });
               }
 
@@ -474,7 +476,9 @@ var parseCode = function(currentDep, code) {
                     //requireName: currentGlobal.requireName,
                     library: currentGlobal.globalName,
                     dependency: current.text,
-                    isChecked: (last.mode === 'code' && last.text === 'typeof')
+                    isChecked: (last.mode === 'code' && last.text === 'typeof'),
+                    file: currentDep,
+                    lineNumber: lineNumber
                   });
                 }
 
@@ -1339,7 +1343,7 @@ var loadGlobalDependenciesRegisters = function(globalDeps, libraries) {
           // This is kindof an odd case, but if it happens we wont go complaining
           // about it since the user can't really do much about it?
         } else {
-          console.log(green, 'Famono:', normal, 'Could not find the global reference "' + needle + '" in "' + fileName + '"');
+          console.log(green, 'Famono:', normal, 'Could not find the global reference "' + needle + '" in "' + dep.file + '.js":L' + dep.lineNumber);
         }
       }
 
