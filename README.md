@@ -28,20 +28,20 @@ When you install famono it will add a `lib/smart.require` file to your main app 
   "famous": {
     "git": "https://github.com/Famous/famous.git"
   },
-  "famousPolyfills": {
+  "famous.polyfills": {
     "git": "https://github.com/Famous/polyfills.git"
   }
 }
 ```
 
-The `lib/smart.require` library registry comes with references to `famous` and `famousPolyfills` repos by default.
+The `lib/smart.require` library registry comes with references to `famous` and `famous.polyfills` repos by default.
 
 This enables you to do:
 ```js
 if (Meteor.isClient) {
 
   // Rig some famo.us deps
-  famousPolyfills;
+  famous.polyfills;
   famous.core.famous;
 
   // Make sure dom got a body...
