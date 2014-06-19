@@ -79,6 +79,10 @@ var installationGitIgnore = function() {
   contents = contents.replace('.famono-repos\n', '');
   // Add the .famono-repos
   contents += '.famono-repos\n';
+  // Remove the .famono-repos
+  contents = contents.replace('.famono-base\n', '');
+  // Add the .famono-base
+  contents += '.famono-base\n';
   // Write the file again...
   fs.writeFileSync(gitignoreFolder, contents, 'utf8');
 };
