@@ -440,6 +440,8 @@ var parseCode = function(currentDep, code) {
         // this is a much cooler way of thinking libraries in js
         if (current.mode === 'code') {
 
+          var foundGlobalReference = null;
+
           for (var globalIndex = 0; globalIndex < libraryGlobals.length; globalIndex++) {
             // Create a helper for current global
             var currentGlobal = libraryGlobals[globalIndex];
@@ -451,14 +453,17 @@ var parseCode = function(currentDep, code) {
               if (last.mode === 'code' && last.text === 'var') {
                 console.log(green, 'Famono:', normal, 'Warning: Global "' + current.text + '" is being overwritten at ' + currentDep + '.js:L'+ lineNumber);
               } else {
-                result.globals.push({
+                // XXX: We could remember the length of the global name and let
+                // the longest win - but in this case we let the last dep in the
+                // library registre win.
+                foundGlobalReference = {
                   //requireName: currentGlobal.requireName,
                   library: currentGlobal.globalName,
                   dependency: current.text,
                   isChecked: (last.mode === 'code' && last.text === 'typeof'),
                   file: currentDep,
                   lineNumber: lineNumber
-                });
+                };
               }
 
             } else {
@@ -472,19 +477,22 @@ var parseCode = function(currentDep, code) {
                 if (last.mode === 'code' && last.text === 'var') {
                   console.log(green, 'Famono:', normal, 'Warning: Global "' + current.text + '" is being overwritten at ' + currentDep + '.js:L'+ lineNumber);
                 } else {
-                  result.globals.push({
+                  foundGlobalReference = {
                     //requireName: currentGlobal.requireName,
                     library: currentGlobal.globalName,
                     dependency: current.text,
                     isChecked: (last.mode === 'code' && last.text === 'typeof'),
                     file: currentDep,
                     lineNumber: lineNumber
-                  });
+                  };
                 }
 
               }
             }
           }
+
+          // We only add one reference
+          if (foundGlobalReference) result.globals.push(foundGlobalReference);
 
         }
 
