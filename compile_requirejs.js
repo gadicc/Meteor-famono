@@ -1329,7 +1329,7 @@ var loadGlobalDependenciesRegisters = function(globalDeps, libraries) {
         // We should create a json.stringify that addds the require statements
         // in the future it would be the code it self being added directly...
       } else {
-        console.log(green, 'Famono:', normal, 'Could not find the global reference "' + needle + '"');
+        console.log(green, 'Famono:', normal, 'Could not find the global reference "' + needle + '" in "' + fileName + '"');
       }
 
     }
@@ -1608,7 +1608,7 @@ Plugin.registerSourceHandler("require", function(compileStep) {
         //if (++checkCounter == missingNamespaces) lib.setConfigObject(namespacesToAdd);
 
       } else {
-        console.log(green, 'Famono:', normal, 'Could not resolve namespace "' + namespace + '"')
+        console.log(green, 'Famono:', normal, 'Could not resolve namespace "' + namespace + '" in "' + file + '"')
         // // Lookup the namespace in the bower db
         // lib.getBowerData(namespace, function(err, result) {
 
