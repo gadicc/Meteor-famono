@@ -1309,8 +1309,27 @@ var loadGlobalDependenciesRegisters = function(globalDeps, libraries) {
       // a list then join using slash and keep popping an item retrying until
       // nothings left - if so then throw a warning...
 
+      // We have to remove the dep.library from the first part of the needle
+      // then have the rest split up if any left
+      // we then shift the dep.library on the needleList supporting stuff like
+      // famous.polyfills.index
+      // |- dep.library -| rest |
       // Create the needle list
-      var needleList = needle.split('.');
+
+      var needleList = [needle];
+
+      // Support direct top level references
+      if (needle !== dep.library) {
+
+        // Remove the library name from the needle
+        var restOfNeedle = needle.substring(dep.library.length + 1);
+
+        // Split the rest up by dots
+        needleList = restOfNeedle.split('.');
+
+        // Add the library name back on to the array
+        needleList.unshift(dep.library);
+      }
 
       // We just add the odd case of index files
       needleList.push('index');
