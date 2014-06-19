@@ -108,10 +108,7 @@ var installationCheck = function() {
       'famous': {
         git: 'https://github.com/Famous/famous.git'
       },
-      'famous-polyfills': {
-        git: 'https://github.com/Famous/polyfills.git'
-      },
-      'famousPolyfills': {
+      'famous.polyfills': {
         git: 'https://github.com/Famous/polyfills.git'
       },
       'library': {
@@ -1626,7 +1623,13 @@ Plugin.registerSourceHandler("require", function(compileStep) {
         //if (++checkCounter == missingNamespaces) lib.setConfigObject(namespacesToAdd);
 
       } else {
-        console.log(green, 'Famono:', normal, 'Could not resolve namespace "' + namespace + '" in "' + file + '"')
+
+        if (namespace == 'famous-polyfills' || namespace == 'famousPolyfills') {
+          console.log(green, 'Famono:', normal, 'DEPRECATED: namespace "' + namespace + '" use "famous.polyfills" in "' + file + '"');
+
+        } else {
+          console.log(green, 'Famono:', normal, 'Could not resolve namespace "' + namespace + '" in "' + file + '"');
+        }
         // // Lookup the namespace in the bower db
         // lib.getBowerData(namespace, function(err, result) {
 
