@@ -27,6 +27,7 @@ Famono handles the `smart.require` file only - but we run a small and very fast 
 
 ### What actually happens when I edit the `smart.require`?
 Well, several things but the basic stuff is that:
+
 1. Famono checks for git updates making sure your libraries are up to date
 2. Famono checks to se if a library have been added/updated/removed
 3. Famono will try to fetch the library code from github or bower
