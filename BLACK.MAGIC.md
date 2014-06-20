@@ -1,10 +1,10 @@
 # The black magic of Famono
 So a while back I created a small package called "Famono" - The name speaks very little of what it does, so I think its time for a recap.
 
-## What is Famono?
+### What is Famono?
 Its a Meteor package that adds library code from sources like bower and github.
 
-## Using libraries
+### Using libraries
 When Famono is installed it created a file `lib/smart.require` and it looks something like this:
 ```js
 {
@@ -19,13 +19,13 @@ When Famono is installed it created a file `lib/smart.require` and it looks some
 
 So this basically makes famono recognize the global scope `famous`. It also tells famono that the `famous.git` is mounted on the scope directly while `polyfills.git` is mounted on `famous.polyfills` extending the global.
 
-## The black magic...
+### The black magic...
 Everytime you change something in your code Meteor runs source handlers. This could be source handlers that converts coffeescript into javascript or less files into css.
 
-## Code scanner / parser
+### Code scanner / parser
 Famono handles the `smart.require` file only - but we run a small and very fast parser on the client-side app code on code edit. This parser figures out what parts of the libraries should be included and figure out library dependencies while at it.
 
-## What actually happens when I edit the `smart.require`?
+### What actually happens when I edit the `smart.require`?
 Well, several things but the basic stuff is that:
 1. Famono checks for git updates making sure your libraries are up to date
 2. Famono checks to se if a library have been added/updated/removed
@@ -33,7 +33,7 @@ Well, several things but the basic stuff is that:
 
 When library have been downloaded its actually parsed and prepared. It creates a library registry of dependencies enabling Famono to be really fast when parsing your code.
 
-## Downloading and parsing library code
+### Downloading and parsing library code
 Famono works in two folders making sure to seperate things:
 `.meteor/famono-repos` - this is where libraries are downloaded
 In famous case its put into the `.meteor/famono-repos/famous` folder - and famono creates a dependecy list pr. library so for example the file `.meteor/famono-repos/.famous` contains an object like:
@@ -61,7 +61,7 @@ In famous case its put into the `.meteor/famono-repos/famous` folder - and famon
 ```
 This simply lists the dependencies of every dependency provided by the library.
 
-## Why parse the original library code?
+### Why parse the original library code?
 The original library repo like famous is missing some things in its define call so famono will change this:
 ```js
 define(function(require, exports, module) {
@@ -70,7 +70,7 @@ define('famous/core/Context', ["famous/core/RenderNode","famous/core/EventHandle
 ```
 Now this is actually not an improvement other than it makes lazyloading possible and it unifies how client-side require work.
 
-## Future library format
+### Future library format
 In the future famono will actually convert this into a much simpler scheme deprecating the use of require and define:
 ```js
 // Simple export - only one export pr. file
@@ -87,7 +87,7 @@ In the future famono will actually convert this into a much simpler scheme depre
 })();
 ```
 
-## More black magic...
+### More black magic...
 So when Famono see a reference to a library scope it adds the dependency to the client bundle code.
 ```js
   // Using library globals
@@ -107,7 +107,7 @@ Famono will add the dependencies for `famous/core/Context`
 ```
 And all their dependencies until we got everything needed...
 
-## More finegrained dependencies
+### More finegrained dependencies
 So we have more finegrained dependencies instead of just adding the whole famous library into the client bundle.
 
 If you view source in your browser while running the famono timbre version you will see something like:
@@ -151,7 +151,7 @@ This is in seperate files when in development mode.
 and..
 Famono will actually know that `famous.polyfills` should really load the `famous.polyfills.index` dependency.
 
-## Global definitions
+### Global definitions
 The new and interresting file is the last in line `/lib/global-definitions.js` it currently looks something like:
 ```js
 famous = {
@@ -207,7 +207,7 @@ famous = {
 
 Not much black magic there - it simply creates the library global for you using plain old require.
 
-## Future of global definitions
+### Future of global definitions
 This is part of a slow refactoring of the Famono package out factoring define and require into separate packages. The library global definition will at some point contain the exports directly like normal js code.
 Eg.
 ```js
