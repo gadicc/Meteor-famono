@@ -1379,7 +1379,7 @@ var loadGlobalDependenciesRegisters = function(globalDeps, libraries) {
           // This is kindof an odd case, but if it happens we wont go complaining
           // about it since the user can't really do much about it?
         } else {
-          console.log(green, 'Famono:', normal, 'Could not find the global reference "' + needle + '" in "' + dep.file + '.js":L' + dep.lineNumber);
+          console.log(green, 'Famono:', normal, 'Warning, could not find the global reference "' + needle + '" in "' + dep.file + '.js":L' + dep.lineNumber);
         }
       }
 
