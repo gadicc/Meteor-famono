@@ -418,6 +418,7 @@ var parseCode = function(currentDep, code) {
           end: i
         });
         // Get the last and current words...
+        var grandfather = words[words.length - 3] || {};
         var last = words[words.length - 2] || {};
         var current = words[words.length - 1];
 
@@ -529,9 +530,14 @@ var parseCode = function(currentDep, code) {
 
             //console.log(resolveDepName);
           } else {
-            // Do nothing to resolve - trust the user?
-            result.deps.push(current.text);
-            //console.log(current.text);
+            // XXX: Make sure require is not used in a typeof
+            if (grandfather.mode == 'code' && grandfather.text == 'typeof') {
+              // This is require used in a typeof...
+            } else {
+              // Do nothing to resolve - trust the user?
+                result.deps.push(current.text);
+              //console.log(current.text);
+            }
           }
 
         }
