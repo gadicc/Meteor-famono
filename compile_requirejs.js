@@ -531,7 +531,6 @@ var parseCode = function(currentDep, code) {
             result.code = result.code.substring(0, newLength);
             // Add the full reference
             result.code += resolveDepName;
-
             //console.log(mode, currentDepPath, current.text, resolveDepName);
             result.deps.push(resolveDepName);
 
@@ -1118,7 +1117,6 @@ var storeFileDependencies = function(file, sourceDeps, globalDeps) {
 
     // Parse the file
     var result = parseCode(depName, code);
-
     // Store the source dependencies
     sourceDeps[depName] = result.deps;
 
@@ -1172,7 +1170,6 @@ var sourceCodeDependencies = function() {
 var libraries = {};
 
 var getLibrary = function(libraryName) {
-
   if (typeof libraries[libraryName] === 'undefined') {
     var filename = path.join(famonoRepoFolder, '.' + libraryName);
     try {
@@ -1518,7 +1515,6 @@ var loadRequireDependenciesRegisters = function(sourceDeps, libraries) {
   var result = {};
 
   eachSourceDeps(sourceDeps, function(dep) {
-
     result[dep.root] = getLibrary(dep.root);
 
   });
