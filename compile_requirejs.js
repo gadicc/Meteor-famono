@@ -493,7 +493,14 @@ var parseCode = function(currentDep, code) {
           }
 
           // We only add one reference
-          if (foundGlobalReference) result.globals.push(foundGlobalReference);
+          if (foundGlobalReference) {
+            // Dont add if we are setting something like a global name like:
+            // { famous: foo }
+            if (c !== ':' && cn !== ':') {
+              // Add the found global
+              result.globals.push(foundGlobalReference);
+            }
+          }
 
         }
 
