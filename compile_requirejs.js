@@ -1144,7 +1144,7 @@ var sourceCodeDependencies = function() {
 
   // Ignore public, private, server and packages
   var ignoreFolders = [path.join(appDir, 'public'), path.join(appDir, 'private'),
-    path.join(appDir, 'server'), path.join(appDir, 'packages')];
+    path.join(appDir, 'server'), path.join(appDir, 'packages'), path.join(appDir, 'tests')];
 
   // Scan the source files to find the dependency list
   eachFile(appDir, function(file) {
