@@ -356,6 +356,22 @@ var parseCode = function(currentDep, code) {
   // Log words and their mode
   var words = [];
 
+  // This function will return the next couple of chars it'll discard spaces 
+  var getNextChars = function(index, count) {
+    var charList = '';
+    var a = 0;
+    // While count is not reached and code length not exeeded add more chars
+    while (charList.length < count && (index + a) < code.length) {
+      // Get the current char
+      var ch = code[index + a];
+      // inc a
+      a++;
+      // Make sure we dont have a space here...
+      if (ch !== ' ') charList += ch;
+    }
+    return charList;
+  };
+
   // Byte parser
   for (var i = 0; i < code.length; i++) {
     // Current char
@@ -451,8 +467,12 @@ var parseCode = function(currentDep, code) {
             // further more we actually want the last item in the library
             // registry to overrule previous ones - allowing overwrites
             if (current.text === currentGlobal.globalName) {
-              if (last.mode === 'code' && last.text === 'var') {
-                console.log(green, 'Famono:', normal, 'Warning: Global "' + current.text + '" is being overwritten at ' + currentDep + '.js:L'+ lineNumber);
+              // Get the next two chars discarding spaces here...
+              var nextOperator = getNextChars(i, 2);
+              // We check if the next two chars are == or just a single =
+              if (nextOperator !== '==' && nextOperator[0] == '=') {
+                // I guess we are overwriting a global
+                console.log(green, 'Famono:', normal, 'Warning: Global "' + current.text + '" may be overwritten at ' + currentDep + '.js:L'+ lineNumber);
               } else {
                 // XXX: We could remember the length of the global name and let
                 // the longest win - but in this case we let the last dep in the
