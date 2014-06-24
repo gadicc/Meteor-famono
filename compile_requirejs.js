@@ -462,6 +462,7 @@ var parseCode = function(currentDep, code) {
         // this is a much cooler way of thinking libraries in js
         if (current.mode === 'code') {
 
+          // Reset found global reference
           var foundGlobalReference = null;
 
           for (var globalIndex = 0; globalIndex < libraryGlobals.length; globalIndex++) {
