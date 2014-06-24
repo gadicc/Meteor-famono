@@ -305,6 +305,10 @@ var isStringMode = function(mode) {
   return (mode === 'single-string' || mode === 'double-string');
 };
 
+var isCommentMode = function(mode) {
+  return (mode === 'line-comment' || mode === 'block-comment');
+};
+
 /**
  * @method parseCode
  * @param {string} code Tha code to modify and scan for deps
