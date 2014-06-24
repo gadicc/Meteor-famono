@@ -465,6 +465,9 @@ var parseCode = function(currentDep, code) {
           // Reset found global reference
           var foundGlobalReference = null;
 
+          // Get the next two chars discarding spaces here...
+          var nextOperator = getNextChars(i, 2);
+
           for (var globalIndex = 0; globalIndex < libraryGlobals.length; globalIndex++) {
             // Create a helper for current global
             var currentGlobal = libraryGlobals[globalIndex];
@@ -473,8 +476,6 @@ var parseCode = function(currentDep, code) {
             // further more we actually want the last item in the library
             // registry to overrule previous ones - allowing overwrites
             if (current.text === currentGlobal.globalName) {
-              // Get the next two chars discarding spaces here...
-              var nextOperator = getNextChars(i, 2);
               // We check if the next two chars are == or just a single =
               if (nextOperator !== '==' && nextOperator[0] == '=') {
                 // I guess we are overwriting a global
@@ -501,8 +502,9 @@ var parseCode = function(currentDep, code) {
               var currentCheck = new RegExp('^' + currentGlobal.globalName + '\\.');
               if (currentCheck.test(current.text)) {
 
-                if (last.mode === 'code' && last.text === 'var') {
                   console.log(green, 'Famono:', normal, 'Warning: Global "' + current.text + '" is being overwritten at ' + currentDep + '.js:L'+ lineNumber);
+                // We check if the next two chars are == or just a single =
+                if (nextOperator !== '==' && nextOperator[0] == '=') {
                 } else {
                   foundGlobalReference = {
                     //requireName: currentGlobal.requireName,
@@ -522,7 +524,7 @@ var parseCode = function(currentDep, code) {
           if (foundGlobalReference) {
             // Dont add if we are setting something like a global name like:
             // { famous: foo }
-            if (c !== ':' && cn !== ':') {
+            if (nextOperator[0] !== ':') {
               // Add the found global
               result.globals.push(foundGlobalReference);
             }
