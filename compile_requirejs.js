@@ -360,6 +360,20 @@ var parseCode = function(currentDep, code) {
   // Log words and their mode
   var words = [];
 
+  // Set the warning level
+  var ignoreNextWarning = false;
+  var ignoreWarnings = false;
+
+  var warning = function(text) {
+    if (ignoreNextWarning || ignoreWarnings) {
+      // Be silent
+      ignoreNextWarning = false;
+    } else {
+      console.log(green, 'Famono:', normal, 'Warning:', text, 'at', currentDep + '.js:L'+ lineNumber);
+    }
+
+  };
+
   // This function will return the next couple of chars it'll discard spaces 
   var getNextChars = function(index, count) {
     var charList = '';
@@ -479,7 +493,7 @@ var parseCode = function(currentDep, code) {
               // We check if the next two chars are == or just a single =
               if (nextOperator !== '==' && nextOperator[0] == '=') {
                 // I guess we are overwriting a global
-                console.log(green, 'Famono:', normal, 'Warning: Global "' + current.text + '" may be overwritten at ' + currentDep + '.js:L'+ lineNumber);
+                warning('Global "' + current.text + '" may be overwritten at ' + currentDep + '.js:L'+ lineNumber);
               } else {
                 // XXX: We could remember the length of the global name and let
                 // the longest win - but in this case we let the last dep in the
@@ -502,9 +516,9 @@ var parseCode = function(currentDep, code) {
               var currentCheck = new RegExp('^' + currentGlobal.globalName + '\\.');
               if (currentCheck.test(current.text)) {
 
-                  console.log(green, 'Famono:', normal, 'Warning: Global "' + current.text + '" is being overwritten at ' + currentDep + '.js:L'+ lineNumber);
                 // We check if the next two chars are == or just a single =
                 if (nextOperator !== '==' && nextOperator[0] == '=') {
+                  warning('Global "' + current.text + '" may be overwritten at ' + currentDep + '.js:L'+ lineNumber);
                 } else {
                   foundGlobalReference = {
                     //requireName: currentGlobal.requireName,
@@ -525,11 +539,28 @@ var parseCode = function(currentDep, code) {
             // Dont add if we are setting something like a global name like:
             // { famous: foo }
             if (nextOperator[0] !== ':') {
+              // We pass on ignore warning
+              if (ignoreNextWarning ||  ignoreWarnings) {
+                // Setting ignoreWarning
+                foundGlobalReference.ignoreWarning = true;
+                ignoreNextWarning = false;
+              }
               // Add the found global
               result.globals.push(foundGlobalReference);
             }
           }
 
+        }
+
+        // Famono annotations...
+        if ( last.text === '@famono' && isCommentMode(last.mode)) {
+          // We got something looking like // @Famono XXX
+          if (isCommentMode(last.mode)) {
+            // @Famono ignore
+            if (current.text == 'ignore') ignoreNextWarning = true;
+            // @Famono silent
+            if (current.text == 'silent') ignoreWarnings = true;
+          }
         }
 
 
@@ -1399,7 +1430,7 @@ var loadGlobalDependenciesRegisters = function(globalDeps, libraries) {
         // We should create a json.stringify that addds the require statements
         // in the future it would be the code it self being added directly...
       } else {
-        if (dep.isChecked) {
+        if (dep.isChecked || dep.ignoreWarning) {
           // This dep is actually just being checked so we dont care about this
           // too much. It could be some code testing for a library scope in this
           // case we try to resolve but dont throw an error if not resolved.
