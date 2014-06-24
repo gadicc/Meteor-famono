@@ -423,7 +423,8 @@ var parseCode = function(currentDep, code) {
 
 
     // Check if the char is valid or if in string mode
-    if (validCharsLookup[c] || isStringMode(charMode)) {
+    // if in comment mode we seperate by words by space and new line
+    if (validCharsLookup[c] || isStringMode(charMode) || (isCommentMode(charMode) && c !== ' ' && c !== '\n')) {
 
       lastCharMode = charMode;
       currentWord += c;
