@@ -157,5 +157,17 @@ Something like: *(foo.js)*
   });
 ```
 
+### Controlling verbosity
+Famono will always try to warn the user about libraries not found or overwriting globals etc. for easier debugging.
+
+This may not be what you want as a package developer why we've added some Famono annotations:
+```js
+  // @famono ignore
+  var famous = {}; // Famono will skip overwrite warning
+
+  // @famono silent
+  // All warnings below is hidden for the current file
+```
+
 
 Kind regards Morten (aka raix)
