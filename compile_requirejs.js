@@ -364,6 +364,7 @@ var parseCode = function(currentDep, code) {
   var ignoreNextWarning = false;
   var ignoreWarnings = false;
 
+  // Helper for printing out warnings
   var warning = function(text) {
     if (ignoreNextWarning || ignoreWarnings) {
       // Be silent
