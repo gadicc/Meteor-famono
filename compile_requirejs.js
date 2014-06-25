@@ -1656,6 +1656,10 @@ Plugin.registerSourceHandler("require", function(compileStep) {
     return;
 
   console.log('\nEnsure dependencies...');
+
+  // Reset globals
+  libraryGlobalRoot = {};
+
   // We check if the config has changes and load / unload dependencies
   // accordingly
   ensureDependencies(compileStep);
