@@ -1512,7 +1512,7 @@ var comleteTextify = function(obj, level, pretty) {
     if (pretty) result += '\n';
   }
 
-  return result + ((level == 0)? ';\n':'');
+  return result + ((level == 0 && result.length)? ';\n':'');
 };
 
 // This function is run after all deps are resolved and will generate the code
