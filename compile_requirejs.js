@@ -497,12 +497,14 @@ var parseCode = function(currentDep, code) {
             var currentCheck = new RegExp('^' + currentGlobal.globalName + '\\.');
             // Test if found
             if (current.text === currentGlobal.globalName || currentCheck.test(current.text)) {
-              
+
               // We check if the next two chars are == or just a single =
               if (nextOperator !== '==' && nextOperator[0] == '=') {
                 // I guess we are overwriting a global
                 warning('Global "' + current.text + '" may be overwritten at ' + currentDep + '.js:L'+ lineNumber);
-              } else {
+                // Dont add if we are setting something like a global name like:
+                // { famous: foo }
+              } else if (nextOperator[0] !== ':') {
                 // XXX: We could remember the length of the global name and let
                 // the longest win - but in this case we let the last dep in the
                 // library registre win.
@@ -521,9 +523,7 @@ var parseCode = function(currentDep, code) {
           }
 
           // We only add one reference
-          // Dont add if we are setting something like a global name like:
-          // { famous: foo }
-          if (foundGlobalReference && nextOperator[0] !== ':') {
+          if (foundGlobalReference) {
             // We pass on ignore warning
             if (ignoreNextWarning || ignoreWarnings) {
               // Setting ignoreWarning
