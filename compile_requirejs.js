@@ -533,7 +533,7 @@ var parseCode = function(currentDep, code) {
               ignoreNextWarning = false;
             }
             // Add the found global
-            result.globals.push(foundGlobalReference);            
+            result.globals.push(foundGlobalReference);
           }
 
         }
@@ -1520,7 +1520,6 @@ var comleteTextify = function(obj, level, pretty) {
 var convertGlobalDependenciesIntoString = function() {
   // libraryGlobalRoot are the ones we work on, we
   // return a string
-
   // We simply stringify the library
   var result = comleteTextify(libraryGlobalRoot, 0, true);
 
