@@ -413,6 +413,7 @@ var parseCode = function(currentDep, code) {
     } else {
       if (c == '/' && !escape && cn == '*') mode = 'block-comment';
       if (c == '/' && !escape && cn == '/') mode = 'line-comment';
+      if (c == '#') mode = 'line-comment'; // Support for coffeescript comments
       if (c == '"' && !escape) mode = 'double-string';
       if (c == "'" && !escape) mode = 'single-string';
     }
