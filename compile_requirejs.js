@@ -489,7 +489,15 @@ var parseCode = function(currentDep, code) {
             // have an exact match or we could have a relative match
             // further more we actually want the last item in the library
             // registry to overrule previous ones - allowing overwrites
-            if (current.text === currentGlobal.globalName) {
+            //
+            // Create check for relative global usage
+            // XXX: at some point we may have a full library registry to make
+            // an exact match only - this way we can make a better error
+            // message if dependency is not found.
+            var currentCheck = new RegExp('^' + currentGlobal.globalName + '\\.');
+            // Test if found
+            if (current.text === currentGlobal.globalName || currentCheck.test(current.text)) {
+              
               // We check if the next two chars are == or just a single =
               if (nextOperator !== '==' && nextOperator[0] == '=') {
                 // I guess we are overwriting a global
@@ -508,30 +516,8 @@ var parseCode = function(currentDep, code) {
                 };
               }
 
-            } else {
-              // Create check for relative global usage
-              // XXX: at some point we may have a full library registry to make
-              // an exact match only - this way we can make a better error
-              // message if dependency is not found.
-              var currentCheck = new RegExp('^' + currentGlobal.globalName + '\\.');
-              if (currentCheck.test(current.text)) {
-
-                // We check if the next two chars are == or just a single =
-                if (nextOperator !== '==' && nextOperator[0] == '=') {
-                  warning('Global "' + current.text + '" may be overwritten at ' + currentDep + '.js:L'+ lineNumber);
-                } else {
-                  foundGlobalReference = {
-                    //requireName: currentGlobal.requireName,
-                    library: currentGlobal.globalName,
-                    dependency: current.text,
-                    isChecked: (last.mode === 'code' && last.text === 'typeof'),
-                    file: currentDep,
-                    lineNumber: lineNumber
-                  };
-                }
-
-              }
             }
+
           }
 
           // We only add one reference
