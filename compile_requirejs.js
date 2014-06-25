@@ -535,19 +535,17 @@ var parseCode = function(currentDep, code) {
           }
 
           // We only add one reference
-          if (foundGlobalReference) {
-            // Dont add if we are setting something like a global name like:
-            // { famous: foo }
-            if (nextOperator[0] !== ':') {
-              // We pass on ignore warning
-              if (ignoreNextWarning || ignoreWarnings) {
-                // Setting ignoreWarning
-                foundGlobalReference.ignoreWarning = true;
-                ignoreNextWarning = false;
-              }
-              // Add the found global
-              result.globals.push(foundGlobalReference);
+          // Dont add if we are setting something like a global name like:
+          // { famous: foo }
+          if (foundGlobalReference && nextOperator[0] !== ':') {
+            // We pass on ignore warning
+            if (ignoreNextWarning || ignoreWarnings) {
+              // Setting ignoreWarning
+              foundGlobalReference.ignoreWarning = true;
+              ignoreNextWarning = false;
             }
+            // Add the found global
+            result.globals.push(foundGlobalReference);            
           }
 
         }
