@@ -553,14 +553,13 @@ var parseCode = function(currentDep, code) {
         }
 
         // Famono annotations...
-        if ( last.text === '@famono' && isCommentMode(last.mode)) {
+        if (last.text === '@famono' && isCommentMode(last.mode) && isCommentMode(current.mode)) {
           // We got something looking like // @Famono XXX
-          if (isCommentMode(current.mode)) {
-            // @Famono ignore
-            if (current.text == 'ignore') ignoreNextWarning = true;
-            // @Famono silent
-            if (current.text == 'silent') ignoreWarnings = true;
-          }
+          //
+          // @Famono ignore
+          if (current.text == 'ignore') ignoreNextWarning = true;
+          // @Famono silent
+          if (current.text == 'silent') ignoreWarnings = true;
         }
 
 
