@@ -540,7 +540,7 @@ var parseCode = function(currentDep, code) {
             // { famous: foo }
             if (nextOperator[0] !== ':') {
               // We pass on ignore warning
-              if (ignoreNextWarning ||  ignoreWarnings) {
+              if (ignoreNextWarning || ignoreWarnings) {
                 // Setting ignoreWarning
                 foundGlobalReference.ignoreWarning = true;
                 ignoreNextWarning = false;
@@ -555,7 +555,7 @@ var parseCode = function(currentDep, code) {
         // Famono annotations...
         if ( last.text === '@famono' && isCommentMode(last.mode)) {
           // We got something looking like // @Famono XXX
-          if (isCommentMode(last.mode)) {
+          if (isCommentMode(current.mode)) {
             // @Famono ignore
             if (current.text == 'ignore') ignoreNextWarning = true;
             // @Famono silent
