@@ -1,5 +1,6 @@
 Package.describe({
   summary: 'RequireJS bundler plugin for Meteor -- to support the use of frameworks like Famo.us.'
+  version: '0.3.11',
 });
 
 Package._transitional_registerBuildPlugin({
@@ -25,6 +26,8 @@ Package.on_use(function(api) {
   api.use('webapp', 'server');  // Used for serving files
   api.use('reload', 'client'); // Not sure if we are using this?
   api.use('routepolicy', 'server'); // Not sure if this is used...
+
+  api.versionsFrom && api.versionsFrom('METEOR-CORE@0.9.0-preview');
 
   api.add_files([
     // Just noop server-side api warning if used on server
