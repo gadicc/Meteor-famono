@@ -1,6 +1,6 @@
 Package.describe({
-  summary: 'RequireJS bundler plugin for Meteor -- to support the use of frameworks like Famo.us.'
   version: '0.3.11',
+  summary: 'Library bundler supports the use of frameworks like Famo.us, bower and requireJS/commonJS libraries'
 });
 
 Package._transitional_registerBuildPlugin({
