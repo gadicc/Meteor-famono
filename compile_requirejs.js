@@ -1658,6 +1658,11 @@ Plugin.registerSourceHandler("require", function(compileStep) {
 
   // Reset globals
   libraryGlobalRoot = {};
+  libraryGlobalsToLoad = [];
+  // Reset deps list
+  neededDeps = {};
+  neededDepsIndex = 0;
+  loadDepsList = [];
 
   // We check if the config has changes and load / unload dependencies
   // accordingly
