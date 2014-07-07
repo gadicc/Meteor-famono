@@ -27,7 +27,7 @@ Package.on_use(function(api) {
   api.use('reload', 'client'); // Not sure if we are using this?
   api.use('routepolicy', 'server'); // Not sure if this is used...
 
-  api.versionsFrom && api.versionsFrom('METEOR-CORE@0.9.0-preview');
+  api.versionsFrom && api.versionsFrom('METEOR-CORE@0.9.0-preview5');
 
   api.add_files([
     // Just noop server-side api warning if used on server
