@@ -1,6 +1,8 @@
 // The library contains all the dependencies, they are not initialized
 var modules = {};
 
+Famono = {};
+
 var getModule = function(name, isDefining) {
   if (name) {
 
@@ -21,7 +23,7 @@ var getModule = function(name, isDefining) {
  * This function expects that any dependencies are all loaded
  * This function will return the module instance or initialize the module
  */
-require = function(name) {
+Famono.require = function(name) {
   // Get the module
   var module = getModule(name);
   // Check that the module is loaded
@@ -35,7 +37,7 @@ require = function(name) {
     } else {
 
       // This is the current format Famo.us uses / requireJs or commonJS
-      module.f(require, {}, module);
+      module.f(Famono.require, {}, module);
 
       // Set the now required library
       modules[name] = module;
@@ -190,7 +192,7 @@ _loadModule = function(deps, f) {
     // 2. ensure all deps are initialized by checking modules[]
     var result = [];
     // Init the dependecies
-    for (var i = 0; i < deps.length; i++) result.push(require(deps[i]));
+    for (var i = 0; i < deps.length; i++) result.push(Famono.require(deps[i]));
     // 3. run f
     f.apply({}, result);
   });
@@ -218,7 +220,7 @@ _defineModule = function(name, deps, f) {
     // Mark this module as loaded
     done(name, f);
     // Check if this is a global?
-    if (name === null) f(require, {}, { exports: window });
+    if (name === null) f(Famono.require, {}, { exports: window });
   });
 }
 
@@ -241,7 +243,7 @@ _defineGlobal = function(f) {
  *
  * > If no name is passed then deps are passed to f as arguments
  */
-define = function(/* name, deps, f or deps, f */) {
+Famono.define = function(/* name, deps, f or deps, f */) {
   if (arguments.length === 1) {
     // Return the load module
     return _defineGlobal.apply(this, arguments);
@@ -261,3 +263,7 @@ define = function(/* name, deps, f or deps, f */) {
     throw new Error('define got invalid number of arguments');
   }
 };
+
+// Add as globals - This part is deprecating...
+if (typeof window.define === 'undefined') window.define = Famono.define;
+if (typeof window.require === 'unrequired') window.require = Famono.require;

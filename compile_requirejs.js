@@ -341,6 +341,7 @@ var parseCode = function(currentDep, code) {
   var lineNumber = 1;
 
   // Get the base name
+  // XXX: We assume that libraries are written in pure js...
   var currentBasename = path.basename(currentDep, '.js');
   // Cut off the file name
   var currentDepPath = path.join(path.sep, path.dirname(currentDep));
@@ -349,7 +350,9 @@ var parseCode = function(currentDep, code) {
   // Set the define reference
   var defineReference = '\'' + currentDepName + '\', ';
   // Set the define statement string
-  var defineStatement = 'define(' + defineReference;
+  // XXX: This could be different if we have coffee script code the ( ) should
+  // be skipped
+  var defineStatement = 'Famono.define(' + defineReference;
   // Init result
   var result = {
     code: '',
@@ -452,7 +455,8 @@ var parseCode = function(currentDep, code) {
         words.push({
           mode: lastCharMode,
           text: currentWord,
-          end: i
+          end: i,
+          newEnd: result.code.length
         });
         // Get the last and current words...
         var grandfather = words[words.length - 3] || {};
@@ -590,6 +594,12 @@ var parseCode = function(currentDep, code) {
             }
           }
 
+          // Insert Famono. in front of the require...
+          var head = result.code.substring(0, last.newEnd - 7);
+          var tail = result.code.substring(last.newEnd);
+
+          result.code = head + 'Famono.require' + tail;
+
         }
 
         // Find define()
@@ -609,7 +619,7 @@ var parseCode = function(currentDep, code) {
             if (current.mode === 'code' && current.text === 'function') {
               // We got define(function...
               var rest = result.code.slice(last.end + 1);
-              result.code = result.code.substring(0, last.end + 1) + defineReference + rest;
+              result.code = result.code.substring(0, last.end + 1 - 7) + 'Famono.define' + result.code[last.end] + defineReference + rest;
               foundDefine = true;
             }
 
@@ -1465,7 +1475,7 @@ var comleteTextify = function(obj, level, pretty) {
     }
 
     if (val instanceof DependencyLoad) {
-      result += 'require(\'' + val.requireName + '\')';
+      result += 'Famono.require(\'' + val.requireName + '\')';
     } else if (val === ''+val) {
       // String
       result += "'" + val + "'";
