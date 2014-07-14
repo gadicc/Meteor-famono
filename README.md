@@ -97,6 +97,9 @@ By editing `lib/smart.require` manually:
   },
   "numeral": {
     "git": "https://github.com/adamwdraper/Numeral-js"
+  },
+  "jquery": {
+    "alias": "$"
   }
 ```
 

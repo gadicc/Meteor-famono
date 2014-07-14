@@ -792,14 +792,46 @@ var checkGitFolders = function(newConfig, oldConfig) {
     var item = config[name];
     // Set repo path
     var repoPath = path.join(famonoRepoFolder, name);
-    // Check if we have a repo
-    if (item.git || item.bower) {
-      // Check if item found in both old and new config
-      var foundInBoth = newConfig[name] && oldConfig[name];
-      // Check if git value has changed
-      var gitIsChanged = foundInBoth && newConfig[name].git !== oldConfig[name].git;
-      // Check if bower value has changed
-      var bowerIsChanged = foundInBoth && newConfig[name].bower !== oldConfig[name].bower;
+    // Check if item found in both old and new config
+    var foundInBoth = newConfig[name] && oldConfig[name];
+    // Check if git value has changed
+    var gitIsChanged = foundInBoth && newConfig[name].git !== oldConfig[name].git;
+    // Check if bower value has changed
+    var bowerIsChanged = foundInBoth && newConfig[name].bower !== oldConfig[name].bower;
+    // Check if alias value has changed
+    var aliasIsChanged = foundInBoth && newConfig[name].alias !== oldConfig[name].alias;
+
+    if (item.alias) {
+
+      if (aliasIsChanged) {
+        // Remove the repo path
+        removeRepoFolder(name);
+
+        // Check if the dep is found in the new config
+        if (newConfig[name]) {
+          // We have to create the folder then
+          fs.mkdirSync(repoPath);
+          // Index file
+          var indexFile = path.join(repoPath, 'index.js');
+          // File dep
+          var data = 'define(function(require, exports, module) { module.exports = ' + item.alias + '; });';
+          // Write the alias
+          fs.writeFileSync(indexFile, data, 'utf8');
+
+          // Remove but keep the repo
+          removeRepoFolder(name, true);
+          // Update the deps
+          updateDependencies(name);        
+          console.log(green, 'Famono:', normal, 'The alias has changed for "' + name + '"', repoPath);
+        } else {
+          console.log(green, 'Famono:', normal, 'remove dep "' + name + '" ' + repoPath);          
+        }
+      } else {
+        console.log(green, 'Famono:', normal, 'The alias for "' + name + '" is up-to-date');        
+      }
+
+      // Check if we have a repo
+    } else if (item.git || item.bower) {
 
       // Check if the git or bower has changed
       if (gitIsChanged || bowerIsChanged) {
