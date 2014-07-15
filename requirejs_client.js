@@ -266,4 +266,4 @@ Famono.define = function(/* name, deps, f or deps, f */) {
 
 // Add as globals - This part is deprecating...
 if (typeof window.define === 'undefined') window.define = Famono.define;
-if (typeof window.require === 'unrequired') window.require = Famono.require;
+if (typeof window.require === 'undefined') window.require = Famono.require;
