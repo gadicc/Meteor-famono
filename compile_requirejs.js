@@ -565,7 +565,7 @@ var parseCode = function(currentDep, code) {
         }
 
         // Find require()
-        if (last.mode === 'code' && last.text === 'require' && isStringMode(current.mode)) {
+        if (last.mode === 'code' && (last.text === 'require' || last.text === 'Famono.require') && isStringMode(current.mode)) {
 
           if (current.text[0] == '.') {
 
