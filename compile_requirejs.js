@@ -760,6 +760,50 @@ var updateDependencies = function(name, rootPath) {
     }
 
   });
+
+  // okay, so bower packages may have some configuration of the main files
+  var bowerJson = path.join(famonoRepoFolder, name, 'bower.json');
+
+  if (fs.existsSync(bowerJson)) {
+    var config = lib.loadFromJSON(bowerJson);
+    // Make sure we got something and its not index.js already...
+    if (config && config.main && config.main !== 'index.js') {
+      // So the main could be string or array - we will convert to array first
+      var mainFiles = (config.main === ''+config.main)? [config.main]: config.main;
+      if (mainFiles.length) {
+
+        var indexDepsLookup = {};
+        for (var a = 0; a < mainFiles.length; a++) {
+          var indexDepName = name + '/' + mainFiles[a].replace(/.js|.css/g, '');
+          if (typeof indexDepsLookup[indexDepName] === 'undefined') {
+            indexDepsLookup[indexDepName] = true;
+          }
+        }
+
+
+        // Convert lookup into array
+        var indexDeps = [];
+        for (var key in indexDepsLookup) indexDeps.push(key);
+
+        // Add the dependency to deps
+        deps[name + '/index'] = indexDeps;
+
+        var indexJsPath = path.join(libPath, 'index.js');
+
+        // Create the contents
+        var indexJs = '// Added by Famono supporting bower configuration\n';
+        indexJs += 'Famono.define(\'' + name + '/index' + '\', ' + JSON.stringify(indexDeps) + ', function(require, exports, module) {\n';
+        for (var key in indexDepsLookup)
+          indexJs += '\tFamono.require(\'' + key + '\');\n';
+        indexJs += '});\n';
+
+        // Write the index.js
+        fs.writeFileSync(indexJsPath, indexJs, 'utf8');
+      
+      }
+    }
+  }
+
   // Write the package deps
   fs.writeFileSync(depsPath, JSON.stringify(deps, null, '\t'), 'utf8');
 };
