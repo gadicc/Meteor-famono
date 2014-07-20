@@ -100,6 +100,10 @@ By editing `lib/smart.require` manually:
   },
   "jquery": {
     "alias": "$"
+  },
+  "foo": {
+    "bower": "foo",
+    "root": "src/path"
   }
 ```
 
