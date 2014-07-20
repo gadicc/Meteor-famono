@@ -853,7 +853,7 @@ var checkGitFolders = function(newConfig, oldConfig) {
 
     if (item.alias) {
 
-      if (aliasIsChanged) {
+      if (aliasIsChanged || !foundInBoth) {
         // Remove the repo path
         removeRepoFolder(name);
 
