@@ -501,6 +501,7 @@ var parseCode = function(currentDep, code) {
             // an exact match only - this way we can make a better error
             // message if dependency is not found.
             var currentCheck = new RegExp('^' + currentGlobal.globalName + '\\.');
+            
             // Test if found
             if (current.text === currentGlobal.globalName || currentCheck.test(current.text)) {
 
@@ -536,6 +537,7 @@ var parseCode = function(currentDep, code) {
               foundGlobalReference.ignoreWarning = true;
               ignoreNextWarning = false;
             }
+
             // Add the found global
             result.globals.push(foundGlobalReference);
           }
@@ -1369,7 +1371,7 @@ var addLibraryGlobalDependency = function(libraryName, depRequireName) {
 // Find the matching dependencies for globals
 var loadGlobalDependenciesRegisters = function(globalDeps, libraries) {
   var result = {};
-
+  var dotResolveWarning = {};
 
   for (var fileName in globalDeps) {
     // Create helper for the file object
@@ -1397,7 +1399,29 @@ var loadGlobalDependenciesRegisters = function(globalDeps, libraries) {
       // with requireJS etc.
       //
       var haystack = getLibrary(dep.library);
+      var haystackDot = {};
 
+      for (var key in haystack) {
+        var dependencies = haystack[key];
+        // We are going to rewrite the dependencies to dot notation.
+        // This is not trivial and will have some limitations:
+        //
+        // "test/dot-file.js" -> "test.dot.file.js"?
+        // "test/dot.file.js" -> "test.dot.file.js"
+        // "test/dot/file.js" -> "test.dot.file.js"
+        // "test.dot.file.js" -> "test.dot.file.js"
+        // So file references could be messed up just a bit - but we can warn
+        // the user? we do this via dotResolveWarning
+        var dotKey = key.replace(/\/|\-/g, '.');
+        if (typeof haystackDot[dotKey] !== 'undefined') {
+          haystackDot[dotKey].keys.push(key);
+        } else {
+          haystackDot[dotKey] = {
+            keys: [key],
+            deps: dependencies
+          };
+        }
+      }
       // Hmmm, okay so now we got the needle = dep.dependency and the
       // haystack = library
       
@@ -1434,14 +1458,21 @@ var loadGlobalDependenciesRegisters = function(globalDeps, libraries) {
       var found = false;
 
       // Iterate over the name until its found or not
-      while (!found && haystack && needleList.length) {
+      while (!found && haystackDot && needleList.length) {
 
         // Get the coresponding requireJS dep name at this search level
-        var current = needleList.join('/');
+        var current = needleList.join('.');
         // console.log('GOT:', current);
 
         // If we got the needle then return found
-        if (haystack[current]) found = current;
+        if (haystackDot[current]) {
+          found = haystackDot[current].keys[0];
+          if (haystackDot[current].keys.length > 1) {
+            // Add a warning
+            dotResolveWarning[current] = found;
+          }
+          // found = current;
+        }
 
         // Loose the last item eg. famous/core/Surface -> famous/core
         needleList.pop();
@@ -1471,6 +1502,11 @@ var loadGlobalDependenciesRegisters = function(globalDeps, libraries) {
 
     }
 
+  }
+
+  // Print out warnings
+  for (var key in dotResolveWarning) {
+    console.log(green, 'Famono:', normal, 'Dot notation warning, multiple references for "' + key + '"" using: ' + dotResolveWarning[key]);
   }
 
   return result;
