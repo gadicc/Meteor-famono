@@ -690,9 +690,12 @@ var parseCode = function(currentDep, code) {
  * @param {string} name Dependency name
  * @param {string} repoPath path of the repo
  */
-var updateDependencies = function(name) {
+var updateDependencies = function(name, rootPath) {
+  // The root path will change the root of the library
+  // We use unix root paths and convert them if needed
+  rootPath = (rootPath || '').replace(/\//g, path.sep);
   // Set repo path
-  var repoPath = path.join(famonoRepoFolder, name);
+  var repoPath = path.join(famonoRepoFolder, name, rootPath);
   // Set repo path
   var libPath = path.join(famonoLibFolder, name);
   // Set deps path
@@ -706,7 +709,8 @@ var updateDependencies = function(name) {
     if (file.ext === 'js' || file.ext === 'css') {
 
       // Remove the famonoRepoFolder part from the filenames
-      var depName = file.filename.substring(famonoRepoFolder.length + 1);
+      var depName = file.filename.substring(repoPath.length + 1);
+      depName = path.join(name, depName);
 
       // Set empty result
       var result = {};
@@ -823,7 +827,7 @@ var checkGitFolders = function(newConfig, oldConfig) {
           // Remove but keep the repo
           removeRepoFolder(name, true);
           // Update the deps
-          updateDependencies(name);        
+          updateDependencies(name, item.root);        
           console.log(green, 'Famono:', normal, 'The alias has changed for "' + name + '"', repoPath);
         } else {
           console.log(green, 'Famono:', normal, 'remove dep "' + name + '" ' + repoPath);          
@@ -855,7 +859,7 @@ var checkGitFolders = function(newConfig, oldConfig) {
           if (result.status == 0) {
             if (result.stdout !== 'Already up-to-date.\n') {
               console.log(green, 'Famono:', normal, 'updating dependencies "' + name + '" ');
-              updateDependencies(name);
+              updateDependencies(name, item.root);
             } else {
               console.log(green, 'Famono:', normal, 'git update "' + name + '" is up-to-date');
             }
@@ -863,7 +867,7 @@ var checkGitFolders = function(newConfig, oldConfig) {
             // Remove but keep the repo
             removeRepoFolder(name, true);
             // Update the deps
-            updateDependencies(name);
+            updateDependencies(name, item.root);
 
           } else {
             console.log(green, 'Famono:', normal, 'git update "' + name + '" ' + repoPath, ' Error!!');
@@ -914,7 +918,7 @@ var checkGitFolders = function(newConfig, oldConfig) {
             } else {
               console.log(green, 'Famono:', normal, 'Scan the folder and create a dependency file for the repo');
 
-              updateDependencies(name);
+              updateDependencies(name, item.root);
             }
           }; // EO fetchFromGitHub
 
