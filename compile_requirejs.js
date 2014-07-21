@@ -1,3 +1,19 @@
+// TODO:
+// * add library watch to reload on library changes when developing
+// * add better parser allowing capture of foo['bar-bar']
+// * all index loads in global definitions should be added before or extending
+//   afterwards
+// * deprecate internal use of Famono.require and Famono.define use direct
+//   function loads
+// * make the client require check global scope for dependencies, making it
+//   compatible with the library globals
+// * UMD universal module definition support - we could actually wrap all module
+//   code in this pattern, then use uglify etc. to make the code parse clean,
+//   removing all the dead code?
+// * Make famono relax about location of lib/smart.require
+// * Extract / isolate the library server for lazyloading and have it serve libs
+//   in the UMD format?
+
 var fs = Npm.require('fs');
 var path = Npm.require('path');
 var exec = Npm.require('sync-exec');
@@ -12,6 +28,7 @@ var white = '\u001b[1m';
 var normal = '\u001b[0m';
 
 // Changing this will force a rerun of deps - this makes it easier for the users
+// to migrate into newer versions of Famono
 var version = '0.1.3';
 // This object will contain the library registry when compiling
 var libraryRegistry = {};
