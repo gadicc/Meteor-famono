@@ -39,11 +39,11 @@ Famono.require = function(name) {
       // This is the current format Famo.us uses / requireJs or commonJS
       module.f(Famono.require, {}, module);
 
-      // Set the now required library
-      modules[name] = module;
-
       // Clean up, help GC
       module.f = null;
+
+      // Set the now required library
+      modules[name] = module;
 
       // We return the things we want to export
       return module.exports;
@@ -64,6 +64,7 @@ Famono.require = function(name) {
  * This method loads javascript libraries
  */
 var _loadScript = function(libraryName, callback) {
+  console.log('Famono lazyloading', libraryName);
   // Get pointer to the head tag
   var head = document.getElementsByTagName('head').item(0);
 
@@ -214,7 +215,6 @@ _defineModule = function(name, deps, f) {
   // Check library
   if (module.loaded === true)
     throw new Error('Famono: library "' + name + '" already defined');
-
   // 1. Make sure the deps are loaded
   loadLibraries(deps, function(done) {
     // Mark this module as loaded
@@ -261,6 +261,31 @@ Famono.define = function(/* name, deps, f or deps, f */) {
     // Invalid arguments
   } else {
     throw new Error('define got invalid number of arguments');
+  }
+};
+
+
+/* @method scope
+ * @param {function} libraryModule The function setting the define/require scope
+ */
+Famono.scope = function(name, deps, libraryModule) {
+  try {
+    var scopedDefine = function(moduleDefinition) {
+      if (typeof moduleDefinition !== 'function') {
+        // first args could be deps but we already got those
+        moduleDefinition = arguments[1];
+      }
+      // Call the famono define
+      _defineModule(name, deps, moduleDefinition);
+    };
+
+    scopedDefine.amd = true;
+
+    libraryModule(Famono.require, scopedDefine);
+  } catch(err) {
+    // XXX: Warn for now?
+    console.log('ERROR:', name, deps);
+    console.warn(err.message);
   }
 };
 
