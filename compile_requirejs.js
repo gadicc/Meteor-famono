@@ -760,7 +760,7 @@ var updateDependencies = function(name, rootPath) {
         var indexJs = '// Added by Famono supporting bower configuration\n';
         indexJs += 'Famono.define(\'' + name + '/index' + '\', ' + JSON.stringify(indexDeps) + ', function(require, exports, module) {\n';
         for (var key in indexDepsLookup)
-          indexJs += '\tFamono.require(\'' + key + '\');\n';
+          indexJs += '\trequire(\'' + key + '\');\n';
         indexJs += '});\n';
 
         // Write the index.js
