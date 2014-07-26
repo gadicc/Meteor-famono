@@ -130,7 +130,10 @@ var installationCheck = function() {
       },
       'library': {
         git: 'https://github.com/raix/library.git'
-      }
+      },
+      'famous-polyfills': {
+        alias: 'famous.polyfills'
+      }      
     }, null, '\t');
 
     fs.writeFileSync(filename, defaultDeps, 'utf8');
