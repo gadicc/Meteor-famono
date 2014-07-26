@@ -105,46 +105,39 @@ var installationGitIgnore = function() {
 };
 
 var installationCheck = function() {
-  // We check for system installation - we dont care if the user moves the
-  // lib/smart.require
-  if (!fs.existsSync(famonoBaseFolder)) {
+  // library folder to ensure load order
+  var libFolder = path.join(process.cwd(), 'lib');
+  // The filename of the smart.require
+  var filename = path.join(libFolder, 'smart.require');
 
-    // library folder to ensure load order
-    var libFolder = path.join(process.cwd(), 'lib');
-    // The filename of the smart.require
-    var filename = path.join(libFolder, 'smart.require');
+  if (!fs.existsSync(libFolder))
+    fs.mkdirSync(libFolder);
 
-    if (!fs.existsSync(libFolder))
-      fs.mkdirSync(libFolder);
+  if (!fs.existsSync(filename)) {
+    installationNote();
+    // Add to ignore
+    installationGitIgnore();
+    // Prepare the user and system on how this is going down...
+    console.log(green, 'Famono:', normal, 'Creating "lib/smart.require" config file, for you to edit');
 
-    if (!fs.existsSync(filename)) {
-      installationNote();
-      // Add to ignore
-      installationGitIgnore();
-      // Prepare the user and system on how this is going down...
-      console.log(green, 'Famono:', normal, 'Creating "lib/smart.require" config file, for you to edit');
+    var defaultDeps = JSON.stringify({
+      'famous': {
+        git: 'https://github.com/Famous/famous.git'
+      },
+      'famous.polyfills': {
+        git: 'https://github.com/Famous/polyfills.git'
+      },
+      'library': {
+        git: 'https://github.com/raix/library.git'
+      },
+      'famous-polyfills': {
+        alias: 'famous.polyfills'
+      }      
+    }, null, '\t');
 
-      var defaultDeps = JSON.stringify({
-        'famous': {
-          git: 'https://github.com/Famous/famous.git'
-        },
-        'famous.polyfills': {
-          git: 'https://github.com/Famous/polyfills.git'
-        },
-        'library': {
-          git: 'https://github.com/raix/library.git'
-        },
-        'famous-polyfills': {
-          alias: 'famous.polyfills'
-        }      
-      }, null, '\t');
-
-      fs.writeFileSync(filename, defaultDeps, 'utf8');
-
-    }
+    fs.writeFileSync(filename, defaultDeps, 'utf8');
 
   }
-
 };
 
 var namespaceErrors = {};
@@ -1062,8 +1055,8 @@ var convertRequireToGlobalName = function(requireName) {
 var ensureDependencies = function(compileStep) {
   // We only want to deal with one require file at this moment... and it has to
   // be located in the lib folder.
-  // if (compileStep.inputPath !== 'lib/smart.require')
-  //   return;
+  if (compileStep.inputPath !== 'lib/smart.require')
+    return;
 
   // Read in the require files
   var requireFile = compileStep.read().toString('utf8');
