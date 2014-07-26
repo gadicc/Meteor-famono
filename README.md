@@ -3,10 +3,12 @@ FAMONO
 
 ### What is it?
 
-RequireJS support for Meteor.js.
+In short you can load libraries from `bower`, `github`, `http`, `locally` or as in memory `alias` libraries.
+
+It currently supports umd/commonjs/requirejs/amd libraries.
 
 It was built to support Famo.us in Meteor (examples below)
-But target has become libraries in general.
+But target has become finegrained reuse of javascript code in general from the web.
 
 If you want a "pure" app without the meteor libraries just remove `standard-app-packages`.
 
@@ -104,6 +106,9 @@ By editing `lib/smart.require` manually:
   "foo": {
     "bower": "foo",
     "root": "src/path"
+  },
+  "jqueryui": {
+    "http": "http://code.jquery.com/ui/jquery-ui-git.js"
   }
 ```
 

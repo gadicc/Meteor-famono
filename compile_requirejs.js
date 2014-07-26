@@ -29,7 +29,7 @@ var normal = '\u001b[0m';
 
 // Changing this will force a rerun of deps - this makes it easier for the users
 // to migrate into newer versions of Famono
-var version = '0.1.6';
+var version = '0.1.7';
 // This object will contain the library registry when compiling
 var libraryRegistry = {};
 // This array will contain library globals, at the moment we got stuff like
@@ -816,6 +816,8 @@ var checkGitFolders = function(newConfig, oldConfig) {
     var bowerIsChanged = foundInBoth && newConfig[name].bower !== oldConfig[name].bower;
     // Check if alias value has changed
     var aliasIsChanged = foundInBoth && newConfig[name].alias !== oldConfig[name].alias;
+    // Check if http value has changed
+    var httpIsChanged = foundInBoth && newConfig[name].http !== oldConfig[name].http;
 
     if (item.alias) {
 
@@ -844,6 +846,61 @@ var checkGitFolders = function(newConfig, oldConfig) {
         }
       } else {
         console.log(green, 'Famono:', normal, 'The alias for "' + name + '" is up-to-date');        
+      }
+
+    } else if (item.http) {
+      if (httpIsChanged || !foundInBoth) {
+        // Remove the repo path
+        removeRepoFolder(name);
+        // Check if the dep is found in the new config
+        if (newConfig[name]) {
+          var Fiber = Npm.require('fibers');
+          var fiber = Fiber.current;
+
+          // Guess we have to download the file...
+          console.log(green, 'Famono:', normal, 'downloading "' + item.http + '"');
+
+          http.get(item.http, function(res) {
+            var data = '';
+            res.on('data', function (chunk) {
+              data += chunk.toString();
+            });
+
+            res.on('end', function() {
+              // We have to create the folder then
+              fs.mkdirSync(repoPath);
+
+              // Index file
+              var indexFile = path.join(repoPath, 'index.js');              
+
+              // Write the data
+              fs.writeFileSync(indexFile, data, 'utf8');
+
+              // Remove but keep the repo
+              removeRepoFolder(name, true);
+              // Update the deps
+              updateDependencies(name, item.root);
+
+              console.log(green, 'Famono:', normal, 'The library was created for "' + name + '"', repoPath);
+              fiber.run();
+            });
+
+          }).on('error', function(e) {
+            console.log(green, 'Famono:', normal, 'Error while loading "'+ name +'" - ', e.message);
+            fiber.run();
+          });
+
+          Fiber.yield();
+
+
+          // Update deps
+          updateDependencies(name, item.root);
+        } else {
+          // Its not in the new repo so we remove it...
+          console.log(green, 'Famono:', normal, 'remove dep "' + name + '" ' + repoPath);          
+        }
+      } else {
+        console.log(green, 'Famono:', normal, 'The http file for "' + name + '" is up-to-date');        
       }
 
       // Check if we have a repo

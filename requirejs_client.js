@@ -30,17 +30,45 @@ Famono.require = function(name) {
   if (module.loaded === true) {
 
     // Check if the library is found
-    if (typeof module.f !== 'function') {
+    if (module.init) {
       // If we are loaded and we dont have a function then return then
       // assume that we are already initialized and return exports
       return module.exports;
     } else {
 
+      // Set init flag
+      module.init = true;
+
+      var moduleDefinitions = (typeof module.f == 'function') ? [{ f: module.f }] : module.f;
       // This is the current format Famo.us uses / requireJs or commonJS
-      module.f(Famono.require, {}, module);
+      for (var i = 0; i < moduleDefinitions.length; i++) {
+        // Helper
+        var current = moduleDefinitions[i];
+        // function call
+        if (typeof current.deps !== 'undefined') {
+          // Amd?
+          var deps = [];
+          for (var d = 0; d < current.deps.length; d++) {
+            if (!/^\.|^\//.test(current.deps[d]))
+              deps.push(Famono.require(current.deps[d]));
+          }
+          // Serve deps
+          try {
+            current.f.apply(current.f, deps);
+          }catch(err) {
+            console.warn('Could not load part of module "' + name + '" define(' + (d+1) + '), Error: ' + err.message);
+          }
+        } else if (current.name) {
+          // noop
+        } else {
+          // commonJS
+          current.f(Famono.require, {}, module);
+        }
+      }
 
       // Clean up, help GC
       module.f = null;
+
 
       // Set the now required library
       modules[name] = module;
@@ -203,15 +231,20 @@ _loadModule = function(deps, f) {
  * @method _defineModule
  * @param {String} name Name of module
  * @param {Array} deps List of dependencies to load
- * @param {Function} f The module
+ * @param {Function|array of functions} f The module
  */
 _defineModule = function(name, deps, f) {
   // Get module
   var module = getModule(name, true);
   // Check for function
-  if (typeof f !== 'function')
+  if (typeof f == 'undefined' || (typeof f !== 'function' && !f.length))
     throw new Error('Famono: library "' + name + '" require a function');
 
+  // XXX: TODO we could be called multiple times, we want to keep the module
+  // export intact but we may have to stack functions in f instead of having one
+  // module definition.
+  // We currently initialize the module using require so the require statement
+  // should be the one to call all the functions
   // Check library
   if (module.loaded === true)
     throw new Error('Famono: library "' + name + '" already defined');
@@ -270,18 +303,24 @@ Famono.define = function(/* name, deps, f or deps, f */) {
  */
 Famono.scope = function(name, deps, libraryModule) {
   try {
-    var scopedDefine = function(moduleDefinition) {
-      if (typeof moduleDefinition !== 'function') {
-        // first args could be deps but we already got those
-        moduleDefinition = arguments[1];
-      }
-      // Call the famono define
-      _defineModule(name, deps, moduleDefinition);
+    var moduleDefinitions = [];
+    var scopedDefine = function(/* arguments */) {
+      // Stack the definitions
+      moduleDefinitions.push({
+        f: arguments[arguments.length-1],
+        deps: arguments[arguments.length-2],
+        name: arguments[arguments.length-3]
+      });
     };
 
+    // Simulate support?
     scopedDefine.amd = true;
 
+    // Define the module
     libraryModule(Famono.require, scopedDefine);
+
+    // Load and define the module
+    _defineModule(name, deps, moduleDefinitions);
   } catch(err) {
     // XXX: Warn for now?
     console.log('ERROR:', name, deps);
