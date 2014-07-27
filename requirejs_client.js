@@ -56,7 +56,7 @@ Famono.require = function(name) {
           try {
             current.f.apply(current.f, deps);
           }catch(err) {
-            console.warn('Could not load part of module "' + name + '" define(' + (d+1) + '), Error: ' + err.message);
+            console.warn('Could not load part of module "' + name + '" define(' + (d+1) + '), Error: ' + err.message, err.stack);
           }
         } else if (current.name) {
           // noop
