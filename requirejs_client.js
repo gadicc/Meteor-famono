@@ -302,6 +302,8 @@ Famono.define = function(/* name, deps, f or deps, f */) {
   }
 };
 
+// Simulate support?
+Famono.define.amd = true;
 
 /* @method scope
  * @param {function} libraryModule The function setting the define/require scope
