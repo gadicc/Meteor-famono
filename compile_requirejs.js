@@ -29,7 +29,7 @@ var normal = '\u001b[0m';
 
 // Changing this will force a rerun of deps - this makes it easier for the users
 // to migrate into newer versions of Famono
-var version = '0.1.7';
+var version = '0.1.8';
 // This object will contain the library registry when compiling
 var libraryRegistry = {};
 // This array will contain library globals, at the moment we got stuff like
@@ -1299,7 +1299,9 @@ var sourceCodeDependencies = function() {
   // We assume famous is included in .meteor/packages because
   // the plugin is run off of lib/smart.require (in the application).
 
-  // Ignore public, private, server and packages
+  // Ignore public, private, server, packages
+  // client/compatibility is scanned for dependencies as normal code
+  // path.join(appDir, 'client', 'compatibility')
   var ignoreFolders = [path.join(appDir, 'public'), path.join(appDir, 'private'),
     path.join(appDir, 'server'), path.join(appDir, 'packages'), path.join(appDir, 'tests')];
 
