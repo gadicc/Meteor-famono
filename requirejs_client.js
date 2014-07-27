@@ -323,7 +323,7 @@ Famono.scope = function(name, deps, libraryModule) {
     _defineModule(name, deps, moduleDefinitions);
   } catch(err) {
     // XXX: Warn for now?
-    console.log('ERROR:', name, deps);
+    // console.log('ERROR:', name, deps);
     console.warn(err.message);
   }
 };
