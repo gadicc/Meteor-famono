@@ -65,7 +65,9 @@ Famono.require = function(name) {
           // noop
         } else {
           // commonJS
-          current.f(Famono.require, {}, module);
+          var returnedModule = current.f(Famono.require, {}, module);
+          // Be able to return the module
+          module.exports = returnedModule || module.exports;
         }
       }
 
