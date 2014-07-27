@@ -305,12 +305,19 @@ Famono.scope = function(name, deps, libraryModule) {
   try {
     var moduleDefinitions = [];
     var scopedDefine = function(/* arguments */) {
-      // Stack the definitions
-      moduleDefinitions.push({
+      var def = {
         f: arguments[arguments.length-1],
         deps: arguments[arguments.length-2],
         name: arguments[arguments.length-3]
-      });
+      };
+
+      if (typeof def.name !== 'undefined') {
+        // Load and define the module
+        _defineModule(def.name, def.deps, def.f);
+      } else {
+        // Stack the definitions
+        moduleDefinitions.push(def);
+      }
     };
 
     // Simulate support?
