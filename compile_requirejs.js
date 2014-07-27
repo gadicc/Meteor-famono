@@ -338,8 +338,7 @@ var parseCode = function(currentDep, code) {
   var t = '';
   var m = '';
   // Create index
-  for (var a = 0; a < validChars.length; a++) validCharsLookup[validChars[a]] = a;
-
+  for (var a = 0; a < validChars.length; a++) validCharsLookup[validChars[a]] = a + 1;
   var mode = 'code';
   var lastMode = mode;
 
