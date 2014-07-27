@@ -54,7 +54,10 @@ Famono.require = function(name) {
           }
           // Serve deps
           try {
-            current.f.apply(current.f, deps);
+            var returnedModule = current.f.apply(current.f, deps);
+            // XXX: Should we somehow extend the module.exports with objects
+            // returned?
+            //if (returnedModule) { _.extend(module.exports, returnedModule ); }
           }catch(err) {
             console.warn('Could not load part of module "' + name + '" define(' + (d+1) + '), Error: ' + err.message, err.stack);
           }
