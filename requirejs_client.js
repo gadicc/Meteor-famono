@@ -273,6 +273,39 @@ _defineGlobal = function(f) {
   Famono.define(null, [], f);
 };
 
+var _parseDefineArguments = function(argsInput) {
+  var result = {};
+  
+  // Convert into array
+  var args = Array.prototype.slice.call(argsInput);
+  
+  // Get the function
+  result.f = args.pop();
+  
+  // Check that we got a function
+  if (typeof result.f !== 'function')
+    throw new Error('Famono: define requires function');
+  
+  // If first argument is string then set it and get on
+  if (args[0] === ''+args[0]) result.name = args.shift();
+
+  // If anything left it should be deps definition?
+  if (args.length) result.deps = args.shift();
+
+  if (result.deps && typeof result.deps.length == 'undefined')
+    throw new Error('Famono: define expected array of dependencies but found ' + (typeof result.deps));
+
+  // If name is set but no deps then init empty deps array
+  if (result.name && !result.deps) result.deps = [];
+
+  // We should not have more than 3 arguments
+  if (args.length)
+    throw new Error('Famono: define passed too many arguments');
+
+  // Return parsed arguments { name, deps, f }
+  return result;
+};
+
 /**
  * @method define
  * @param {String} [name] Name of module
