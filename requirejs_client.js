@@ -270,7 +270,7 @@ _defineModule = function(name, deps, f) {
  */
 _defineGlobal = function(f) {
   // Define a global thing...
-  define(null, [], f);
+  Famono.define(null, [], f);
 };
 
 /**
