@@ -340,6 +340,9 @@ Famono.define = function(/* name, deps, f or deps, f */) {
 // Simulate support?
 Famono.define.amd = true;
 
+// Noop module definition
+var noopModuleDefinition = function() {};
+
 /* @method scope
  * @param {function} libraryModule The function setting the define/require scope
  */
@@ -363,6 +366,11 @@ Famono.scope = function(name, deps, libraryModule) {
 
     // Define the module
     libraryModule(Famono.require, scopedDefine);
+
+    // If the module have no definitions we cheat at hand it one
+    // there could be valid reasons for a module to have no definition.
+    // eg. if defines in the module define new modules.
+    if (!moduleDefinitions.length) moduleDefinitions = noopModuleDefinition;
 
     // Load and define the module
     _defineModule(name, deps, moduleDefinitions);
