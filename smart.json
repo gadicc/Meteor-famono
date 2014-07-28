@@ -3,7 +3,7 @@
 	"description": "RequireJS bundler plugin for Meteor -- to support the use of frameworks like Famo.us.",
 	"homepage": "https://github.com/raix/Meteor-famono",
 	"author": "Morten Henriksen  (http://gi-software.com)",
-	"version": "0.4.5",
+	"version": "0.4.6",
 	"git": "https://github.com/raix/Meteor-famono.git",
 	"packages": {}
 }
