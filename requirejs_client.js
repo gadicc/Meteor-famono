@@ -315,19 +315,21 @@ var _parseDefineArguments = function(argsInput) {
  * > If no name is passed then deps are passed to f as arguments
  */
 Famono.define = function(/* name, deps, f or deps, f */) {
-  if (arguments.length === 1) {
-    // Return the load module
-    return _defineGlobal.apply(this, arguments);
+  var def = _parseDefineArguments(arguments);
+
+  if (!def.name && !def.deps && def.f) {
+    // Return the load module define(function() {})
+    return _defineGlobal(def.f);
 
     // define([deps, ... , deps], function() {});
-  } else if (arguments.length === 2) {
+  } else if (!def.name && def.deps && def.f) {
     // Return the load module
-    return _loadModule.apply(this, arguments);
+    return _loadModule(def.deps, def.f);
 
     // define('name', [deps, ... , deps], function() {});
-  } else if (arguments.length == 3) {
+  } else if (def.name && def.deps && def.f) {
     // Return the define module
-    return _defineModule.apply(this, arguments);
+    return _defineModule(def.name, def.deps, def.f);
 
     // Invalid arguments
   } else {
@@ -345,11 +347,7 @@ Famono.scope = function(name, deps, libraryModule) {
   try {
     var moduleDefinitions = [];
     var scopedDefine = function(/* arguments */) {
-      var def = {
-        f: arguments[arguments.length-1],
-        deps: arguments[arguments.length-2],
-        name: arguments[arguments.length-3]
-      };
+      var def = _parseDefineArguments(arguments);
 
       if (typeof def.name !== 'undefined') {
         // Load and define the module
