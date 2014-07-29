@@ -292,7 +292,7 @@ var _parseDefineArguments = function(argsInput) {
     throw new Error('Famono: define requires function');
   
   // If first argument is string then set it and get on
-  if (args[0] === ''+args[0]) result.name = args.shift();
+  if (args[0] === ''+args[0] || args[0] === null) result.name = args.shift();
 
   // If anything left it should be deps definition?
   if (args.length) result.deps = args.shift();
@@ -301,12 +301,12 @@ var _parseDefineArguments = function(argsInput) {
     throw new Error('Famono: define expected array of dependencies but found ' + (typeof result.deps));
 
   // If name is set but no deps then init empty deps array
-  if (result.name && !result.deps) result.deps = [];
+  if (typeof result.name !== 'undefined' && !result.deps) result.deps = [];
 
   // We should not have more than 3 arguments
   if (args.length) {
     // XXX: remove when issues resolved
-    console.warn('Famono define debug (Report to raix):', argsInput, 'Def:', result, 'Left', args);
+    console.warn('Famono define debug (Report to raix issue #55):', argsInput, 'Def:', result, 'Left', args);
 
     throw new Error('Famono: define passed too many arguments');
   }
@@ -326,17 +326,17 @@ var _parseDefineArguments = function(argsInput) {
 Famono.define = function(/* name, deps, f or deps, f */) {
   var def = _parseDefineArguments(arguments);
 
-  if (!def.name && !def.deps && def.f) {
+  if (typeof def.name === 'undefined' && !def.deps && def.f) {
     // Return the load module define(function() {})
     return _defineGlobal(def.f);
 
     // define([deps, ... , deps], function() {});
-  } else if (!def.name && def.deps && def.f) {
+  } else if (typeof def.name === 'undefined'  && def.deps && def.f) {
     // Return the load module
     return _loadModule(def.deps, def.f);
 
     // define('name', [deps, ... , deps], function() {});
-  } else if (def.name && def.deps && def.f) {
+  } else if (typeof def.name !== 'undefined' && def.deps && def.f) {
     // Return the define module
     return _defineModule(def.name, def.deps, def.f);
 
