@@ -9,7 +9,7 @@ var getModule = function(name, isDefining) {
     var last = '/' + name.split('/').pop();
     // We either return the module or init an empty module for tracking
     return modules[name] || modules[name + '/index'] || modules[name + last] ||
-      (modules[name] = { exports: {}, callbacks: [], loaded: (isDefining) ? false : null });
+      (modules[name] = { exports: { prototype: {} }, callbacks: [], loaded: (isDefining) ? false : null });
 
   } else {
     return {};
