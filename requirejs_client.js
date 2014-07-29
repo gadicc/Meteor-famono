@@ -59,7 +59,7 @@ Famono.require = function(name) {
             // returned?
             //if (returnedModule) { _.extend(module.exports, returnedModule ); }
           }catch(err) {
-            console.warn('Could not load part of module "' + name + '" define(' + (d+1) + '), Error: ' + err.message, err.stack);
+            console.warn('Famono: Could not load part of module "' + name + '" define(' + (d+1) + '), Error: ' + err.message, err.stack);
           }
         } else if (current.name) {
           // noop
