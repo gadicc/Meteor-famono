@@ -304,8 +304,12 @@ var _parseDefineArguments = function(argsInput) {
   if (result.name && !result.deps) result.deps = [];
 
   // We should not have more than 3 arguments
-  if (args.length)
+  if (args.length) {
+    // XXX: remove when issues resolved
+    console.warn('Famono define debug (Report to raix):', argsInput, 'Def:', result, 'Left', args);
+
     throw new Error('Famono: define passed too many arguments');
+  }
 
   // Return parsed arguments { name, deps, f }
   return result;
