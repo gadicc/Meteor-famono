@@ -70,7 +70,7 @@ Famono.require = function(name) {
             // Be able to return the module
             module.exports = returnedModule || module.exports;
           } catch(err) {
-            console.error('Famono: Could not module "' + name + '", Error: ' + err.message, err.stack);
+            console.error('Famono: Could not load module "' + name + '", Error: ' + err.message, err.stack);
 
           }
         }
