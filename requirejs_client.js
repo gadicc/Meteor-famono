@@ -65,9 +65,14 @@ Famono.require = function(name) {
           // noop
         } else {
           // commonJS
-          var returnedModule = current.f(Famono.require, {}, module);
-          // Be able to return the module
-          module.exports = returnedModule || module.exports;
+          try {          
+            var returnedModule = current.f(Famono.require, {}, module);
+            // Be able to return the module
+            module.exports = returnedModule || module.exports;
+          } catch(err) {
+            console.error('Famono: Could not module "' + name + '", Error: ' + err.message, err.stack);
+
+          }
         }
       }
 
