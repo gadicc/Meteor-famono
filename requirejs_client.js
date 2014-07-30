@@ -278,7 +278,7 @@ _defineGlobal = function(f) {
   Famono.define(null, [], f);
 };
 
-var _parseDefineArguments = function(argsInput) {
+var _parseDefineArguments = function(name, argsInput) {
   var result = {};
   
   // Convert into array
@@ -289,7 +289,7 @@ var _parseDefineArguments = function(argsInput) {
   
   // Check that we got a function
   if (typeof result.f !== 'function')
-    throw new Error('Famono: define requires function');
+    throw new Error('Famono: ' + name + ' requires function');
   
   // If first argument is string then set it and get on
   if (args[0] === ''+args[0] || args[0] === null) result.name = args.shift();
@@ -298,7 +298,7 @@ var _parseDefineArguments = function(argsInput) {
   if (args.length) result.deps = args.shift();
 
   if (result.deps && typeof result.deps.length == 'undefined')
-    throw new Error('Famono: define expected array of dependencies but found ' + (typeof result.deps));
+    throw new Error('Famono: ' + name + ' expected array of dependencies but found ' + (typeof result.deps));
 
   // If name is set but no deps then init empty deps array
   if (typeof result.name !== 'undefined' && !result.deps) result.deps = [];
@@ -306,9 +306,9 @@ var _parseDefineArguments = function(argsInput) {
   // We should not have more than 3 arguments
   if (args.length) {
     // XXX: remove when issues resolved
-    console.warn('Famono define debug (Report to raix issue #55):', argsInput, 'Def:', result, 'Left', args);
+    console.warn('Famono: ' + name + ' debug (Report to raix issue #55):', argsInput, 'Def:', result, 'Left', args);
 
-    throw new Error('Famono: define passed too many arguments');
+    throw new Error('Famono: ' + name + ' passed too many arguments');
   }
 
   // Return parsed arguments { name, deps, f }
@@ -324,7 +324,7 @@ var _parseDefineArguments = function(argsInput) {
  * > If no name is passed then deps are passed to f as arguments
  */
 Famono.define = function(/* name, deps, f or deps, f */) {
-  var def = _parseDefineArguments(arguments);
+  var def = _parseDefineArguments('define', arguments);
 
   if (typeof def.name === 'undefined' && !def.deps && def.f) {
     // Return the load module define(function() {})
@@ -355,11 +355,12 @@ var noopModuleDefinition = function() {};
 /* @method scope
  * @param {function} libraryModule The function setting the define/require scope
  */
-Famono.scope = function(name, deps, libraryModule) {
+Famono.scope = function(/* name [, deps] , libraryModule */) {
+  var scope = _parseDefineArguments('Famono.scope', arguments);
   try {
     var moduleDefinitions = [];
     var scopedDefine = function(/* arguments */) {
-      var def = _parseDefineArguments(arguments);
+      var def = _parseDefineArguments('define', arguments);
 
       if (typeof def.name !== 'undefined') {
         // Load and define the module
@@ -374,7 +375,7 @@ Famono.scope = function(name, deps, libraryModule) {
     scopedDefine.amd = true;
 
     // Define the module
-    libraryModule(Famono.require, scopedDefine);
+    scope.f(Famono.require, scopedDefine);
 
     // If the module have no definitions we cheat at hand it one
     // there could be valid reasons for a module to have no definition.
@@ -382,10 +383,10 @@ Famono.scope = function(name, deps, libraryModule) {
     if (!moduleDefinitions.length) moduleDefinitions = noopModuleDefinition;
 
     // Load and define the module
-    _defineModule(name, deps, moduleDefinitions);
+    _defineModule(scope.name, scope.deps, moduleDefinitions);
   } catch(err) {
     // XXX: Warn for now?
-    // console.log('ERROR:', name, deps);
+    // console.log('ERROR:', scope.name, scope.deps);
     console.warn(err.message);
   }
 };
