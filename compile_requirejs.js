@@ -371,7 +371,8 @@ var parseCode = function(currentDep, code) {
     code: '',
     current: currentDepName,
     deps: [],
-    globals: []
+    globals: [],
+    namespaces: []
   };
   // Log words and their mode
   var words = [];
@@ -604,6 +605,28 @@ var parseCode = function(currentDep, code) {
             }
           }
 
+        }
+
+        // XXX: Just playing with some ideas
+        //
+        // Find required namespaces
+        if (grandfather.mode == 'code' && grandfather.text == 'namespace' &&
+              isStringMode(last.mode) && isStringMode(current.mode)) {
+          result.namespaces.push({
+            name: last.text,
+            source: current.text
+          });
+          console.log('SOURCE: ' + last.text + ' -> ' + current.text);
+        }
+        
+        // Find required namespace alias
+        if (grandfather.mode == 'code' && grandfather.text == 'namespace' &&
+              isStringMode(last.mode) && current.mode == 'code') {
+          result.namespaces.push({
+            name: last.text,
+            alias: current.text
+          });
+          console.log('ALIAS: ' + last.text + ' -> ' + current.text);
         }
 
       }
