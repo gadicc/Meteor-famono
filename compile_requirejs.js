@@ -388,7 +388,7 @@ var parseArray = function(str) {
  * @param {string} code Tha code to modify and scan for deps
  * @returns {Object} { code:'', deps: [] }
  */
-var parseCode = function(currentDep, code) {
+var parseCode = function(currentDep, code, inLibraryCode) {
 //console.log(code);
   var validChars = '_.$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
   var validCharsLookup = {};
@@ -643,7 +643,7 @@ var parseCode = function(currentDep, code) {
         // This is important since some libraries may be simple loaders
         if (grandfather.mode === 'code' && grandfather.text === 'define' && greatGrandfather.text !== 'typeof') {
 
-          if (isStringMode(last.mode) && (current.mode == 'code' || current.mode == 'array')) {
+          if (isStringMode(last.mode) && (current.mode == 'code' || current.mode == 'array') && !inLibraryCode) {
             // Eg.:
             // define('moduleName', [deps], function)
             // define('moduleName', function)
@@ -794,7 +794,7 @@ var updateDependencies = function(name, rootPath) {
       if (file.ext === 'js') {
 
         // Parse and correct the code
-        result = parseCode(depName, fs.readFileSync(file.filename, 'utf8'));
+        result = parseCode(depName, fs.readFileSync(file.filename, 'utf8'), true);
         // Set deps relations
         deps[result.current] = result.deps;
 
