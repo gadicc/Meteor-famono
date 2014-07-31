@@ -38,6 +38,9 @@ var libraryRegistry = {};
 // with requirejs reference model.
 var libraryGlobals = [];
 
+// app module registry
+var appModuleRegistry = {};
+
 // Set the main famono folder for our work -- to hold the uncompiled requirejs repositories.
 var famonoRepoFolder = path.join(process.cwd(), '.meteor', '.famono-repos');
 // Make sure famonoRepoFolder exists
@@ -1874,6 +1877,8 @@ Plugin.registerSourceHandler("require", function(compileStep) {
   // Reset globals
   libraryGlobalRoot = {};
   libraryGlobalsToLoad = [];
+  appModuleRegistry = {};
+  
   // Reset deps list
   neededDeps = {};
   neededDepsIndex = 0;
