@@ -587,6 +587,8 @@ var parseCode = function(currentDep, code) {
               if (nextOperator !== '==' && nextOperator[0] == '=') {
                 // I guess we are overwriting a global, but dont warn if in the
                 // module definition itself
+                // currentDep -> moment/test/moment/zones
+
                 if (!overwriteInModuleItSelf)
                   warning('Global "' + current.text + '" may be overwritten'); //' at ' + currentDep + '.js:L'+ lineNumber);
 
