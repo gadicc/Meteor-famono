@@ -905,6 +905,45 @@ var removeRepoFolder = function(name, keepRepo) {
 // Source fetchers
 var sourceFetchers = {};
 
+sourceFetchers.http = function(done) {
+  var self = this;
+  var Fiber = Npm.require('fibers');
+  var fiber = Fiber.current;
+
+  // Guess we have to download the file...
+  console.log(green, 'Famono:', normal, 'downloading "' + self.source + '"');
+
+  http.get(self.source, function(res) {
+    var data = '';
+    res.on('data', function (chunk) {
+      data += chunk.toString();
+    });
+
+    res.on('end', function() {
+      // We have to create the folder then
+      fs.mkdirSync(self.target);
+
+      // Index file
+      var indexFile = path.join(self.target, 'index.js');              
+
+      // Write the data
+      fs.writeFileSync(indexFile, data, 'utf8');
+
+      // Remove but keep the repo
+      removeRepoFolder(self.name, true);
+
+      done();
+      fiber.run();
+    });
+
+  }).on('error', function(e) {
+    done('Error while loading "'+ self.name +'" - ', e.message);
+    fiber.run();
+  });
+
+  Fiber.yield();
+};
+
 /**
  * @method checkGitFolders
  * @param {Object} config Configuration to match
