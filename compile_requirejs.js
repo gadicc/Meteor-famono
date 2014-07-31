@@ -641,7 +641,46 @@ var parseCode = function(currentDep, code) {
 
         // Find define
         // This is important since some libraries may be simple loaders
-        if (last.mode === 'code' && last.text === 'define') {
+        if (grandfather.mode === 'code' && grandfather.text === 'define' && greatGrandfather.text !== 'typeof') {
+
+          if (isStringMode(last.mode) && (current.mode == 'code' || current.mode == 'array')) {
+            // Eg.:
+            // define('moduleName', [deps], function)
+            // define('moduleName', function)
+            var moduleName = last.text;
+            var deps = [];
+            try {
+              deps = parseArray((current.mode == 'array') ? current.text : '[]');
+            } catch(err) {
+              warning('could not parse array "' + current.text + '"');
+            }
+            
+            // Test if app module is already registered
+            if (typeof appModuleRegistry[moduleName] == 'undefined') {
+
+              // Add module reference to registry
+              appModuleRegistry[moduleName] = {
+                deps: deps,
+                fileName: currentDep,
+                lineNumber: lineNumber,
+              };
+
+              // Deps should be added on same level as if in a require statement
+              for (var dnr = 0; dnr < deps.length; dnr++) {
+                // XXX: We dont support relative paths here or anything too
+                // fancy, just plain strings - we strip string encapsulation ''
+                var dependecyName = deps[dnr].replace(/'/g, '');
+
+                // This should not hinder stops lazy-loading? Since we are
+                // actually resolving stuff only if a module name is given.
+                if (dependecyName) result.deps.push(dependecyName);
+              }
+
+            } else {
+              warning('App module "' + moduleName + '" already defined');
+            }
+          }
+
           foundDefine++;
         }
 
