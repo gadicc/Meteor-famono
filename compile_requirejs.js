@@ -531,6 +531,7 @@ var parseCode = function(currentDep, code) {
           newEnd: result.code.length
         });
         // Get the last and current words...
+        var greatGrandfather = words[words.length - 4] || {};
         var grandfather = words[words.length - 3] || {};
         var last = words[words.length - 2] || {};
         var current = words[words.length - 1];
