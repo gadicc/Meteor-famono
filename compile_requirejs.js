@@ -1286,7 +1286,7 @@ var readPackagejs = function(packagejsSource) {
 
     var use = function(names, where) {
       // Check this is depended on the client.
-      if (where && where !== 'client' && where.indexOf('client') < 0) return;
+      if (where && typeof where != 'object' && where !== 'client' && where.indexOf('client') < 0) return;
 
       // Check famono is depended on.
       // Parse the package names into a checkable string ex. /session/ejson/
