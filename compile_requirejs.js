@@ -480,7 +480,9 @@ var parseCode = function(currentDep, code) {
       if (mode === 'line-comment' && c == '\n') mode = 'code';
       if (mode === 'double-string' && c == '"' && !escape) mode = 'code';
       if (mode === 'single-string' && c == "'" && !escape) mode = 'code';
+      if (mode === 'array' && cp == "]" && !escape) mode = 'code';
     } else {
+      if (c == '[' && !escape) mode = 'array';
       if (c == '/' && !escape && cn == '*') mode = 'block-comment';
       if (c == '/' && !escape && cn == '/') mode = 'line-comment';
       if (c == '#') mode = 'line-comment'; // Support for coffeescript comments
