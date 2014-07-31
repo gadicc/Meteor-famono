@@ -902,6 +902,9 @@ var removeRepoFolder = function(name, keepRepo) {
   }
 };
 
+// Source fetchers
+var sourceFetchers = {};
+
 /**
  * @method checkGitFolders
  * @param {Object} config Configuration to match
