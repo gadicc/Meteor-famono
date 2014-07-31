@@ -905,6 +905,12 @@ var removeRepoFolder = function(name, keepRepo) {
 // Source fetchers
 var sourceFetchers = {};
 
+sourceFetchers.path = function(done) {
+  var self = this;
+  console.log('Copy files from', self.source, 'to', self.target);
+  // XXX: TODO
+};
+
 // Rig alias
 sourceFetchers.alias = function(done) {
   var self = this;
