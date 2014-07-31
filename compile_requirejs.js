@@ -326,6 +326,60 @@ var isCommentMode = function(mode) {
   return (mode === 'line-comment' || mode === 'block-comment');
 };
 
+// Takes a string to parse
+var parseArray = function(str) {
+  var result = [];
+  var mode = 'code';
+  var lastMode = 'code';
+  var word = '';
+  var escape = false;
+  var lastEscape = false;
+
+  // Check format
+  if (str[0] !== '[' || str[str.length-1] !== ']')
+    throw new Error('Could not parse string, expected "[]"');
+
+  // Runner
+  for (var i = 1; i < str.length-1; i++) {
+    var cp = str[i-1];
+    var c = str[i];
+    var cn = str[i+1];
+    
+    // Check previous char
+    escape = (cp === '\\') && !lastEscape;
+
+    if (mode == 'code') {
+      if (c == '"' && !escape) mode = 'double-string';
+      if (c == "'" && !escape) mode = 'single-string';
+    } else {
+      if (mode === 'double-string' && c == '"' && !escape) mode = 'code';
+      if (mode === 'single-string' && c == "'" && !escape) mode = 'code';
+    }
+
+    if (mode !== lastMode) c = "'";
+
+    if (mode == 'code' && c == ' ') {
+      // Ignore whitespace when in code
+    } else if (mode == 'code' && c == ',') {
+      // comma is seperator in arrays
+      result.push(word);
+      word = '';
+
+    } else {
+      word += c;
+    }
+
+    // Remember
+    lastMode = mode;
+    lastEscape = escape;
+  }
+
+  // Push the last word if any?
+  if (word) result.push(word);
+
+  return result;
+};
+
 /**
  * @method parseCode
  * @param {string} code Tha code to modify and scan for deps
