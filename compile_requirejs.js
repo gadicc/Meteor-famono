@@ -575,7 +575,7 @@ var parseCode = function(currentDep, code) {
             var currentCheck = new RegExp('^' + currentGlobal.globalName + '\\.');
 
             // Check for module name
-            var isCurrentModule = new RegExp('^' + currentDepName + '.');
+            var isCurrentModule = new RegExp('^' + currentDepName + '\\/');
             
             // Test if found
             if (current.text === currentGlobal.globalName || currentCheck.test(current.text)) {
