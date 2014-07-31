@@ -514,14 +514,22 @@ var parseCode = function(currentDep, code) {
             // an exact match only - this way we can make a better error
             // message if dependency is not found.
             var currentCheck = new RegExp('^' + currentGlobal.globalName + '\\.');
+
+            // Check for module name
+            var isCurrentModule = new RegExp('^' + currentDepName + '.');
             
             // Test if found
             if (current.text === currentGlobal.globalName || currentCheck.test(current.text)) {
 
+              // Test if this is an overwrite in the module it self
+              var overwriteInModuleItSelf = isCurrentModule.test(current.text + '.');
+
               // We check if the next two chars are == or just a single =
               if (nextOperator !== '==' && nextOperator[0] == '=') {
-                // I guess we are overwriting a global
-                warning('Global "' + current.text + '" may be overwritten at ' + currentDep + '.js:L'+ lineNumber);
+                // I guess we are overwriting a global, but dont warn if in the
+                // module definition itself
+                if (!overwriteInModuleItSelf)
+                  warning('Global "' + current.text + '" may be overwritten at ' + currentDep + '.js:L'+ lineNumber);
                 // Dont add if we are setting something like a global name like:
                 // { famous: foo }
               } else if (nextOperator[0] !== ':') {
