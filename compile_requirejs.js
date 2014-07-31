@@ -585,7 +585,8 @@ var parseCode = function(currentDep, code) {
                 // I guess we are overwriting a global, but dont warn if in the
                 // module definition itself
                 if (!overwriteInModuleItSelf)
-                  warning('Global "' + current.text + '" may be overwritten at ' + currentDep + '.js:L'+ lineNumber);
+                  warning('Global "' + current.text + '" may be overwritten'); //' at ' + currentDep + '.js:L'+ lineNumber);
+
                 // Dont add if we are setting something like a global name like:
                 // { famous: foo }
               } else if (nextOperator[0] !== ':') {
