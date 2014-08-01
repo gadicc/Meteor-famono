@@ -1340,6 +1340,8 @@ var convertRequireToGlobalName = function(requireName) {
   return result;
 };
 
+var firstRunInitWatchers = true;
+
 var ensureDependencies = function(compileStep) {
   // We only want to deal with one require file at this moment... and it has to
   // be located in the lib folder.
@@ -1383,9 +1385,15 @@ var ensureDependencies = function(compileStep) {
     fs.writeFileSync(configFolder, requireFile, 'utf8');
     // Update the version file
     fs.writeFileSync(versionFile, version, 'utf8');
-
+    // Trigger watch refresh
+    watchFiles(newConfig);
   } else {
     // console.log('CONFIG NOT CHANGED');
+    if (firstRunInitWatchers) {
+      firstRunInitWatchers = false;
+      // Trigger watch refresh
+      watchFiles(newConfig, true);
+    }
   }
 
   libraryRegistry = newConfig;
