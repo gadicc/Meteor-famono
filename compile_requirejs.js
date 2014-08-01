@@ -1146,7 +1146,7 @@ var checkGitFolders = function(newConfig, oldConfig) {
     var sourceType = '';
     // If this souce maybe reloaded
     // XXX: At the moment its not finegrained into libraries KISS
-    var sourceReloadAllowed = (inWatcherReload)? !!item.watch: true;
+    var sourceReloadAllowed = (inWatcherReload)? isWatchSource(item): !isWatchSource(item);
     // If no reload allowed now skip
     if (!sourceReloadAllowed) continue;
 
