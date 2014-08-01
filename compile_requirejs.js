@@ -2214,6 +2214,9 @@ Plugin.registerSourceHandler("require", function(compileStep) {
   // Add the library javascript
   for (var i = 0; i < loadDepsList.length; i++) {
     var dep = loadDepsList[i];
+    
+    // Remove the trailing /index
+    dep.name = dep.name.replace(/\/index$/, '');
 
     if (!isShipped[dep.name]) {
       // Make sure we only serve things once
