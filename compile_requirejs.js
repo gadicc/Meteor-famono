@@ -904,6 +904,16 @@ var removeRepoFolder = function(name, keepRepo) {
   }
 };
 
+////////////////////////////////////////////////////////////////////////////////
+//
+//    WATCH LOCAL LIBRARIES                                                   //
+//
+////////////////////////////////////////////////////////////////////////////////
+
+var watchers = {};
+var changedWatchLibraries = {};
+var inWatcherReload = true;
+
 // Source fetchers
 var sourceFetchers = {};
 
@@ -1042,6 +1052,11 @@ var checkGitFolders = function(newConfig, oldConfig) {
     var validSources = ['git', 'bower', 'alias', 'http', 'path'];
     // The current source type one of validSources
     var sourceType = '';
+    // If this souce maybe reloaded
+    // XXX: At the moment its not finegrained into libraries KISS
+    var sourceReloadAllowed = (inWatcherReload)? !!item.watch: true;
+    // If no reload allowed now skip
+    if (!sourceReloadAllowed) continue;
 
     // Initialize check for source changes
     for (var i = 0; i < validSources.length; i++) {
@@ -1211,6 +1226,9 @@ var checkGitFolders = function(newConfig, oldConfig) {
       console.error('Famono could not find repo for "' + name + '", please set "' + validSources.join('"/"') + '"');
     }
   }
+
+  // Reset we just got out of reload
+  inWatcherReload = false;
 };
 
 // This is an important piece of the global dependencies since this converts
