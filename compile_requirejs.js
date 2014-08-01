@@ -21,6 +21,8 @@ var lib = Npm.require('famono');
 
 var http = Npm.require('http');
 
+var chokidar = Npm.require('chokidar');
+
 var red = '\u001b[31m';
 var green = '\u001b[32m';
 var gray = '\u001b[2m';

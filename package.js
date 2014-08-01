@@ -11,7 +11,8 @@ Package._transitional_registerBuildPlugin({
   ],
   npmDependencies: {
     'sync-exec': '0.3.2', // exec sync - we could also just run in a fiber?
-    'famono': '0.0.9' // Our way of to require famono_lib.js
+    'famono': '0.0.9', // Our way of to require famono_lib.js
+    'chokidar': '0.8.2' // For watching local files..
   }
 });
 
