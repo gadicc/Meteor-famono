@@ -963,40 +963,31 @@ var rigWatchListener = function(libraryName) {
 };
 
 var watchFiles = function(config, firstRun) {
-  var appFolderExp = new RegExp('^' + process.cwd());
-
   // Start any missing watchers
   for (var key in config) {
     // helper
     var item = config[key];
 
-    if (item.path && item.watch == 'true') {
-      if (appFolderExp.test(item.path)) {
-        // Make sure watchers are not applied on the app folder itself could
-        // trigger infinit reload?
-        console.log(green, 'Famono:', normal, 'Warning please disable watch for "' + key + '" - in app folder: ', item.path);
-      } else {
-        if (!watchers[key]) {
-          console.log(green, 'Famono:', normal, 'Watching files for "' + key + '" in', item.path);
-          // Add watcher
-          watchers[key] = new chokidar.watch(key, {
-            ignored: /[\/\\]\./,
-            persistent: true,
-            ignoreInitial: true
-          });
-          // Add the file
-          watchers[key].add(item.path);
-          // Rig listeners
-          rigWatchListener(key);
-        }
-      }
+    // So source is to be watched, just make sure we arent already
+    if (isWatchSource(item) && !watchers[key]) {
+      console.log(green, 'Famono:', normal, 'Watching files for "' + key + '" in', item.path);
+      // Add watcher
+      watchers[key] = new chokidar.watch(key, {
+        ignored: /[\/\\]\./,
+        persistent: true,
+        ignoreInitial: true
+      });
+      // Add the file
+      watchers[key].add(item.path);
+      // Rig listeners
+      rigWatchListener(key);
     }
   }
 
   // Check if any watchers should be removed
   for (var key in watchers) {
     var item = config[key];
-    if (item.path && item.watch == 'true') {
+    if (isWatchSource(item)) {
       // Should be ok
     } else {
       // unload

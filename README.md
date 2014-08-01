@@ -110,12 +110,12 @@ By editing `lib/smart.require` manually:
   "jqueryui": {
     "http": "http://code.jquery.com/ui/jquery-ui-git.js"
   },
-  "localLib": {
-    "path": "/some/where/over/the/rainbow"
-  },
   "localDevLib": {
     "path": "/just/something/I/m/working/on",
-    "watch": "true"
+  },
+  "localLib": {
+    "path": "/some/where/over/the/rainbow"
+    "watch": "false" // default is true
   }
 ```
 
