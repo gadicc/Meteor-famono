@@ -909,8 +909,58 @@ var sourceFetchers = {};
 
 sourceFetchers.path = function(done) {
   var self = this;
-  console.log('Copy files from', self.source, 'to', self.target);
   // XXX: TODO
+
+  var sourcePath = self.path;
+
+  var isFile = fs.statSync(self.source).isFile();
+  
+  // We have to create the folder then
+  fs.mkdirSync(self.target); 
+
+  if (isFile) {
+  
+    console.log(green, 'Famono:', normal, 'Copying file', self.source);
+    // XXX: do some error checking...
+    try {
+      // Read the source code
+      var data = fs.readFileSync(self.source, 'utf8');
+      // Write the code to the famono repo registry
+      fs.writeFileSync(path.join(self.target, 'index.js'), data, 'utf8');
+    } catch(err) {
+      // Stop and Return the error
+      return done('Could not copy the source for "' + self.name + '", Error:' + err.message);
+    }
+  
+  } else {  
+  
+    console.log('Copy files from', self.source);
+  
+    eachFile(self.source, function(file) {
+      // Cut out the relative path
+      var relativePath = file.folder.substring(self.source.length);
+      var folder = path.join(self.target, relativePath);
+      var fileName = path.join(folder, file.name);
+
+      // Make sure the target folder exists
+      ensureFolder(folder);
+
+      // Then copy the file
+      try {
+        // Read the source code
+        var data = fs.readFileSync(file.filename, 'utf8');
+        // Write the code to the famono repo registry
+        fs.writeFileSync(fileName, data, 'utf8');
+      } catch(err) {
+        // Stop and Return the error
+        return done('Could not copy the source for "' + self.name + '", Error:' + err.message);
+      }      
+    });  
+  }
+
+  removeRepoFolder(self.name, true);  
+  // Call when done
+  done();
 };
 
 // Rig alias
