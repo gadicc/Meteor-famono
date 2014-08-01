@@ -126,8 +126,12 @@ var installationCheck = function() {
     console.log(green, 'Famono:', normal, 'Creating "lib/smart.require" config file, for you to edit');
 
     var defaultDeps = JSON.stringify({
+      // 'famous': {
+      //   git: 'https://github.com/Famous/famous.git'
+      // },
       'famous': {
-        git: 'https://github.com/Famous/famous.git'
+        git: 'https://github.com/raix/famous.git',
+        branch: 'famono'
       },
       'famous.polyfills': {
         git: 'https://github.com/Famous/polyfills.git'
