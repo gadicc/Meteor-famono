@@ -914,6 +914,90 @@ var watchers = {};
 var changedWatchLibraries = {};
 var inWatcherReload = true;
 
+var watcherListener = function(libraryName, event, folder, stats) {
+//  console.log('Watcher', libraryName, 'Changed');
+  // library folder to ensure load order
+  var libFolder = path.join(process.cwd(), 'lib');
+  // The filename of the smart.require
+  var filename = path.join(libFolder, 'smart.require');
+
+  var data = fs.readFileSync(filename, 'utf8');
+
+  if (data[data.length-1] == '\n') {
+    data = data.substring(0, data.length-1);
+  } else {
+    data += '\n';
+  }
+
+  inWatcherReload = true;
+
+  // Trigger reload?
+  fs.writeFileSync(filename, data, 'utf8');
+};
+
+var rigWatchListener = function(libraryName) {
+  if (watchers[libraryName]) {
+    // Add the listner
+    watchers[libraryName].on('all', function(event, path, stats) {
+      // Stop other timeouts..
+      if (changedWatchLibraries[libraryName]) clearTimeout(changedWatchLibraries[libraryName]);
+      // Add this event timeout
+      changedWatchLibraries[libraryName] = setTimeout(function() {
+        // Remove ref
+        changedWatchLibraries[libraryName] = null;
+        delete changedWatchLibraries[libraryName];
+
+        // Call the listener
+        watcherListener(libraryName, event, path, stats);
+      }, 500);
+
+    });
+  }
+};
+
+var watchFiles = function(config, firstRun) {
+  // Start any missing watchers
+  for (var key in config) {
+    // helper
+    var item = config[key];
+
+    if (item.path && item.watch == 'true') {
+      if (!watchers[key]) {
+        console.log(green, 'Famono:', normal, 'Watching files for "' + key + '" in', item.path);
+        // Add watcher
+        watchers[key] = new chokidar.watch(key, {
+          ignored: /[\/\\]\./,
+          persistent: true,
+          ignoreInitial: true
+        });
+        // Add the file
+        watchers[key].add(item.path);
+        // Rig listeners
+        rigWatchListener(key);
+      }
+    }
+  }
+
+  // Check if any watchers should be removed
+  for (var key in watchers) {
+    var item = config[key];
+    if (item.path && item.watch == 'true') {
+      // Should be ok
+    } else {
+      // unload
+      watchers[key].close();
+      // GC
+      watchers[key] = null;
+      delete watchers[key];
+    }
+  }
+
+};
+
+
+
+///////////////
+
 // Source fetchers
 var sourceFetchers = {};
 
