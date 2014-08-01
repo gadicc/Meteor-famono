@@ -1144,6 +1144,8 @@ var checkGitFolders = function(newConfig, oldConfig) {
     var hasChanged = {};
     // Supported source pointers
     var validSources = ['git', 'bower', 'alias', 'http', 'path'];
+    // Valid arguments
+    var validArguments = ['branch', 'root', 'tag'];
     // The current source type one of validSources
     var sourceType = '';
     // If this souce maybe reloaded
@@ -1155,7 +1157,15 @@ var checkGitFolders = function(newConfig, oldConfig) {
     // Initialize check for source changes
     for (var i = 0; i < validSources.length; i++) {
       var val = validSources[i];
+
+      // Main check if config has chaged for source
       hasChanged[val] = foundInBoth && newConfig[name][val] !== oldConfig[name][val];
+
+      // Valid arguments branch, root, tag
+      if (foundInBoth)
+        for (var a = 0; a < validArguments.length; a++)
+          if (newConfig[name][validArguments[a]] !== oldConfig[name][validArguments[a]]) hasChanged[val] = true;
+
       if (typeof item[val] !== 'undefined') sourceType = val;
     }
 
