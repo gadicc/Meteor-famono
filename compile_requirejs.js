@@ -1055,8 +1055,13 @@ var checkGitFolders = function(newConfig, oldConfig) {
         console.log(green, 'Famono:', normal, errorMessage);
       } else {
         // Update the deps
-        updateDependencies(name, item.root);        
-        console.log(green, 'Famono:', normal, 'The ' + sourceType + ' has changed for "' + name + '"', repoPath);
+        updateDependencies(name, item.root);
+        // Make it just a bit more correct when printing out stuff to the user
+        if (foundInBoth) {
+          console.log(green, 'Famono:', normal, 'Library "' + name + '" was updated via ' + sourceType);
+        } else {
+          console.log(green, 'Famono:', normal, 'Library created for "' + name + '" via ' + sourceType);
+        }
       }
     };
 
