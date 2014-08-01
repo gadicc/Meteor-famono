@@ -914,6 +914,13 @@ var watchers = {};
 var changedWatchLibraries = {};
 var inWatcherReload = true;
 
+var isWatchSource = function(item) {
+  var appFolderExp = new RegExp('^' + process.cwd());
+  // if path and not in app folder plus the user havent explicitly turned off
+  // watch, then we got a source to watch...
+  return (item.path && !appFolderExp.test(item.path) && item.watch !== 'false');
+};
+
 var watcherListener = function(libraryName, event, folder, stats) {
 //  console.log('Watcher', libraryName, 'Changed');
   // library folder to ensure load order
