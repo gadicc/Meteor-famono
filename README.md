@@ -3,9 +3,11 @@ FAMONO
 
 ### What is it?
 
-In short you can load libraries from `bower`, `github`, `http`, `locally` or as in memory `alias` libraries.
+In short you can load libraries from `bower`, `github`, `http`, locally from `path` or as in memory `alias` libraries.
 
-It currently supports umd/commonjs/requirejs/amd libraries.
+It currently supports `umd`/`commonjs`/`requirejs`/`amd` libraries.
+
+__You get:__ [famous](https://github.com/Famous/famous) libraries pr. default along with [meteor integration library](https://github.com/raix/library).
 
 It was built to support Famo.us in Meteor (examples below)
 But target has become finegrained reuse of javascript code in general from the web.
@@ -83,7 +85,7 @@ if (Meteor.isClient) {
 
 ### Will the entire repo be loaded to the client??
 
-Nope - the package scans your code and figure outs dependencies based on your calls to `require`.
+__Nope!!__ - the package scans your code and figure outs dependencies based on your calls to `require`.
 
 ### Adding additional libraries
 You can add additional libraries like `moment`/`underscore` etc
