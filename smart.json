@@ -1,6 +1,6 @@
 {
 	"name": "famono",
-	"description": "RequireJS bundler plugin for Meteor -- to support the use of frameworks like Famo.us.",
+	"description": "Library bundler supports the use of frameworks like Famo.us, bower and requireJS/commonJS/AMD/UMD libraries",
 	"homepage": "https://github.com/raix/Meteor-famono",
 	"author": "Morten Henriksen  (http://gi-software.com)",
 	"version": "0.6.7",

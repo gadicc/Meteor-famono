@@ -1,6 +1,6 @@
 Package.describe({
   version: '0.3.12',
-  summary: 'Library bundler supports the use of frameworks like Famo.us, bower and requireJS/commonJS libraries'
+  summary: 'Library bundler supports the use of frameworks like Famo.us, bower and requireJS/commonJS/AMD/UMD libraries'
 });
 
 Package._transitional_registerBuildPlugin({
