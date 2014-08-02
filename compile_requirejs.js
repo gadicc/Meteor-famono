@@ -389,6 +389,30 @@ var parseArray = function(str) {
   return result;
 };
 
+
+var parserResolveDep = function(text, currentDepPath) {
+  // Check for relative
+  if (text[0] == '.') {
+    // Resolve dependency
+    // Correct the dependency by removing the current word from the
+    // code buffer and insert the resolved dep name instead
+    var resolveDepName = resolveDepPath(currentDepPath, text);
+    // First char to overwrite
+    var newLength = result.code.length - text.length;
+    // Remove the origibal reference
+    result.code = result.code.substring(0, newLength);
+    // Add the full reference
+    result.code += resolveDepName;
+    //console.log(mode, currentDepPath, text, resolveDepName);
+    return resolveDepName;
+
+    //console.log(resolveDepName);
+  }
+
+  // Do nothing to resolve - trust the user?
+   return text;
+};
+
 /**
  * @method parseCode
  * @param {string} code Tha code to modify and scan for deps
@@ -541,6 +565,7 @@ var parseCode = function(currentDep, code, inLibraryCode) {
         var grandfather = words[words.length - 3] || {};
         var last = words[words.length - 2] || {};
         var current = words[words.length - 1];
+        var grandfatherTypeof = (grandfather.mode == 'code' && grandfather.text == 'typeof');
 
         // if (debug === 2) {
         //   if (last.text === 'require') {
@@ -691,35 +716,8 @@ var parseCode = function(currentDep, code, inLibraryCode) {
         }
 
         // Find require()
-        if (last.mode === 'code' && (last.text === 'require' || last.text === 'Famono.require') && isStringMode(current.mode)) {
-
-          if (current.text[0] == '.') {
-
-            // Resolve dependency
-            // Correct the dependency by removing the current word from the
-            // code buffer and insert the resolved dep name instead
-            var resolveDepName = resolveDepPath(currentDepPath, current.text);
-            // First char to overwrite
-            var newLength = result.code.length - current.text.length;
-            // Remove the origibal reference
-            result.code = result.code.substring(0, newLength);
-            // Add the full reference
-            result.code += resolveDepName;
-            //console.log(mode, currentDepPath, current.text, resolveDepName);
-            result.deps.push(resolveDepName);
-
-            //console.log(resolveDepName);
-          } else {
-            // XXX: Make sure require is not used in a typeof
-            if (grandfather.mode == 'code' && grandfather.text == 'typeof') {
-              // This is require used in a typeof...
-            } else {
-              // Do nothing to resolve - trust the user?
-                result.deps.push(current.text);
-              //console.log(current.text);
-            }
-          }
-
+        if (last.mode === 'code' && (last.text === 'require' || last.text === 'Famono.require') && isStringMode(current.mode) && !grandfatherTypeof) {
+          result.deps.push(parserResolveDep(current.text, currentDepPath));
         }
 
       }
