@@ -1147,6 +1147,8 @@ var checkGitFolders = function(newConfig, oldConfig) {
     var foundInBoth = newConfig[name] && oldConfig[name];
     // Was changed test
     var hasChanged = {};
+    // Changes
+    var changes = 0;
     // Supported source pointers
     var validSources = ['git', 'bower', 'alias', 'http', 'path'];
     // Valid arguments - minus watch since this is handled elsewhere
@@ -1160,20 +1162,29 @@ var checkGitFolders = function(newConfig, oldConfig) {
     // If no reload allowed now skip
     if (!sourceReloadAllowed) continue;
 
+    // Get the source type
     // Initialize check for source changes
     for (var i = 0; i < validSources.length; i++) {
       var val = validSources[i];
 
       // Main check if config has chaged for source
-      hasChanged[val] = foundInBoth && newConfig[name][val] !== oldConfig[name][val];
+      hasChanged[val] = foundInBoth && newConfig[name][sourceType] !== oldConfig[name][sourceType];
 
-      // Valid arguments branch, root, tag
-      if (foundInBoth)
-        for (var a = 0; a < validArguments.length; a++)
-          if (newConfig[name][validArguments[a]] !== oldConfig[name][validArguments[a]]) hasChanged[val] = true;
-
+      // Count changes
+      if (hasChanged[val]) changes++;
+      
       if (typeof item[val] !== 'undefined') sourceType = val;
     }
+
+    // Valid arguments branch, root, tag
+    if (foundInBoth)
+      for (var a = 0; a < validArguments.length; a++) {
+        var val = validArguments[a];
+        hasChanged[val] = (newConfig[name][val] !== oldConfig[name][val]);
+
+        // Count changes
+        if (hasChanged[val]) changes++;
+      }
 
     var doneLoading = function(errorMessage) {
       if (errorMessage) {
@@ -1193,7 +1204,7 @@ var checkGitFolders = function(newConfig, oldConfig) {
     // Check if sourceType is supported by the sourceFetchers
     if (sourceFetchers[sourceType]) {
       // If sourceType was changed or not found in both
-      if (hasChanged[sourceType] || !foundInBoth) {
+      if (changes || !foundInBoth) {
         // Remove the repo sourceType
         removeRepoFolder(name);
 
