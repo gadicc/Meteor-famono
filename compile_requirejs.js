@@ -1989,7 +1989,7 @@ var convertGlobalDependenciesIntoString = function() {
   // libraryGlobalRoot are the ones we work on, we
   // return a string
   // We simply stringify the library
-  var result = comleteTextify(libraryGlobalRoot, 0, true);
+  var result = comleteTextify(libraryGlobalRoot, 0, false);
   for (var i = 0; i < libraryGlobalsToLoad.length; i++) {
     var lib = libraryGlobalsToLoad[i];
     result += '\n' + lib.globalName + ' = Famono.require(\'' + lib.requireName + '\');';
