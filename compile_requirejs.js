@@ -397,12 +397,7 @@ var parserResolveDep = function(text, currentDepPath) {
     // Correct the dependency by removing the current word from the
     // code buffer and insert the resolved dep name instead
     var resolveDepName = resolveDepPath(currentDepPath, text);
-    // First char to overwrite
-    var newLength = result.code.length - text.length;
-    // Remove the origibal reference
-    result.code = result.code.substring(0, newLength);
-    // Add the full reference
-    result.code += resolveDepName;
+
     //console.log(mode, currentDepPath, text, resolveDepName);
     return resolveDepName;
 
@@ -717,7 +712,19 @@ var parseCode = function(currentDep, code, inLibraryCode) {
 
         // Find require()
         if (last.mode === 'code' && (last.text === 'require' || last.text === 'Famono.require') && isStringMode(current.mode) && !grandfatherTypeof) {
-          result.deps.push(parserResolveDep(current.text, currentDepPath));
+          // Resolve the dep name
+          var resolveDepName = parserResolveDep(current.text, currentDepPath);
+          // Push the dependency
+          result.deps.push(resolveDepName);
+          
+          // Update the source code:
+          // First char to overwrite
+          var newLength = result.code.length - current.text.length;
+          // Remove the origibal reference
+          result.code = result.code.substring(0, newLength);
+          // Add the full reference
+          result.code += resolveDepName;
+
         }
 
       }
