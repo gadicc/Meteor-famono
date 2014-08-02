@@ -1144,8 +1144,8 @@ var checkGitFolders = function(newConfig, oldConfig) {
     var hasChanged = {};
     // Supported source pointers
     var validSources = ['git', 'bower', 'alias', 'http', 'path'];
-    // Valid arguments
-    var validArguments = ['branch', 'root', 'tag'];
+    // Valid arguments - minus watch since this is handled elsewhere
+    var validArguments = ['branch', 'root', 'tag', 'recursive' /* 'watch'*/];
     // The current source type one of validSources
     var sourceType = '';
     // If this souce maybe reloaded
