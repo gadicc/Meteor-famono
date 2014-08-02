@@ -921,7 +921,7 @@ var removeRepoFolder = function(name, keepRepo) {
 
 var watchers = {};
 var changedWatchLibraries = {};
-var inWatcherReload = true;
+var inWatcherReload = false;
 
 var isWatchSource = function(item) {
   var appFolderExp = new RegExp('^' + process.cwd());
