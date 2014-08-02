@@ -1156,6 +1156,7 @@ var checkGitFolders = function(newConfig, oldConfig) {
     // If this souce maybe reloaded
     // XXX: At the moment its not finegrained into libraries KISS
     var sourceReloadAllowed = (inWatcherReload)? isWatchSource(item): !isWatchSource(item);
+    // console.log('READY CHECK', name, sourceReloadAllowed);
     // If no reload allowed now skip
     if (!sourceReloadAllowed) continue;
 
@@ -1372,7 +1373,6 @@ var ensureDependencies = function(compileStep) {
   // be located in the lib folder.
   if (compileStep.inputPath !== 'lib/smart.require')
     return;
-
   // Read in the require files
   var requireFile = compileStep.read().toString('utf8');
   var lastRequireFile = (fs.existsSync(configFolder)) ? fs.readFileSync(configFolder, 'utf8') : '{}';
@@ -1403,7 +1403,7 @@ var ensureDependencies = function(compileStep) {
       oldConfig = '{}';
     }
 
-    //console.log('CHECK REPO FOLDER');
+    // console.log('CHECK REPO FOLDER');
     // Make sure the repo is up to date
     checkGitFolders(newConfig, oldConfig);
     // Update the last config
