@@ -1920,6 +1920,9 @@ var comleteTextify = function(obj, level, pretty) {
     var key = keys[a];
     var val = obj[key];
 
+    // XXX: Skip the dependency load printout
+    if (val instanceof DependencyLoad) continue;
+
     // Add pretty indent
     if (pretty) result += prettyIndent(level);
 
@@ -1987,7 +1990,10 @@ var convertGlobalDependenciesIntoString = function() {
   // return a string
   // We simply stringify the library
   var result = comleteTextify(libraryGlobalRoot, 0, true);
-
+  for (var i = 0; i < libraryGlobalsToLoad.length; i++) {
+    var lib = libraryGlobalsToLoad[i];
+    result += '\n' + lib.globalName + ' = Famono.require(\'' + lib.requireName + '\');';
+  }
   return result;
 };
 
@@ -2146,7 +2152,6 @@ Plugin.registerSourceHandler("require", function(compileStep) {
   var libraryRequireDeps = loadRequireDependenciesRegisters(sourceDeps);
 
   var libraryGlobalsDeps = loadGlobalDependenciesRegisters(globalDeps);
-
 
   // Load needed deps list
   for (var file in sourceDeps) {
