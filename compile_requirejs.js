@@ -67,12 +67,6 @@ if (!fs.existsSync(famonoLibFolder)) fs.mkdirSync(famonoLibFolder);
 
 var versionFile = path.join(famonoLibFolder, '.version');
 
-// Watcher globals
-var watchers = {};
-var changedWatchLibraries = {};
-var inWatcherReload = true; // If set true it fails on initial load of smart.require
-
-
 var installationNote = function() {
   console.log('');
   console.log('', white);
@@ -126,9 +120,6 @@ var installationCheck = function() {
     fs.mkdirSync(libFolder);
 
   if (!fs.existsSync(filename)) {
-    // Make sure to set this false
-    inWatcherReload = false;
-
     installationNote();
     // Add to ignore
     installationGitIgnore();
@@ -938,6 +929,11 @@ var removeRepoFolder = function(name, keepRepo) {
 //    WATCH LOCAL LIBRARIES                                                   //
 //
 ////////////////////////////////////////////////////////////////////////////////
+
+// Watcher globals
+var watchers = {};
+var changedWatchLibraries = {};
+var inWatcherReload = false; // If set true it fails on initial load of smart.require
 
 var isWatchSource = function(item) {
   var appFolderExp = new RegExp('^' + process.cwd());
