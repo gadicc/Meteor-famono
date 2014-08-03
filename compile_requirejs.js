@@ -126,6 +126,9 @@ var installationCheck = function() {
     fs.mkdirSync(libFolder);
 
   if (!fs.existsSync(filename)) {
+    // Make sure to set this false
+    inWatcherReload = false;
+
     installationNote();
     // Add to ignore
     installationGitIgnore();
