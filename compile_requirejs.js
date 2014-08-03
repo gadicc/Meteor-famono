@@ -713,18 +713,27 @@ var parseCode = function(currentDep, code, inLibraryCode) {
 
         // Find require()
         if (last.mode === 'code' && (last.text === 'require' || last.text === 'Famono.require') && isStringMode(current.mode) && !grandfatherTypeof) {
-          // Resolve the dep name
-          var resolveDepName = parserResolveDep(current.text, currentDepPath);
-          // Push the dependency
-          result.deps.push(resolveDepName);
-          
-          // Update the source code:
-          // First char to overwrite
-          var newLength = result.code.length - current.text.length;
-          // Remove the origibal reference
-          result.code = result.code.substring(0, newLength);
-          // Add the full reference
-          result.code += resolveDepName;
+          // Get the next two chars discarding spaces here...
+          var nextOperator = getNextChars(last.end, 2);
+          // Found any : or = then we arent in a require
+          var inRequire = true;
+          // do a minor check for operators
+          for (var a = 0; a < nextOperator.length; a++)
+            if (/:|=|\+|\-|\*|\/|%|\||\&/.test(nextOperator[a])) inRequire = false;
+          if (inRequire) {          
+            // Resolve the dep name
+            var resolveDepName = parserResolveDep(current.text, currentDepPath);
+            // Push the dependency
+            result.deps.push(resolveDepName);
+            
+            // Update the source code:
+            // First char to overwrite
+            var newLength = result.code.length - current.text.length;
+            // Remove the origibal reference
+            result.code = result.code.substring(0, newLength);
+            // Add the full reference
+            result.code += resolveDepName;
+          }
 
         }
 
