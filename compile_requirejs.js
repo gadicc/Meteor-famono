@@ -958,7 +958,7 @@ var watcherListener = function(libraryName, event, folder, stats) {
   }
 
   inWatcherReload = true;
-
+  // console.log('Watcher reload smart.require');
   // Trigger reload?
   fs.writeFileSync(filename, data, 'utf8');
 };
@@ -1140,6 +1140,7 @@ sourceFetchers.http = function(done) {
   Fiber.yield();
 };
 
+// var ensureCounter = 0;
 /**
  * @method checkGitFolders
  * @param {Object} config Configuration to match
@@ -1147,6 +1148,7 @@ sourceFetchers.http = function(done) {
  *
  */
 var checkGitFolders = function(newConfig, oldConfig) {
+  // console.log('inWatcherReload', inWatcherReload, ensureCounter++);
   // Create one united config
   var config = objectMerge(oldConfig, newConfig);
   // Iterate over the deps
@@ -1361,6 +1363,7 @@ var checkGitFolders = function(newConfig, oldConfig) {
   }
 
   // Reset we just got out of reload
+  // console.log('inWatcherReload set FALSE');
   inWatcherReload = false;
 };
 
