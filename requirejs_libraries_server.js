@@ -15,21 +15,21 @@ var registry = {};
 
 // Make sure famonoLibFolder exists
 if (!fs.existsSync(famonoLibFolder)) {
-  console.log('Famono: Error lib folder not found "' + famonoLibFolder + '"');
+  console.log('Famono-server: Error lib folder not found "' + famonoLibFolder + '"');
 } else {
   // Load config and registry into mem
 
   try {
     config = JSON.parse(fs.readFileSync(path.join(famonoBaseFolder, '.config'), 'utf8'));
   } catch (err) {
-    throw new Error('Famono: Error could not parse .config json, ' + err.message);
+    throw new Error('Famono-server: Error could not parse .config json, ' + err.message);
   }
 
   for (var ns in config) {
     try {
       registry[ns] = JSON.parse(fs.readFileSync(path.join(famonoRepoFolder, '.' + ns), 'utf8'));
     } catch (err) {
-      console.log('Famono: Error namespace config load failed "' + ns + '"');
+      console.log('Famono-server: Error namespace config load failed "' + ns + '"');
     }
   }
 
@@ -73,7 +73,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
       // Set error
       res.writeHead(500);
       // If no config loaded then report as an error
-      res.end('Famono: Error registry not found in "' + famonoRepoFolder + '"');
+      res.end('Famono-server: Error registry not found in "' + famonoRepoFolder + '"');
     } else {
       // Get the namespace
       var namespace = getNamespace(req.url);
@@ -147,10 +147,10 @@ WebApp.connectHandlers.use(function(req, res, next) {
 
           if (found) {
             // Show nicer error message
-            res.end('Famono: Error, did you mean "' + found.key + '" instead of "' + found.name + '"?');
+            res.end('Famono-server: Error, did you mean "' + found.key + '" instead of "' + found.name + '"?');
           } else {
             // If no config loaded then report as an error
-            res.end('Famono: Error, library not found in "' + name + '"');
+            res.end('Famono-server: Error, library not found in "' + name + '"');
           }
         }
 
@@ -158,7 +158,7 @@ WebApp.connectHandlers.use(function(req, res, next) {
         // Set error
         res.writeHead(400);
         // If no config loaded then report as an error
-        res.end('Famono: Error namespace not found "' + namespace + '"');
+        res.end('Famono-server: Error namespace not found "' + namespace + '"');
       }
     }
 

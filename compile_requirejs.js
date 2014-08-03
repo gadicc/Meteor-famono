@@ -28,6 +28,7 @@ var green = '\u001b[32m';
 var gray = '\u001b[2m';
 var white = '\u001b[1m';
 var normal = '\u001b[0m';
+var yellow = '\u001B[0;33m';
 
 // Changing this will force a rerun of deps - this makes it easier for the users
 // to migrate into newer versions of Famono
@@ -153,7 +154,7 @@ var namespaceErrors = {};
 var namespaceError = function(name, filename) {
   if (!namespaceErrors[name] && !appModuleRegistry[name]) {
 
-    console.log(green, 'Famono:', normal, 'Warning, could not load library namespace "' + name + '" file:', filename);
+    console.warn(yellow, 'Famono:', normal, 'Warning, could not load library namespace "' + name + '" file:', filename);
     // Hinder more errors on the namespace...
     namespaceErrors[name] = true;
 
@@ -164,7 +165,7 @@ var libraryErrors = {};
 var libraryError = function(name, lookup, filename) {
   if (!libraryErrors[name] && !appModuleRegistry[name]) {
 
-    console.log(green, 'Famono:', normal, 'Warning, could not load library "' + name + '" file:', filename);
+    console.warn(yellow, 'Famono:', normal, 'Warning, could not load library "' + name + '" file:', filename);
 
     if (!lookup[name]) {
       var found;
@@ -172,7 +173,7 @@ var libraryError = function(name, lookup, filename) {
         if (name.toLowerCase() == key.toLowerCase()) found = { key: key, name: name};
 
       if (found)
-        console.log(green, 'Famono:', normal, 'Did you mean "' + found.key + '" instead of "' + found.name + '"?');
+        console.warn(yellow, 'Famono:', normal, 'Did you mean "' + found.key + '" instead of "' + found.name + '"?');
     } else {
       // Some other error
     }
@@ -468,7 +469,7 @@ var parseCode = function(currentDep, code, inLibraryCode) {
       // Be silent
       ignoreNextWarning = false;
     } else {
-      console.log(green, 'Famono:', normal, 'Warning:', text, 'at', currentDep + '.js:L'+ lineNumber);
+      console.warn(yellow, 'Famono:', normal, 'Warning:', text, 'at', currentDep + '.js:L'+ lineNumber);
     }
 
   };
@@ -1188,7 +1189,7 @@ var checkGitFolders = function(newConfig, oldConfig) {
 
     var doneLoading = function(errorMessage) {
       if (errorMessage) {
-        console.log(green, 'Famono:', normal, errorMessage);
+        console.error(red, 'Famono:', normal, errorMessage);
       } else {
         // Update the deps
         updateDependencies(name, item.root);
@@ -1344,7 +1345,7 @@ var checkGitFolders = function(newConfig, oldConfig) {
         }
       }
     } else {
-      console.error('Famono could not find repo for "' + name + '", please set "' + validSources.join('"/"') + '"');
+      console.error(red, 'Famono:', green, 'Could not find repo for "' + name + '", please set "' + validSources.join('"/"') + '"');
     }
   }
 
@@ -1397,7 +1398,7 @@ var ensureDependencies = function(compileStep) {
   try {
     newConfig = JSON.parse(requireFile);
   } catch (err) {
-    console.log(green, 'Famono:', normal, 'You have an error in your "lib/smart.require"');
+    console.error(red, 'Famono:', normal, 'You have an error in your "lib/smart.require"');
     console.log(red, 'Error:', normal, err.message);
     throw new Error('Famono: could not parse "lib/smart.require"');
   }
@@ -1583,7 +1584,7 @@ var dependentPackageFiles = function(appDir) {
         });
       }
     } catch (e) {
-      console.log(green, 'Famono:', normal, 'problem reading package.js for "' + packag.name + '" package.', e);
+      console.error(red, 'Famono:', normal, 'problem reading package.js for "' + packag.name + '" package.', e);
     }
   });
 
@@ -1901,7 +1902,7 @@ var loadGlobalDependenciesRegisters = function(globalDeps, libraries) {
           // This is kindof an odd case, but if it happens we wont go complaining
           // about it since the user can't really do much about it?
         } else {
-          console.log(green, 'Famono:', normal, 'Warning, could not find the global reference "' + needle + '" in "' + dep.file + '.js":L' + dep.lineNumber);
+          console.warn(yellow, 'Famono:', normal, 'Warning, could not find the global reference "' + needle + '" in "' + dep.file + '.js":L' + dep.lineNumber);
         }
       }
 
@@ -1911,7 +1912,7 @@ var loadGlobalDependenciesRegisters = function(globalDeps, libraries) {
 
   // Print out warnings
   for (var key in dotResolveWarning) {
-    console.log(green, 'Famono:', normal, 'Dot notation warning, multiple references for "' + key + '"" using: ' + dotResolveWarning[key]);
+    console.warn(yellow, 'Famono:', normal, 'Dot notation warning, multiple references for "' + key + '"" using: ' + dotResolveWarning[key]);
   }
 
   return result;
@@ -2202,10 +2203,10 @@ Plugin.registerSourceHandler("require", function(compileStep) {
       } else {
 
         if (namespace == 'famous-polyfills' || namespace == 'famousPolyfills') {
-          console.log(green, 'Famono:', normal, 'DEPRECATED: namespace "' + namespace + '" use "famous.polyfills" in "' + file + '"');
+          console.warn(yellow, 'Famono:', normal, 'DEPRECATED: namespace "' + namespace + '" use "famous.polyfills" in "' + file + '"');
 
         } else {
-          console.log(green, 'Famono:', normal, 'Could not resolve namespace "' + namespace + '" in "' + file + '"');
+          console.warn(yellow, 'Famono:', normal, 'Could not resolve namespace "' + namespace + '" in "' + file + '"');
         }
         // // Lookup the namespace in the bower db
         // lib.getBowerData(namespace, function(err, result) {
