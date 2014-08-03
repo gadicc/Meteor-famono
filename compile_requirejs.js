@@ -1328,7 +1328,7 @@ var checkGitFolders = function(newConfig, oldConfig) {
             lib.getBowerData(item.bower, function(err, result) {
 
               if (err) {
-                console.log(green, 'Famono:', normal, 'Could not resolve namespace "' + namespace + '" in Bower database');
+                console.error(red, 'Famono:', normal, 'Could not resolve namespace "' + name + '" in Bower database, "' + item.bower + '" not found');
               } else {
                 // Add the package
                 item.git = result.url;
