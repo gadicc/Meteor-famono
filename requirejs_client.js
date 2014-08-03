@@ -23,7 +23,11 @@ var getModule = function(name, isDefining) {
  * This function expects that any dependencies are all loaded
  * This function will return the module instance or initialize the module
  */
-Famono.require = function(name) {
+Famono.require = function(name, f) {
+  // one could do require([deps], function( /* args */ ) { })
+  if (typeof f == 'function')
+    return Famono.define(name, f);
+
   // Get the module
   var module = getModule(name);
   // Check that the module is loaded
