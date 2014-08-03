@@ -861,7 +861,8 @@ var updateDependencies = function(name, rootPath) {
 
         var indexDepsLookup = {};
         for (var a = 0; a < mainFiles.length; a++) {
-          var indexDepName = name + '/' + mainFiles[a].replace(/.js|.css/g, '');
+          // Remove any css or js ext, and any ./ at the beginning - its assumed
+          var indexDepName = name + '/' + mainFiles[a].replace(/.js|.css/g, '').replace(/^.\//, '');
           if (typeof indexDepsLookup[indexDepName] === 'undefined') {
             indexDepsLookup[indexDepName] = true;
           }
