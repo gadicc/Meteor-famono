@@ -1424,7 +1424,7 @@ var ensureDependencies = function(compileStep) {
     } catch (err) {
       // We reset if theres an error on the old config...
       // XXX: we should clean out the folder
-      oldConfig = '{}';
+      oldConfig = {};
     }
 
     // console.log('CHECK REPO FOLDER');
