@@ -32,7 +32,7 @@ var yellow = '\u001B[0;33m';
 
 // Changing this will force a rerun of deps - this makes it easier for the users
 // to migrate into newer versions of Famono
-var version = '0.1.8';
+var version = '0.1.9';
 // This object will contain the library registry when compiling
 var libraryRegistry = {};
 // This array will contain library globals, at the moment we got stuff like

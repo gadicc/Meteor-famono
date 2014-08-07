@@ -1,5 +1,5 @@
 Package.describe({
-  version: '0.7.0',
+  version: '0.7.1',
   summary: 'Library bundler supports the use of frameworks like Famo.us, bower and requireJS/commonJS/AMD/UMD libraries'
 });
 
