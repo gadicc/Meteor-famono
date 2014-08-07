@@ -44,8 +44,17 @@ var libraryGlobals = [];
 // app module registry
 var appModuleRegistry = {};
 
+// The expected .meteor folder
+var meteorFolder = path.join(process.cwd(), '.meteor');
+
+// If this folder is not found then exit silently - we could be in a publish
+// XXX: At the moment we have no clue if this is run in meteor publish or
+// simply out side a meteor app - we cannot warn the user at the moment.
+if (!fs.existsSync(meteorFolder))
+  return;
+
 // Set the main famono folder for our work -- to hold the uncompiled requirejs repositories.
-var famonoRepoFolder = path.join(process.cwd(), '.meteor', '.famono-repos');
+var famonoRepoFolder = path.join(meteorFolder, '.famono-repos');
 // Make sure famonoRepoFolder exists
 if (!fs.existsSync(famonoRepoFolder)) fs.mkdirSync(famonoRepoFolder);
 
@@ -53,7 +62,7 @@ if (!fs.existsSync(famonoRepoFolder)) fs.mkdirSync(famonoRepoFolder);
 if (!fs.existsSync(famonoRepoFolder))
   throw new Error('Famono cannot create any files - make sure you have the necessary rights to the filesystem');
 
-var famonoBaseFolder = path.join(process.cwd(), '.meteor', '.famono-base');
+var famonoBaseFolder = path.join(meteorFolder, '.famono-base');
 // Make sure famonoBaseFolder exists
 if (!fs.existsSync(famonoBaseFolder)) fs.mkdirSync(famonoBaseFolder);
 
