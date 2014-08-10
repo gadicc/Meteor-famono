@@ -3,7 +3,7 @@
 	"description": "Library bundler supports the use of frameworks like Famo.us, bower and requireJS/commonJS/AMD/UMD libraries",
 	"homepage": "https://github.com/raix/Meteor-famono",
 	"author": "Morten Henriksen  (http://gi-software.com)",
-	"version": "0.7.2",
+	"version": "0.7.3",
 	"git": "https://github.com/raix/Meteor-famono.git",
 	"packages": {}
 }
