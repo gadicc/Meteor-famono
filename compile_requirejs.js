@@ -1519,7 +1519,7 @@ var readPackagejs = function(packagejsSource) {
       // Parse the package names into a checkable string ex. /session/ejson/
       names = '/' + ((names === '' + names) ? names : names.join('/')) + '/';
 
-      if (/\/famono\//.test(names)) {
+      if (/\/famono\/|\/raix:famono\//.test(names)) {
         ret.useFamono = true;
       }
     };
@@ -1581,7 +1581,7 @@ var dependentPackageFiles = function(appDir) {
   var dependentClientFiles = [];
 
   eachPackage(appDir, function(packag) {
-    if (packag.name === 'famono') return;
+    if (packag.name === 'famono' || packag.name === 'raix:famono') return;
 
     var packagejs = path.join(packag.folder, 'package.js');
 
