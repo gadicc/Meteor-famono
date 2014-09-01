@@ -1,7 +1,7 @@
 var fs = Npm.require('fs');
 var path = Npm.require('path');
-var send = Npm.require('send');
-var useragent = Npm.require('useragent');
+var send = FamonoBinaryDeps.send;
+var useragent = FamonoBinaryDeps.useragent;
 
 // Set the main famono folder for our work...
 var famonoRepoFolder = path.resolve(process.cwd(), '../../../../.famono-repos');

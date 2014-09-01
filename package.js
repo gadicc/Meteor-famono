@@ -1,25 +1,15 @@
 Package.describe({
   name: "raix:famono",
-  version: '0.8.0',
+  version: '0.8.1',
   summary: 'Library bundler supports use of libraries like Famo.us, via git/bower and requireJS/commonJS/AMD/UMD'
 });
 
 Package._transitional_registerBuildPlugin({
   name: 'compileRequirejs',
-  use: [],
+  use: [ 'raix:famono-binary-deps' ],
   sources: [
     'compile_requirejs.js' // The holy grail!!
-  ],
-  npmDependencies: {
-    'sync-exec': '0.3.2', // exec sync - we could also just run in a fiber?
-    'famono': '0.0.9', // Our way of to require famono_lib.js
-    'chokidar': '0.8.2' // For watching local files..
-  }
-});
-
-Npm.depends({
-  send: '0.1.4', // Serving library files async / lazyloading
-  useragent: "2.0.7" // Ment for client specific bundles?
+  ]
 });
 
 Package.on_use(function(api) {
@@ -28,6 +18,7 @@ Package.on_use(function(api) {
   api.use('webapp@1.0.0', 'server');  // Used for serving files
   api.use('reload@1.0.0', 'client'); // Not sure if we are using this?
   api.use('routepolicy@1.0.0', 'server'); // Not sure if this is used...
+  api.use('raix:famono-binary-deps@1.0.0', 'server');
 
   //api.versionsFrom && api.versionsFrom('METEOR-CORE@0.9.0-preview4');
 
