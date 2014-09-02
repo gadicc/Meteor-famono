@@ -1478,22 +1478,55 @@ var eachPackage = function(appDir, callback) {
 
   var file = path.join(appDir, '.meteor', 'packages');
 
+  var versions = {};
+  var versionsFile = path.join(appDir, '.meteor', 'versions');
+  if (fs.existsSync(versionsFile)) {
+    var raw = fs.readFileSync(versionsFile, 'utf8');
+    var lines = raw.split(/\r*\n\r*/);
+    for (var i=0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      if (/^#/.test(line)) {
+        // Noop we got a comment
+      } else if (line.length) {
+        line = line.split('@');
+        versions[line[0]] = line[1];
+      }
+    }
+  }
+
   var raw = fs.readFileSync(file, 'utf8');
   var lines = raw.split(/\r*\n\r*/);
 
   for (var i = 0; i < lines.length; i++) {
-    var line = lines[i].trim();
+    // Strip off forced versions (we have it from versions file already)
+    var line = lines[i].trim().replace(/@.*$/, '');
     if (/^#/.test(line)) {
       // Noop we got a comment
     } else if (line.length && line !== ' ') {
       var folder = path.join(appDir, 'packages', line);
-      // Check if the package is in the packages folder
       if (fs.existsSync(folder)) {
+        // Meteor 0.9 does indeed first look in the packages folder
         if (callback) {
           callback({
             name: line,
             folder: folder
           });
+        }
+      } else {
+        // Otherwise try find version store in user's Meteor dir
+        folder = path.join(process.env.HOME, '.meteor',
+          'packages', line, versions[line]);
+        if (fs.existsSync(folder)) {
+          if (callback) {
+            callback({
+              name: line,
+              folder: folder
+            });
+          }
+        } else {
+          // I think this is impossible, but just in case... :)
+          console.warn(yellow, 'Famono:', normal,
+            'Warning, could not find location of package "' + line + '"');
         }
       }
     }
@@ -1583,32 +1616,68 @@ var dependentPackageFiles = function(appDir) {
   eachPackage(appDir, function(packag) {
     if (packag.name === 'famono' || packag.name === 'raix:famono') return;
 
-    var packagejs = path.join(packag.folder, 'package.js');
+    // First check if it's a compiled unipackage
+    var unipackagejson = path.join(packag.folder, 'unipackage.json');
 
-    // Ignore folders that are missing a package.js.
-    if (!fs.existsSync(packagejs)) return;
+    if (fs.existsSync(unipackagejson)) {
+      var unipackage = JSON.parse(fs.readFileSync(unipackagejson, 'utf8'));
+      if (unipackage.format !== 'unipackage-pre2') {
+        console.warn(yellow, 'Famono:', normal,
+          'Warning, skipping unipackage "' + packag.name +
+          '" with unknown format "' + unipackage.format + '"');
+        return;
+      }
 
-    // Read the package.js file.
-    packagejs = fs.readFileSync(packagejs, 'utf8');
+      _.each(unipackage.unibuilds, function(build) {
+        var buildpath 
+        var buildjson = JSON.parse( 
+          fs.readFileSync(path.join(packag.folder, build.path), 'utf8')
+        );
 
-    try {
-      var results = readPackagejs(packagejs);
+        if (!_.some(buildjson.uses, function(usedPackage) {
+          return usedPackage.package === 'raix:famono'
+        })) return;
 
-      // Make sure the package depends on famono.
-      if (results.useFamono) {
-
-        // Return all the package's client files.
-        results.clientFiles.forEach(function(relativeClientFile) {
-          var folder = packag.folder + '/' + relativeClientFile;
+        _.each(buildjson.resources, function(res) {
+          if (res.type !== 'prelink') return;
+          var folder = packag.folder + '/' + res.file;
           folder = path.dirname(folder);
-          var file = relativeClientFile.substring(relativeClientFile.lastIndexOf('/') + 1);
-
+          var file = res.file.substring(res.file.lastIndexOf('/') + 1);
           dependentClientFiles.push(fileProperties(folder, file));
         });
-      }
-    } catch (e) {
-      console.error(red, 'Famono:', normal, 'problem reading package.js for "' + packag.name + '" package.', e);
+      });
+
+
+    } else {
+      // unipackage.json doesn't exist, interpret as local package
+      var packagejs = path.join(packag.folder, 'package.js');
+
+      // Ignore folders that are missing a package.js.
+      if (!fs.existsSync(packagejs)) return;
+
+      // Read the package.js file.
+      packagejs = fs.readFileSync(packagejs, 'utf8');
+
+      try {
+        var results = readPackagejs(packagejs);
+
+        // Make sure the package depends on famono.
+        if (results.useFamono) {
+
+          // Return all the package's client files.
+          results.clientFiles.forEach(function(relativeClientFile) {
+            var folder = packag.folder + '/' + relativeClientFile;
+            folder = path.dirname(folder);
+            var file = relativeClientFile.substring(relativeClientFile.lastIndexOf('/') + 1);
+
+            dependentClientFiles.push(fileProperties(folder, file));
+          });
+        }
+      } catch (e) {
+        console.error(red, 'Famono:', normal, 'problem reading package.js for "' + packag.name + '" package.', e);
+      }      
     }
+
   });
 
   return dependentClientFiles;
